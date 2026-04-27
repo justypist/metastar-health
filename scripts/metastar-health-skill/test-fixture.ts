@@ -10,11 +10,30 @@ export interface FixtureOptions {
 
 export function withFixture<T>(options: FixtureOptions, run: (cwd: string) => T): T {
   const cwd = mkdtempSync(join(tmpdir(), "metastar-health-skill-"));
+  const requiredScriptFiles = [
+    "index.ts",
+    "autocomplete.ts",
+    "client.ts",
+    "config.ts",
+    "drugs.ts",
+    "gbd.ts",
+    "hpa.ts",
+    "literature-process.ts",
+    "ocr.ts",
+    "papers.ts",
+    "polling.ts",
+    "target-assistant.ts",
+    "target-quick-assessment.ts",
+    "text-extraction.ts",
+    "types.ts",
+    "upload.ts",
+  ];
 
   try {
     const skillDir = join(cwd, ".agents/skills/metastar-health");
     mkdirSync(join(cwd, "api"), { recursive: true });
     mkdirSync(join(skillDir, "references"), { recursive: true });
+    mkdirSync(join(skillDir, "scripts"), { recursive: true });
     writeFileSync(
       join(cwd, "api/index.ts"),
       Object.keys(options.modules)
@@ -38,6 +57,9 @@ export function withFixture<T>(options: FixtureOptions, run: (cwd: string) => T)
     writeFileSync(join(skillDir, "references/sync-search.md"), "# 同步查询 API\n\n示例只能手动调用。\n");
     writeFileSync(join(skillDir, "references/async-doc-processing.md"), "# 文档处理 API\n\n只有用户明确授权后才上传文件。\n");
     writeFileSync(join(skillDir, "references/target-workflows.md"), "# 靶点工作流 API\n\n不得自动创建远端任务。\n");
+    for (const fileName of requiredScriptFiles) {
+      writeFileSync(join(skillDir, "scripts", fileName), "export function searchPapers(): void {}\n");
+    }
     return run(cwd);
   } finally {
     rmSync(cwd, { recursive: true, force: true });

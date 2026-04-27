@@ -7,7 +7,7 @@ description: "使用 MetaStar Health 开放 API 进行研究任务，按需调�
 
 # MetaStar Health
 
-使用本技能帮助 agent 发现并安全调用 MetaStar Health 开放 API。入口只提供导航和约束，具体函数参数、返回字段和示例按需阅读 `references/` 资源文档。
+使用本技能帮助 agent 发现并安全调用 MetaStar Health 开放 API。函数实现位于 `scripts/`，统一入口为 `scripts/index.ts`，具体参数、返回字段和示例按需阅读 `references/` 资源文档。
 
 ## 触发场景
 
@@ -29,6 +29,7 @@ description: "使用 MetaStar Health 开放 API 进行研究任务，按需调�
 
 ## 资源索引
 
+- `scripts/index.ts`：TypeScript 统一导出入口，业务函数和基础能力按模块拆分在 `scripts/` 下。
 - `references/overview.md`：先阅读此文档了解通用调用模式、认证配置和副作用边界。
 - `references/sync-search.md`：论文搜索、实体补全、药物搜索、HPA 画像和 GBD 查询。
 - `references/async-doc-processing.md`：OCR、临床前文本提取和文献解析的提交、查询与轮询。
