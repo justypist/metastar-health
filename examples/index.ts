@@ -1,3 +1,5 @@
+export * from "./scenarios.ts";
+
 export interface ExampleContext {
   appKey: string;
   appSecret: string;
