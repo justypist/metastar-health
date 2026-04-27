@@ -1,6 +1,6 @@
 ## 1. SKILL 结构与生成基础
 
-- [ ] 1.1 创建 `.agents/skills/metastar-health/` 目录结构，添加 `SKILL.md`、`references/` 资源文档和生成区域标记
+- [x] 1.1 创建 `.agents/skills/metastar-health/` 目录结构，添加 `SKILL.md`、`references/` 资源文档和生成区域标记
 - [ ] 1.2 实现 API 能力元数据与导出扫描逻辑，基于 `api/index.ts` 识别可用业务模块
 - [ ] 1.3 实现 SKILL 生成/校验脚本，支持更新 `description` 与 `references/api-map.md`，并支持 `--check` 模式
 
