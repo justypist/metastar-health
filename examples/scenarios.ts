@@ -1,4 +1,5 @@
 import { basicScenarios } from "./basic.ts";
+import { ocrAndTextExtractionScenarios } from "./ocr-and-text-extraction.ts";
 import { syncApiScenarios } from "./sync-apis.ts";
 import { uploadAndPollingScenarios } from "./upload-and-polling.ts";
 
@@ -12,6 +13,7 @@ export const exampleScenarios: readonly ExampleScenario[] = [
   ...basicScenarios,
   ...uploadAndPollingScenarios,
   ...syncApiScenarios,
+  ...ocrAndTextExtractionScenarios,
 ];
 
 export function listExampleScenarios(): readonly ExampleScenario[] {

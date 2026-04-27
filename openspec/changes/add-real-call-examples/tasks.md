@@ -14,7 +14,7 @@
 
 ## 4. 异步任务 API 示例
 
-- [ ] 4.1 为 `submitOcrTask`、`getOcrResult`、`pollOcrResult`、`submitTextExtractionTask`、`getTextExtractionResult`、`pollTextExtractionResult` 各写一个真实调用场景示例。
+- [x] 4.1 为 `submitOcrTask`、`getOcrResult`、`pollOcrResult`、`submitTextExtractionTask`、`getTextExtractionResult`、`pollTextExtractionResult` 各写一个真实调用场景示例。
 - [ ] 4.2 为 `submitLiteratureProcessTask`、`getLiteratureProcessResult`、`pollLiteratureProcessResult` 各写一个真实调用场景示例。
 - [ ] 4.3 为 `submitTargetAssistantTask`、`getTargetAssistantResult`、`pollTargetAssistantResult`、`submitTargetQuickAssessmentTask`、`getTargetQuickAssessmentResult`、`pollTargetQuickAssessmentResult` 各写一个真实调用场景示例。
 
