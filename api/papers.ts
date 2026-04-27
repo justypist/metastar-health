@@ -54,7 +54,13 @@ export interface PapersHealthResult {
 export function searchPapers(params: PaperSearchParams, options: OpenApiRequestOptions = {}): Promise<PaperSearchResult> {
   return requestOpenApiData<PaperSearchResult>("/api/papers/search", {
     ...options,
-    query: params,
+    query: {
+      disease: params.disease,
+      drug: params.drug,
+      target: params.target,
+      company: params.company,
+      limit: params.limit,
+    },
   });
 }
 

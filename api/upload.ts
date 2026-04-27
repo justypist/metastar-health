@@ -39,6 +39,17 @@ function isBlob(value: unknown): value is Blob {
   return typeof Blob !== "undefined" && value instanceof Blob;
 }
 
+function toBlobPart(data: ArrayBuffer | Uint8Array): BlobPart {
+  if (data instanceof ArrayBuffer) {
+    return data;
+  }
+
+  const copy = new Uint8Array(data.byteLength);
+  copy.set(data);
+
+  return copy.buffer;
+}
+
 async function preparePathFile(path: string | URL, options: UploadFileOptions): Promise<PreparedFile> {
   const filePath = path instanceof URL ? path : new URL(path, "file://");
   const bytes = await readFile(filePath);
@@ -57,7 +68,7 @@ async function prepareFileInput(input: FileInput, options: UploadFileOptions): P
   if (isNamedFileData(input)) {
     const value = isBlob(input.data)
       ? input.data
-      : new Blob([input.data], { type: input.contentType ?? options.contentType ?? "application/octet-stream" });
+      : new Blob([toBlobPart(input.data)], { type: input.contentType ?? options.contentType ?? "application/octet-stream" });
 
     return {
       value,
@@ -80,7 +91,7 @@ async function prepareFileInput(input: FileInput, options: UploadFileOptions): P
   }
 
   return {
-    value: new Blob([input], { type: options.contentType ?? "application/octet-stream" }),
+    value: new Blob([toBlobPart(input)], { type: options.contentType ?? "application/octet-stream" }),
     filename: options.filename ?? "upload.bin",
   };
 }

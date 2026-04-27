@@ -21,6 +21,10 @@ export function autocompleteEntities(
 ): Promise<AutocompleteEntitiesResult> {
   return requestOpenApiData<AutocompleteEntitiesResult>("/api/ai/autocomplete/entities", {
     ...options,
-    query: params,
+    query: {
+      query: params.query,
+      size: params.size,
+      type: params.type,
+    },
   });
 }

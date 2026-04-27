@@ -1,5 +1,5 @@
 import { OpenApiRequestError } from "./types.ts";
-import type { AsyncTaskBase, PollOptions } from "./types.ts";
+import type { PollOptions } from "./types.ts";
 
 export interface AsyncPollOptions extends PollOptions {
   completedStatuses?: readonly string[];
@@ -28,7 +28,7 @@ function wait(ms: number, signal?: AbortSignal): Promise<void> {
   });
 }
 
-export async function pollAsyncTask<TTask extends AsyncTaskBase<string>>(
+export async function pollAsyncTask<TTask extends { taskId: string; status: string; error?: string }>(
   getTask: () => Promise<TTask>,
   options: AsyncPollOptions = {},
 ): Promise<TTask> {
