@@ -1,4 +1,4 @@
-import { dirname, join } from "node:path";
+import { dirname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 import { readFileSync, writeFileSync } from "node:fs";
 
@@ -28,6 +28,10 @@ export interface ApiCapabilityScanResult {
 export interface SkillGenerationResult {
   checked: boolean;
   changedFiles: string[];
+}
+
+export interface SkillStructureValidationResult {
+  checkedFiles: string[];
 }
 
 export const capabilityMetadata = [
@@ -110,6 +114,14 @@ const skillDescriptionBeginMarker = "# BEGIN GENERATED description";
 const skillDescriptionEndMarker = "# END GENERATED description";
 const apiMapBeginMarker = "<!-- BEGIN GENERATED api-map -->";
 const apiMapEndMarker = "<!-- END GENERATED api-map -->";
+const requiredSkillFiles = [
+  ".agents/skills/metastar-health/SKILL.md",
+  ".agents/skills/metastar-health/references/overview.md",
+  ".agents/skills/metastar-health/references/sync-search.md",
+  ".agents/skills/metastar-health/references/async-doc-processing.md",
+  ".agents/skills/metastar-health/references/target-workflows.md",
+  ".agents/skills/metastar-health/references/api-map.md",
+] as const;
 
 export function parseApiIndexExports(source: string): Array<{ moduleName: string; exportPath: string }> {
   const exports: Array<{ moduleName: string; exportPath: string }> = [];
@@ -247,10 +259,65 @@ export function generateSkillFiles(options: { check?: boolean; cwd?: string } = 
   return { checked: check, changedFiles };
 }
 
+function assertDoesNotContainSecrets(relativePath: string, source: string): void {
+  const secretPatterns = [
+    /appKey\s*[:=]\s*["'][^"']{8,}["']/iu,
+    /appSecret\s*[:=]\s*["'][^"']{8,}["']/iu,
+    /APP_KEY\s*=\s*(?!<|\$|APP_KEY|your-|example)[^\s]+/iu,
+    /APP_SECRET\s*=\s*(?!<|\$|APP_SECRET|your-|example)[^\s]+/iu,
+  ];
+
+  for (const pattern of secretPatterns) {
+    if (pattern.test(source)) {
+      throw new Error(`Potential real credential found in ${relativePath}`);
+    }
+  }
+}
+
+export function validateSkillStructure(options: { cwd?: string } = {}): SkillStructureValidationResult {
+  const cwd = options.cwd ?? process.cwd();
+  const checkedFiles: string[] = [];
+
+  for (const requiredFile of requiredSkillFiles) {
+    const fullPath = join(cwd, requiredFile);
+    const source = readFileSync(fullPath, "utf8");
+    checkedFiles.push(fullPath);
+    assertDoesNotContainSecrets(requiredFile, source);
+  }
+
+  const skillPath = join(cwd, ".agents/skills/metastar-health/SKILL.md");
+  const skillSource = readFileSync(skillPath, "utf8");
+  const skillLines = skillSource.split("\n").length;
+  if (skillLines > 80) {
+    throw new Error(`SKILL.md should stay concise; found ${skillLines} lines.`);
+  }
+  if (!skillSource.includes("不得自动访问真实网络")) {
+    throw new Error("SKILL.md must explicitly forbid default real network access.");
+  }
+  if (!skillSource.includes("references/api-map.md")) {
+    throw new Error("SKILL.md must route users to references/api-map.md.");
+  }
+
+  const referenceSafetyFiles = ["overview.md", "sync-search.md", "async-doc-processing.md", "target-workflows.md"];
+  for (const fileName of referenceSafetyFiles) {
+    const fullPath = join(cwd, ".agents/skills/metastar-health/references", fileName);
+    const source = readFileSync(fullPath, "utf8");
+    if (!/(授权|手动调用|不得自动|只有用户明确)/u.test(source)) {
+      throw new Error(`${relative(cwd, fullPath)} must describe manual authorization or no-default-network behavior.`);
+    }
+  }
+
+  return { checkedFiles };
+}
+
 function runCli(): void {
   const check = process.argv.includes("--check");
   const result = generateSkillFiles({ check });
   const action = check ? "checked" : "updated";
+
+  if (check) {
+    validateSkillStructure();
+  }
 
   if (result.changedFiles.length === 0) {
     console.log(`metastar-health SKILL metadata ${action}; no changes needed.`);

@@ -10,6 +10,7 @@ import {
   generateSkillFiles,
   parseApiIndexExports,
   scanApiCapabilities,
+  validateSkillStructure,
 } from "./metastar-health-skill.ts";
 
 interface FixtureOptions {
@@ -43,6 +44,22 @@ function withFixture<T>(options: FixtureOptions, run: (cwd: string) => T): T {
       join(cwd, ".agents/skills/metastar-health/references/api-map.md"),
       `# API 能力表\n\n<!-- BEGIN GENERATED api-map -->\n${options.apiMap ?? "stale"}\n<!-- END GENERATED api-map -->\n`,
     );
+    writeFileSync(
+      join(cwd, ".agents/skills/metastar-health/references/overview.md"),
+      "# 总览\n\n只有用户明确授权后才调用真实网络。\n",
+    );
+    writeFileSync(
+      join(cwd, ".agents/skills/metastar-health/references/sync-search.md"),
+      "# 同步查询 API\n\n示例只能手动调用。\n",
+    );
+    writeFileSync(
+      join(cwd, ".agents/skills/metastar-health/references/async-doc-processing.md"),
+      "# 文档处理 API\n\n只有用户明确授权后才上传文件。\n",
+    );
+    writeFileSync(
+      join(cwd, ".agents/skills/metastar-health/references/target-workflows.md"),
+      "# 靶点工作流 API\n\n不得自动创建远端任务。\n",
+    );
 
     return run(cwd);
   } finally {
@@ -55,6 +72,38 @@ test("parseApiIndexExports reads public module exports", () => {
     { moduleName: "papers", exportPath: "./papers.ts" },
     { moduleName: "client", exportPath: "./client.ts" },
   ]);
+});
+
+test("validateSkillStructure checks required files and safety constraints", () => {
+  withFixture(
+    {
+      modules: {
+        papers: "export function searchPapers(): void {}\n",
+      },
+      skillDescription:
+        'description: "使用 MetaStar Health 开放 API 进行研究任务，按需调用论文搜索能力。"\n不得自动访问真实网络\nreferences/api-map.md',
+    },
+    (cwd) => {
+      const result = validateSkillStructure({ cwd });
+
+      assert.equal(result.checkedFiles.length, 6);
+    },
+  );
+});
+
+test("validateSkillStructure rejects likely real credentials", () => {
+  withFixture(
+    {
+      modules: {
+        papers: "export function searchPapers(): void {}\n",
+      },
+      skillDescription:
+        'description: "使用 MetaStar Health 开放 API 进行研究任务，按需调用论文搜索能力。"\n不得自动访问真实网络\nreferences/api-map.md\nappSecret: "real-secret-value"',
+    },
+    (cwd) => {
+      assert.throws(() => validateSkillStructure({ cwd }), /Potential real credential/);
+    },
+  );
 });
 
 test("scanApiCapabilities identifies business modules and exported functions", () => {
