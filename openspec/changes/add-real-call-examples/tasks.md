@@ -10,7 +10,7 @@
 
 ## 3. 同步业务 API 示例
 
-- [ ] 3.1 为 `autocompleteEntities`、`searchPapers`、`getPapersHealth`、`searchDrugs`、`searchGbdData`、`getHpaProfile` 各写一个真实调用场景示例。
+- [x] 3.1 为 `autocompleteEntities`、`searchPapers`、`getPapersHealth`、`searchDrugs`、`searchGbdData`、`getHpaProfile` 各写一个真实调用场景示例。
 
 ## 4. 异步任务 API 示例
 

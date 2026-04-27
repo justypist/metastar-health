@@ -1,4 +1,5 @@
 import { basicScenarios } from "./basic.ts";
+import { syncApiScenarios } from "./sync-apis.ts";
 import { uploadAndPollingScenarios } from "./upload-and-polling.ts";
 
 export interface ExampleScenario {
@@ -7,7 +8,11 @@ export interface ExampleScenario {
   run: () => Promise<void>;
 }
 
-export const exampleScenarios: readonly ExampleScenario[] = [...basicScenarios, ...uploadAndPollingScenarios];
+export const exampleScenarios: readonly ExampleScenario[] = [
+  ...basicScenarios,
+  ...uploadAndPollingScenarios,
+  ...syncApiScenarios,
+];
 
 export function listExampleScenarios(): readonly ExampleScenario[] {
   return exampleScenarios;
