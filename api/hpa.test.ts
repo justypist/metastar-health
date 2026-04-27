@@ -27,7 +27,7 @@ test("getHpaProfile requests profile path and normalizes aliases arrays", async 
     { appKey: "key", appSecret: "secret", baseUrl: "https://api.example.test", fetch: fetchImpl },
   );
 
-  assert.equal(result, response);
+  assert.deepEqual(result, response);
   assert.equal(String(calls[0]?.input), "https://api.example.test/api/hpa/profile?target=BRCA1&aliases=RNF53%3BBRCC1");
   assert.equal(calls[0]?.init?.method, "GET");
 });

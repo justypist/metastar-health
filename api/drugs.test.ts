@@ -35,7 +35,7 @@ test("searchDrugs posts search params and returns the parsed response", async ()
     fetch: fetchImpl,
   });
 
-  assert.equal(result, response);
+  assert.deepEqual(result, response);
   assert.equal(String(calls[0]?.input), "https://api.example.test/api/drugs/search");
   assert.equal(calls[0]?.init?.method, "POST");
   assert.equal(calls[0]?.init?.body, JSON.stringify(params));

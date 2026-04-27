@@ -26,7 +26,7 @@ test("searchPapers requests papers search path with query parameters", async () 
     { appKey: "key", appSecret: "secret", baseUrl: "https://api.example.test", fetch: fetchImpl },
   );
 
-  assert.equal(result, data);
+  assert.deepEqual(result, data);
   assert.equal(String(calls[0]?.input), "https://api.example.test/api/papers/search?disease=cancer&target=EGFR&limit=10");
   assert.equal(calls[0]?.init?.method, "GET");
 });
@@ -52,6 +52,6 @@ test("getPapersHealth requests health path and returns health data", async () =>
     fetch: fetchImpl,
   });
 
-  assert.equal(result, data);
+  assert.deepEqual(result, data);
   assert.equal(String(calls[0]?.input), "https://api.example.test/api/papers/health");
 });

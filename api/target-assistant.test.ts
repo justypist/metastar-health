@@ -27,7 +27,7 @@ test("submitTargetAssistantTask posts params and returns successful submission",
     return successPayload(data);
   };
 
-  assert.equal(
+  assert.deepEqual(
     await submitTargetAssistantTask(params, {
       appKey: "key",
       appSecret: "secret",

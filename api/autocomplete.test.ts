@@ -35,7 +35,7 @@ test("autocompleteEntities requests entity suggestions with query parameters", a
     { appKey: "key", appSecret: "secret", baseUrl: "https://api.example.test", fetch: fetchImpl },
   );
 
-  assert.equal(result, data);
+  assert.deepEqual(result, data);
   assert.equal(String(calls[0]?.input), "https://api.example.test/api/ai/autocomplete/entities?query=brca&size=5&type=target");
   assert.equal(calls[0]?.init?.method, "GET");
 });
