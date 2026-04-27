@@ -2,6 +2,7 @@ export * from "./client.ts";
 export * from "./config.ts";
 export * from "./literature-process.ts";
 export * from "./ocr.ts";
+export * from "./papers.ts";
 export * from "./polling.ts";
 export * from "./text-extraction.ts";
 export * from "./types.ts";
