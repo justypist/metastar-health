@@ -1,3 +1,4 @@
+export * from "./autocomplete.ts";
 export * from "./client.ts";
 export * from "./config.ts";
 export * from "./literature-process.ts";
