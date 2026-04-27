@@ -2,6 +2,7 @@ export * from "./autocomplete.ts";
 export * from "./client.ts";
 export * from "./config.ts";
 export * from "./drugs.ts";
+export * from "./gbd.ts";
 export * from "./hpa.ts";
 export * from "./literature-process.ts";
 export * from "./ocr.ts";
