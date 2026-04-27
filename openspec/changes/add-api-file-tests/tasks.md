@@ -15,7 +15,7 @@
 
 - [x] 3.1 为 `api/autocomplete.ts` 添加测试，覆盖实体补全路径与查询参数
 - [x] 3.2 为 `api/papers.ts` 添加测试，覆盖论文搜索和健康检查路径、查询参数与返回值
-- [ ] 3.3 为 `api/drugs.ts` 添加测试，覆盖药物搜索 POST 方法、请求体和返回值
+- [x] 3.3 为 `api/drugs.ts` 添加测试，覆盖药物搜索 POST 方法、请求体和返回值
 - [ ] 3.4 为 `api/gbd.ts` 添加测试，覆盖 GBD 搜索 POST 方法、请求体和返回值
 - [ ] 3.5 为 `api/hpa.ts` 添加测试，覆盖 HPA 查询路径、target 参数和 aliases 数组归一化
 
