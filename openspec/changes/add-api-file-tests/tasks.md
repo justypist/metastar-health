@@ -23,7 +23,7 @@
 
 - [x] 4.1 为 `api/ocr.ts` 添加测试，覆盖提交上传、结果查询路径编码和轮询入口
 - [x] 4.2 为 `api/text-extraction.ts` 添加测试，覆盖提交上传、结果查询路径编码和轮询入口
-- [ ] 4.3 为 `api/literature-process.ts` 添加测试，覆盖提交上传、结果查询路径编码和轮询入口
+- [x] 4.3 为 `api/literature-process.ts` 添加测试，覆盖提交上传、结果查询路径编码和轮询入口
 - [ ] 4.4 为 `api/target-assistant.ts` 添加测试，覆盖提交成功、提交校验失败、结果查询路径编码和轮询入口
 - [ ] 4.5 为 `api/target-quick-assessment.ts` 添加测试，覆盖提交 POST、结果查询路径编码和轮询入口
 
