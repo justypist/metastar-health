@@ -2,6 +2,7 @@ import { basicScenarios } from "./basic.ts";
 import { literatureProcessScenarios } from "./literature-process.ts";
 import { ocrAndTextExtractionScenarios } from "./ocr-and-text-extraction.ts";
 import { syncApiScenarios } from "./sync-apis.ts";
+import { targetTaskScenarios } from "./target-tasks.ts";
 import { uploadAndPollingScenarios } from "./upload-and-polling.ts";
 
 export interface ExampleScenario {
@@ -16,6 +17,7 @@ export const exampleScenarios: readonly ExampleScenario[] = [
   ...syncApiScenarios,
   ...ocrAndTextExtractionScenarios,
   ...literatureProcessScenarios,
+  ...targetTaskScenarios,
 ];
 
 export function listExampleScenarios(): readonly ExampleScenario[] {
