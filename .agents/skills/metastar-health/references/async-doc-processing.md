@@ -2,7 +2,7 @@
 
 覆盖 OCR、临床前文本提取和文献解析。
 
-所有函数都从 `api/index.ts` 导入。文档处理会上传文件并创建远端异步任务，只有用户明确提供文件和授权调用时才能执行。
+文档处理会上传文件并创建远端异步任务，只有用户明确提供文件和授权调用时才能执行。
 
 ## 函数清单
 
@@ -19,8 +19,6 @@
 默认轮询约定来自 `pollAsyncTask`：`intervalMs` 默认为 5000，`timeoutMs` 默认为 600000；`completed` 视为成功，`failed` 会抛出 `OpenApiRequestError`。可传入 `signal` 取消轮询。
 
 ```ts
-import { pollOcrResult, submitOcrTask } from "./api/index.ts";
-
 // 仅在用户明确提供文件并授权上传后手动调用。
 const submission = await submitOcrTask({ data: fileBytes, filename: "document.pdf" });
 const task = await pollOcrResult(submission.taskId, { intervalMs: 5000, timeoutMs: 600000 });

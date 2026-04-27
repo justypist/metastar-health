@@ -2,7 +2,7 @@
 
 覆盖论文搜索、实体补全、药物搜索、HPA 靶点画像和 GBD 查询。
 
-所有函数都从 `api/index.ts` 导入。以下示例只展示调用形状，不应在未准备认证和用户输入时自动执行。
+以下示例只展示调用形状，不应在未准备认证和用户输入时自动执行。
 
 ## 函数清单
 
@@ -20,8 +20,6 @@
 - 建议显式设置 `limit`，避免一次请求返回过多数据。
 
 ```ts
-import { searchPapers } from "./api/index.ts";
-
 // 仅在用户提供查询条件并授权访问开放 API 后手动调用。
 const result = await searchPapers({ disease: "lung cancer", target: "EGFR", limit: 10 });
 ```

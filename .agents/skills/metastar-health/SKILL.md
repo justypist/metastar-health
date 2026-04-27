@@ -7,18 +7,17 @@ description: "使用 MetaStar Health 开放 API 进行研究任务，按需调�
 
 # MetaStar Health
 
-使用本技能帮助 agent 发现并安全调用项目 `api/index.ts` 导出的 MetaStar Health 开放 API。入口只提供导航和约束，具体函数参数、返回字段和示例按需阅读 `references/` 资源文档。
+使用本技能帮助 agent 发现并安全调用 MetaStar Health 开放 API。入口只提供导航和约束，具体函数参数、返回字段和示例按需阅读 `references/` 资源文档。
 
 ## 触发场景
 
 - 用户需要检索论文、药物、疾病负担、HPA 靶点画像或补全疾病、药物、靶点、公司实体。
 - 用户需要对文档执行 OCR、临床前模型文本提取或文献结构化解析。
 - 用户需要提交靶点助手研究任务，或批量执行靶点快速评估。
-- 用户询问 MetaStar Health 开放 API 的 TypeScript 调用入口和异步任务轮询方式。
+- 用户询问 MetaStar Health 开放 API 的 TypeScript 函数和异步任务轮询方式。
 
-## 认证与导入
+## 认证
 
-- 从项目根目录的 `api/index.ts` 导入业务函数，例如 `import { searchPapers } from "./api/index.ts"`。
 - 使用环境变量或调用方传入配置提供 `APP_KEY`、`APP_SECRET` 和 `OPEN_API_BASE_URL`。
 - 不要在技能文档、示例或测试中写入真实凭据、真实业务文件路径或用户私有数据。
 

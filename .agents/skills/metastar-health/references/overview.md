@@ -1,6 +1,6 @@
 # 总览
 
-MetaStar Health API 函数从项目根目录的 `api/index.ts` 统一导入。
+MetaStar Health API 函数由宿主环境提供。本技能只描述何时选择对应函数、需要哪些参数、如何处理返回结构和副作用边界。
 
 ## 安全边界
 

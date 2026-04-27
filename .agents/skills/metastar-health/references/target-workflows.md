@@ -2,7 +2,7 @@
 
 覆盖靶点助手和靶点快速评估。
 
-所有函数都从 `api/index.ts` 导入。靶点工作流会创建远端异步任务，只有用户明确给出靶点并授权调用时才能执行。
+靶点工作流会创建远端异步任务，只有用户明确给出靶点并授权调用时才能执行。
 
 ## 函数清单
 
@@ -17,8 +17,6 @@
 - 失败状态会抛出或返回包含 `error` 的任务结果；向用户说明失败原因前应保留 `taskId` 便于后续排查。
 
 ```ts
-import { pollTargetAssistantResult, submitTargetAssistantTask } from "./api/index.ts";
-
 // 仅在用户明确提供靶点并授权创建远端任务后手动调用。
 const submission = await submitTargetAssistantTask({ target: "EGFR", language: "zh-CN" });
 const task = await pollTargetAssistantResult(submission.taskId, { intervalMs: 5000, timeoutMs: 900000 });
