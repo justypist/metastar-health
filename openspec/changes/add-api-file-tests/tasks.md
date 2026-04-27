@@ -8,7 +8,7 @@
 - [x] 2.1 为 `api/config.ts` 添加测试，覆盖环境变量、override 和缺失凭据错误
 - [x] 2.2 为 `api/types.ts` 添加测试，覆盖 `OpenApiRequestError` 字段保留和公共类型导入编译约束
 - [x] 2.3 为 `api/client.ts` 添加测试，覆盖 fetch 解析、URL 构造、查询参数、JSON body、认证头、响应解析和错误抛出
-- [ ] 2.4 为 `api/upload.ts` 添加测试，覆盖内存文件 FormData、额外字段、上传认证头、查询参数和错误响应，不使用真实业务文件
+- [x] 2.4 为 `api/upload.ts` 添加测试，覆盖内存文件 FormData、额外字段、上传认证头、查询参数和错误响应，不使用真实业务文件
 - [ ] 2.5 为 `api/polling.ts` 添加测试，覆盖任务完成、任务失败、超时和 abort 场景，避免长时间真实等待
 
 ## 3. 同步业务 API 模块测试
