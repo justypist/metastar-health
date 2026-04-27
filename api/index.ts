@@ -8,6 +8,7 @@ export * from "./literature-process.ts";
 export * from "./ocr.ts";
 export * from "./papers.ts";
 export * from "./polling.ts";
+export * from "./target-assistant.ts";
 export * from "./text-extraction.ts";
 export * from "./types.ts";
 export * from "./upload.ts";
