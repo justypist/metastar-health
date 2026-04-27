@@ -14,7 +14,7 @@ export interface OpenApiRequestOptions extends OpenApiClientOptions {
   signal?: AbortSignal;
 }
 
-function getFetch(fetchOverride?: OpenApiFetch): OpenApiFetch {
+export function getOpenApiFetch(fetchOverride?: OpenApiFetch): OpenApiFetch {
   const resolvedFetch = fetchOverride ?? globalThis.fetch;
 
   if (!resolvedFetch) {
@@ -71,7 +71,7 @@ function readApiData(payload: unknown): unknown {
   return isRecord(payload) ? payload.data : undefined;
 }
 
-async function parseResponsePayload(response: Response): Promise<unknown> {
+export async function parseOpenApiResponsePayload(response: Response): Promise<unknown> {
   const text = await response.text();
 
   if (!text) {
@@ -86,7 +86,7 @@ async function parseResponsePayload(response: Response): Promise<unknown> {
   return JSON.parse(text) as unknown;
 }
 
-function assertSuccessfulResponse(response: Response, payload: unknown): void {
+export function assertSuccessfulOpenApiResponse(response: Response, payload: unknown): void {
   const code = readApiErrorCode(payload);
   const message = readApiMessage(payload);
   const data = readApiData(payload);
@@ -105,7 +105,7 @@ function assertSuccessfulResponse(response: Response, payload: unknown): void {
 
 export async function requestOpenApi<TResponse>(path: string, options: OpenApiRequestOptions = {}): Promise<TResponse> {
   const config = readOpenApiConfig(options);
-  const fetchImpl = getFetch(options.fetch);
+  const fetchImpl = getOpenApiFetch(options.fetch);
   const url = buildOpenApiUrl(config.baseUrl, path, options.query);
   const headers = new Headers(options.headers);
 
@@ -124,9 +124,9 @@ export async function requestOpenApi<TResponse>(path: string, options: OpenApiRe
     body,
     signal: options.signal,
   });
-  const payload = await parseResponsePayload(response);
+  const payload = await parseOpenApiResponsePayload(response);
 
-  assertSuccessfulResponse(response, payload);
+  assertSuccessfulOpenApiResponse(response, payload);
 
   return payload as TResponse;
 }
