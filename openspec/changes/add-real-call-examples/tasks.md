@@ -6,7 +6,7 @@
 ## 2. 基础能力示例
 
 - [x] 2.1 为 `readOpenApiConfig`、`getOpenApiFetch`、`buildOpenApiUrl`、`parseOpenApiResponsePayload`、`assertSuccessfulOpenApiResponse`、`requestOpenApi`、`requestOpenApiData` 各写一个真实调用场景示例。
-- [ ] 2.2 为 `createUploadFormData`、`requestOpenApiUpload`、`pollAsyncTask` 各写一个真实调用场景示例，上传示例仅使用占位文件路径或环境变量路径。
+- [x] 2.2 为 `createUploadFormData`、`requestOpenApiUpload`、`pollAsyncTask` 各写一个真实调用场景示例，上传示例仅使用占位文件路径或环境变量路径。
 
 ## 3. 同步业务 API 示例
 
