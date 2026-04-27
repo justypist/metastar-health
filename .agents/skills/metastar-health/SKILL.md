@@ -1,7 +1,7 @@
 ---
 name: metastar-health
 # BEGIN GENERATED description
-description: 使用 MetaStar Health 开放 API 进行研究任务，按需调用论文搜索、实体补全、药物、HPA、GBD、OCR、文本提取、文献解析、靶点助手和靶点快速评估能力。
+description: "使用 MetaStar Health 开放 API 进行研究任务，按需调用实体补全、药物搜索、GBD 查询、HPA 画像、文献解析、OCR、论文搜索、靶点助手、靶点快速评估、临床前文本提取能力。"
 # END GENERATED description
 ---
 

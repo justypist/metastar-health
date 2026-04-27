@@ -1,5 +1,6 @@
 import { dirname, join } from "node:path";
-import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { readFileSync, writeFileSync } from "node:fs";
 
 export type CapabilityCategory = "sync-search" | "async-doc-processing" | "target-workflows";
 
@@ -22,6 +23,11 @@ export interface ApiCapabilityScanResult {
   businessCapabilities: Array<CapabilityMetadata & { functions: string[] }>;
   infrastructureModules: ModuleExportInfo[];
   modulesWithoutMetadata: ModuleExportInfo[];
+}
+
+export interface SkillGenerationResult {
+  checked: boolean;
+  changedFiles: string[];
 }
 
 export const capabilityMetadata = [
@@ -100,6 +106,10 @@ export const capabilityMetadata = [
 const infrastructureModuleNames = new Set(["client", "config", "polling", "types", "upload"]);
 
 const capabilityMetadataByModule = new Map(capabilityMetadata.map((metadata) => [metadata.moduleName, metadata]));
+const skillDescriptionBeginMarker = "# BEGIN GENERATED description";
+const skillDescriptionEndMarker = "# END GENERATED description";
+const apiMapBeginMarker = "<!-- BEGIN GENERATED api-map -->";
+const apiMapEndMarker = "<!-- END GENERATED api-map -->";
 
 export function parseApiIndexExports(source: string): Array<{ moduleName: string; exportPath: string }> {
   const exports: Array<{ moduleName: string; exportPath: string }> = [];
@@ -157,4 +167,102 @@ export function scanApiCapabilities(indexPath = join(process.cwd(), "api/index.t
     infrastructureModules,
     modulesWithoutMetadata,
   };
+}
+
+export function buildSkillDescription(scanResult: ApiCapabilityScanResult): string {
+  const topics = scanResult.businessCapabilities.map((capability) => capability.descriptionTopic);
+
+  return `使用 MetaStar Health 开放 API 进行研究任务，按需调用${topics.join("、")}能力。`;
+}
+
+export function buildApiMapMarkdown(scanResult: ApiCapabilityScanResult): string {
+  const lines = [
+    "| 业务模块 | 能力 | 参考文档 | 公共函数 |",
+    "| --- | --- | --- | --- |",
+    ...scanResult.businessCapabilities.map((capability) => {
+      const functions = capability.functions.map((functionName) => `\`${functionName}\``).join(", ");
+      return `| \`${capability.moduleName}\` | ${capability.title} | \`${capability.referenceFile}\` | ${functions || "-"} |`;
+    }),
+  ];
+
+  return lines.join("\n");
+}
+
+export function replaceGeneratedBlock(source: string, beginMarker: string, endMarker: string, generatedContent: string): string {
+  const beginIndex = source.indexOf(beginMarker);
+  const endIndex = source.indexOf(endMarker);
+
+  if (beginIndex === -1 || endIndex === -1 || endIndex < beginIndex) {
+    throw new Error(`Missing generated markers: ${beginMarker} / ${endMarker}`);
+  }
+
+  const beforeContentStart = source.indexOf("\n", beginIndex);
+  if (beforeContentStart === -1) {
+    throw new Error(`Generated begin marker must be on its own line: ${beginMarker}`);
+  }
+
+  const afterContentEnd = source.lastIndexOf("\n", endIndex);
+  if (afterContentEnd === -1 || afterContentEnd < beforeContentStart) {
+    throw new Error(`Generated end marker must be on its own line: ${endMarker}`);
+  }
+
+  return `${source.slice(0, beforeContentStart + 1)}${generatedContent}\n${source.slice(afterContentEnd + 1)}`;
+}
+
+export function generateSkillFiles(options: { check?: boolean; cwd?: string } = {}): SkillGenerationResult {
+  const cwd = options.cwd ?? process.cwd();
+  const check = options.check ?? false;
+  const scanResult = scanApiCapabilities(join(cwd, "api/index.ts"));
+  const updates = [
+    {
+      path: join(cwd, ".agents/skills/metastar-health/SKILL.md"),
+      beginMarker: skillDescriptionBeginMarker,
+      endMarker: skillDescriptionEndMarker,
+      content: `description: ${JSON.stringify(buildSkillDescription(scanResult))}`,
+    },
+    {
+      path: join(cwd, ".agents/skills/metastar-health/references/api-map.md"),
+      beginMarker: apiMapBeginMarker,
+      endMarker: apiMapEndMarker,
+      content: buildApiMapMarkdown(scanResult),
+    },
+  ];
+  const changedFiles: string[] = [];
+
+  for (const update of updates) {
+    const source = readFileSync(update.path, "utf8");
+    const nextSource = replaceGeneratedBlock(source, update.beginMarker, update.endMarker, update.content);
+    if (source !== nextSource) {
+      changedFiles.push(update.path);
+      if (!check) {
+        writeFileSync(update.path, nextSource);
+      }
+    }
+  }
+
+  if (check && changedFiles.length > 0) {
+    throw new Error(`metastar-health SKILL metadata is out of date. Run: node scripts/metastar-health-skill.ts`);
+  }
+
+  return { checked: check, changedFiles };
+}
+
+function runCli(): void {
+  const check = process.argv.includes("--check");
+  const result = generateSkillFiles({ check });
+  const action = check ? "checked" : "updated";
+
+  if (result.changedFiles.length === 0) {
+    console.log(`metastar-health SKILL metadata ${action}; no changes needed.`);
+    return;
+  }
+
+  console.log(`metastar-health SKILL metadata ${action}:`);
+  for (const changedFile of result.changedFiles) {
+    console.log(`- ${changedFile}`);
+  }
+}
+
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  runCli();
 }
