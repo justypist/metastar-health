@@ -9,10 +9,10 @@ import {
 import {
   PLACEHOLDER_TASK_ID,
   assertConfiguredValue,
-  exampleClientOptions,
   handleExampleError,
   logExampleResult,
   readExampleContext,
+  toOpenApiClientOptions,
 } from "./context.ts";
 import type { ExampleScenario } from "./scenarios.ts";
 
@@ -35,7 +35,7 @@ export async function exampleSubmitTargetAssistantTask(): Promise<void> {
         },
         language: "en-US",
       },
-      exampleClientOptions(context),
+      toOpenApiClientOptions(context),
     );
 
     logExampleResult("submitTargetAssistantTask", submission);
@@ -51,7 +51,7 @@ export async function exampleGetTargetAssistantResult(): Promise<void> {
 
     assertConfiguredValue("OPEN_API_TARGET_ASSISTANT_TASK_ID or OPEN_API_TASK_ID", taskId, PLACEHOLDER_TASK_ID);
 
-    const result = await getTargetAssistantResult(taskId, exampleClientOptions(context));
+    const result = await getTargetAssistantResult(taskId, toOpenApiClientOptions(context));
 
     logExampleResult("getTargetAssistantResult", result);
   } catch (error) {
@@ -67,7 +67,7 @@ export async function examplePollTargetAssistantResult(): Promise<void> {
     assertConfiguredValue("OPEN_API_TARGET_ASSISTANT_TASK_ID or OPEN_API_TASK_ID", taskId, PLACEHOLDER_TASK_ID);
 
     const result = await pollTargetAssistantResult(taskId, {
-      ...exampleClientOptions(context),
+      ...toOpenApiClientOptions(context),
       intervalMs: 5000,
       timeoutMs: 600000,
     });
@@ -85,7 +85,7 @@ export async function exampleSubmitTargetQuickAssessmentTask(): Promise<void> {
       {
         targetNames: ["EGFR", "ALK"],
       },
-      exampleClientOptions(context),
+      toOpenApiClientOptions(context),
     );
 
     logExampleResult("submitTargetQuickAssessmentTask", submission);
@@ -101,7 +101,7 @@ export async function exampleGetTargetQuickAssessmentResult(): Promise<void> {
 
     assertConfiguredValue("OPEN_API_TARGET_QUICK_ASSESSMENT_TASK_ID or OPEN_API_TASK_ID", taskId, PLACEHOLDER_TASK_ID);
 
-    const result = await getTargetQuickAssessmentResult(taskId, exampleClientOptions(context));
+    const result = await getTargetQuickAssessmentResult(taskId, toOpenApiClientOptions(context));
 
     logExampleResult("getTargetQuickAssessmentResult", result);
   } catch (error) {
@@ -117,7 +117,7 @@ export async function examplePollTargetQuickAssessmentResult(): Promise<void> {
     assertConfiguredValue("OPEN_API_TARGET_QUICK_ASSESSMENT_TASK_ID or OPEN_API_TASK_ID", taskId, PLACEHOLDER_TASK_ID);
 
     const result = await pollTargetQuickAssessmentResult(taskId, {
-      ...exampleClientOptions(context),
+      ...toOpenApiClientOptions(context),
       intervalMs: 5000,
       timeoutMs: 600000,
     });

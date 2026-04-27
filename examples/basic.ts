@@ -8,11 +8,11 @@ import {
   requestOpenApiData,
 } from "../api/index.ts";
 import {
-  exampleAuthHeaders,
-  exampleClientOptions,
+  createOpenApiAuthHeaders,
   handleExampleError,
   logExampleResult,
   readExampleContext,
+  toOpenApiClientOptions,
 } from "./context.ts";
 import type { ExampleScenario } from "./scenarios.ts";
 import type { ApiSuccessResponse, PapersHealthResult } from "../api/index.ts";
@@ -34,10 +34,10 @@ export function exampleReadOpenApiConfig(): void {
 export async function exampleGetOpenApiFetch(): Promise<void> {
   try {
     const context = readExampleContext();
-    const config = readOpenApiConfig(exampleClientOptions(context));
+    const config = readOpenApiConfig(toOpenApiClientOptions(context));
     const fetchImpl = getOpenApiFetch();
     const response = await fetchImpl(buildOpenApiUrl(config.baseUrl, "/api/papers/health"), {
-      headers: exampleAuthHeaders(context),
+      headers: createOpenApiAuthHeaders(context),
     });
 
     logExampleResult("getOpenApiFetch", { ok: response.ok, status: response.status });
@@ -49,7 +49,7 @@ export async function exampleGetOpenApiFetch(): Promise<void> {
 export function exampleBuildOpenApiUrl(): void {
   try {
     const context = readExampleContext();
-    const config = readOpenApiConfig(exampleClientOptions(context));
+    const config = readOpenApiConfig(toOpenApiClientOptions(context));
     const url = buildOpenApiUrl(config.baseUrl, "/api/papers/search", {
       disease: "lung cancer",
       limit: 5,
@@ -64,9 +64,9 @@ export function exampleBuildOpenApiUrl(): void {
 export async function exampleParseOpenApiResponsePayload(): Promise<void> {
   try {
     const context = readExampleContext();
-    const config = readOpenApiConfig(exampleClientOptions(context));
+    const config = readOpenApiConfig(toOpenApiClientOptions(context));
     const response = await getOpenApiFetch()(buildOpenApiUrl(config.baseUrl, "/api/papers/health"), {
-      headers: exampleAuthHeaders(context),
+      headers: createOpenApiAuthHeaders(context),
     });
     const payload = await parseOpenApiResponsePayload(response);
 
@@ -79,9 +79,9 @@ export async function exampleParseOpenApiResponsePayload(): Promise<void> {
 export async function exampleAssertSuccessfulOpenApiResponse(): Promise<void> {
   try {
     const context = readExampleContext();
-    const config = readOpenApiConfig(exampleClientOptions(context));
+    const config = readOpenApiConfig(toOpenApiClientOptions(context));
     const response = await getOpenApiFetch()(buildOpenApiUrl(config.baseUrl, "/api/papers/health"), {
-      headers: exampleAuthHeaders(context),
+      headers: createOpenApiAuthHeaders(context),
     });
     const payload = await parseOpenApiResponsePayload(response);
 
@@ -95,7 +95,7 @@ export async function exampleAssertSuccessfulOpenApiResponse(): Promise<void> {
 export async function exampleRequestOpenApi(): Promise<void> {
   try {
     const context = readExampleContext();
-    const response = await requestOpenApi<ApiSuccessResponse<PapersHealthResult>>("/api/papers/health", exampleClientOptions(context));
+    const response = await requestOpenApi<ApiSuccessResponse<PapersHealthResult>>("/api/papers/health", toOpenApiClientOptions(context));
 
     logExampleResult("requestOpenApi", response);
   } catch (error) {
@@ -106,7 +106,7 @@ export async function exampleRequestOpenApi(): Promise<void> {
 export async function exampleRequestOpenApiData(): Promise<void> {
   try {
     const context = readExampleContext();
-    const data = await requestOpenApiData<PapersHealthResult>("/api/papers/health", exampleClientOptions(context));
+    const data = await requestOpenApiData<PapersHealthResult>("/api/papers/health", toOpenApiClientOptions(context));
 
     logExampleResult("requestOpenApiData", data);
   } catch (error) {

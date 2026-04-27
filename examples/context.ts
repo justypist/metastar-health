@@ -28,7 +28,7 @@ export function readExampleContext(): ExampleContext {
   };
 }
 
-export function exampleClientOptions(context: ExampleContext): Pick<ExampleContext, "appKey" | "appSecret" | "baseUrl"> {
+export function toOpenApiClientOptions(context: ExampleContext): Pick<ExampleContext, "appKey" | "appSecret" | "baseUrl"> {
   return {
     appKey: context.appKey,
     appSecret: context.appSecret,
@@ -36,7 +36,7 @@ export function exampleClientOptions(context: ExampleContext): Pick<ExampleConte
   };
 }
 
-export function exampleAuthHeaders(context: ExampleContext): Headers {
+export function createOpenApiAuthHeaders(context: ExampleContext): Headers {
   return new Headers({
     "x-app-key": context.appKey,
     "x-app-secret": context.appSecret,

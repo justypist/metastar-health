@@ -6,7 +6,7 @@ import {
   searchGbdData,
   searchPapers,
 } from "../api/index.ts";
-import { exampleClientOptions, handleExampleError, logExampleResult, readExampleContext } from "./context.ts";
+import { handleExampleError, logExampleResult, readExampleContext, toOpenApiClientOptions } from "./context.ts";
 import type { ExampleScenario } from "./scenarios.ts";
 
 export async function exampleAutocompleteEntities(): Promise<void> {
@@ -18,7 +18,7 @@ export async function exampleAutocompleteEntities(): Promise<void> {
         size: 5,
         type: "target",
       },
-      exampleClientOptions(context),
+      toOpenApiClientOptions(context),
     );
 
     logExampleResult("autocompleteEntities", result);
@@ -36,7 +36,7 @@ export async function exampleSearchPapers(): Promise<void> {
         target: "EGFR",
         limit: 5,
       },
-      exampleClientOptions(context),
+      toOpenApiClientOptions(context),
     );
 
     logExampleResult("searchPapers", result);
@@ -48,7 +48,7 @@ export async function exampleSearchPapers(): Promise<void> {
 export async function exampleGetPapersHealth(): Promise<void> {
   try {
     const context = readExampleContext();
-    const result = await getPapersHealth(exampleClientOptions(context));
+    const result = await getPapersHealth(toOpenApiClientOptions(context));
 
     logExampleResult("getPapersHealth", result);
   } catch (error) {
@@ -65,7 +65,7 @@ export async function exampleSearchDrugs(): Promise<void> {
         diseases: [{ name: "non-small cell lung cancer" }],
         limit: 5,
       },
-      exampleClientOptions(context),
+      toOpenApiClientOptions(context),
     );
 
     logExampleResult("searchDrugs", result);
@@ -87,7 +87,7 @@ export async function exampleSearchGbdData(): Promise<void> {
         year: 2021,
         limit: 5,
       },
-      exampleClientOptions(context),
+      toOpenApiClientOptions(context),
     );
 
     logExampleResult("searchGbdData", result);
@@ -104,7 +104,7 @@ export async function exampleGetHpaProfile(): Promise<void> {
         target: "EGFR",
         aliases: ["ERBB1"],
       },
-      exampleClientOptions(context),
+      toOpenApiClientOptions(context),
     );
 
     logExampleResult("getHpaProfile", result);

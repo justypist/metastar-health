@@ -7,10 +7,10 @@ import {
   PLACEHOLDER_TASK_ID,
   PLACEHOLDER_UPLOAD_FILE_PATH,
   assertConfiguredValue,
-  exampleClientOptions,
   handleExampleError,
   logExampleResult,
   readExampleContext,
+  toOpenApiClientOptions,
 } from "./context.ts";
 import type { ExampleScenario } from "./scenarios.ts";
 
@@ -25,7 +25,7 @@ export async function exampleSubmitLiteratureProcessTask(): Promise<void> {
     assertConfiguredValue("OPEN_API_UPLOAD_FILE_PATH", context.uploadFilePath, PLACEHOLDER_UPLOAD_FILE_PATH);
 
     const submission = await submitLiteratureProcessTask(context.uploadFilePath, {
-      ...exampleClientOptions(context),
+      ...toOpenApiClientOptions(context),
       fieldName: "file",
       contentType: "application/pdf",
     });
@@ -43,7 +43,7 @@ export async function exampleGetLiteratureProcessResult(): Promise<void> {
 
     assertConfiguredValue("OPEN_API_LITERATURE_PROCESS_TASK_ID or OPEN_API_TASK_ID", taskId, PLACEHOLDER_TASK_ID);
 
-    const result = await getLiteratureProcessResult(taskId, exampleClientOptions(context));
+    const result = await getLiteratureProcessResult(taskId, toOpenApiClientOptions(context));
 
     logExampleResult("getLiteratureProcessResult", result);
   } catch (error) {
@@ -59,7 +59,7 @@ export async function examplePollLiteratureProcessResult(): Promise<void> {
     assertConfiguredValue("OPEN_API_LITERATURE_PROCESS_TASK_ID or OPEN_API_TASK_ID", taskId, PLACEHOLDER_TASK_ID);
 
     const result = await pollLiteratureProcessResult(taskId, {
-      ...exampleClientOptions(context),
+      ...toOpenApiClientOptions(context),
       intervalMs: 5000,
       timeoutMs: 600000,
     });

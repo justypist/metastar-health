@@ -10,10 +10,10 @@ import {
   PLACEHOLDER_TASK_ID,
   PLACEHOLDER_UPLOAD_FILE_PATH,
   assertConfiguredValue,
-  exampleClientOptions,
   handleExampleError,
   logExampleResult,
   readExampleContext,
+  toOpenApiClientOptions,
 } from "./context.ts";
 import type { ExampleScenario } from "./scenarios.ts";
 
@@ -28,7 +28,7 @@ export async function exampleSubmitOcrTask(): Promise<void> {
     assertConfiguredValue("OPEN_API_UPLOAD_FILE_PATH", context.uploadFilePath, PLACEHOLDER_UPLOAD_FILE_PATH);
 
     const submission = await submitOcrTask(context.uploadFilePath, {
-      ...exampleClientOptions(context),
+      ...toOpenApiClientOptions(context),
       fieldName: "file",
       contentType: "application/pdf",
     });
@@ -46,7 +46,7 @@ export async function exampleGetOcrResult(): Promise<void> {
 
     assertConfiguredValue("OPEN_API_OCR_TASK_ID or OPEN_API_TASK_ID", taskId, PLACEHOLDER_TASK_ID);
 
-    const result = await getOcrResult(taskId, exampleClientOptions(context));
+    const result = await getOcrResult(taskId, toOpenApiClientOptions(context));
 
     logExampleResult("getOcrResult", result);
   } catch (error) {
@@ -62,7 +62,7 @@ export async function examplePollOcrResult(): Promise<void> {
     assertConfiguredValue("OPEN_API_OCR_TASK_ID or OPEN_API_TASK_ID", taskId, PLACEHOLDER_TASK_ID);
 
     const result = await pollOcrResult(taskId, {
-      ...exampleClientOptions(context),
+      ...toOpenApiClientOptions(context),
       intervalMs: 5000,
       timeoutMs: 600000,
     });
@@ -80,7 +80,7 @@ export async function exampleSubmitTextExtractionTask(): Promise<void> {
     assertConfiguredValue("OPEN_API_UPLOAD_FILE_PATH", context.uploadFilePath, PLACEHOLDER_UPLOAD_FILE_PATH);
 
     const submission = await submitTextExtractionTask(context.uploadFilePath, {
-      ...exampleClientOptions(context),
+      ...toOpenApiClientOptions(context),
       fieldName: "file",
       contentType: "application/pdf",
     });
@@ -98,7 +98,7 @@ export async function exampleGetTextExtractionResult(): Promise<void> {
 
     assertConfiguredValue("OPEN_API_TEXT_EXTRACTION_TASK_ID or OPEN_API_TASK_ID", taskId, PLACEHOLDER_TASK_ID);
 
-    const result = await getTextExtractionResult(taskId, exampleClientOptions(context));
+    const result = await getTextExtractionResult(taskId, toOpenApiClientOptions(context));
 
     logExampleResult("getTextExtractionResult", result);
   } catch (error) {
@@ -114,7 +114,7 @@ export async function examplePollTextExtractionResult(): Promise<void> {
     assertConfiguredValue("OPEN_API_TEXT_EXTRACTION_TASK_ID or OPEN_API_TASK_ID", taskId, PLACEHOLDER_TASK_ID);
 
     const result = await pollTextExtractionResult(taskId, {
-      ...exampleClientOptions(context),
+      ...toOpenApiClientOptions(context),
       intervalMs: 5000,
       timeoutMs: 600000,
     });

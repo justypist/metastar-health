@@ -3,10 +3,10 @@ import {
   PLACEHOLDER_TASK_ID,
   PLACEHOLDER_UPLOAD_FILE_PATH,
   assertConfiguredValue,
-  exampleClientOptions,
   handleExampleError,
   logExampleResult,
   readExampleContext,
+  toOpenApiClientOptions,
 } from "./context.ts";
 import type { ExampleScenario } from "./scenarios.ts";
 import type { ApiSuccessResponse, OcrTaskResult, TaskSubmission } from "../api/index.ts";
@@ -38,7 +38,7 @@ export async function exampleRequestOpenApiUpload(): Promise<void> {
       "/api/ocr/submit",
       context.uploadFilePath,
       {
-        ...exampleClientOptions(context),
+        ...toOpenApiClientOptions(context),
         fieldName: "file",
         contentType: "application/pdf",
       },
@@ -56,7 +56,7 @@ export async function examplePollAsyncTask(): Promise<void> {
 
     assertConfiguredValue("OPEN_API_TASK_ID", context.taskId, PLACEHOLDER_TASK_ID);
 
-    const clientOptions = exampleClientOptions(context);
+    const clientOptions = toOpenApiClientOptions(context);
     const result = await pollAsyncTask<OcrTaskResult>(
       () => requestOpenApiData<OcrTaskResult>(`/api/ocr/result/${encodeURIComponent(context.taskId)}`, clientOptions),
       {
