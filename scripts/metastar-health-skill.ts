@@ -109,7 +109,9 @@ export const capabilityMetadata = [
 
 const infrastructureModuleNames = new Set(["client", "config", "polling", "types", "upload"]);
 
-const capabilityMetadataByModule = new Map(capabilityMetadata.map((metadata) => [metadata.moduleName, metadata]));
+const capabilityMetadataByModule: ReadonlyMap<string, CapabilityMetadata> = new Map(
+  capabilityMetadata.map((metadata): [string, CapabilityMetadata] => [metadata.moduleName, metadata]),
+);
 const skillDescriptionBeginMarker = "# BEGIN GENERATED description";
 const skillDescriptionEndMarker = "# END GENERATED description";
 const apiMapBeginMarker = "<!-- BEGIN GENERATED api-map -->";
