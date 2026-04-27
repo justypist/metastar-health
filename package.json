@@ -7,7 +7,8 @@
   "type": "module",
   "scripts": {
     "check": "tsc --noEmit",
-    "test": "node --test api/*.test.ts"
+    "test": "node --test api/*.test.ts",
+    "example": "node --env-file .env examples/run.ts"
   },
   "devDependencies": {
     "@types/node": "^25.6.0",

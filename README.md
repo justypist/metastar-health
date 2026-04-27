@@ -23,3 +23,10 @@ const ocrTask = await pollOcrResult(taskId, { intervalMs: 5000, timeoutMs: 60000
 
 console.log(papers.total, ocrTask.result?.downloadUrl);
 ```
+
+## example
+
+```shell
+pnpm example xxx
+pnpm example read-open-api-config
+```
