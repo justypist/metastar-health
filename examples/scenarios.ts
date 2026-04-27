@@ -1,10 +1,12 @@
+import { basicScenarios } from "./basic.ts";
+
 export interface ExampleScenario {
   name: string;
   description: string;
   run: () => Promise<void>;
 }
 
-export const exampleScenarios: readonly ExampleScenario[] = [];
+export const exampleScenarios: readonly ExampleScenario[] = [...basicScenarios];
 
 export function listExampleScenarios(): readonly ExampleScenario[] {
   return exampleScenarios;
