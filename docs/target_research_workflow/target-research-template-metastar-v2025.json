@@ -1,0 +1,1722 @@
+{
+  "version": "metastar_v2025",
+  "exportedAt": "2026-05-19T08:33:13.688Z",
+  "nodeCount": 27,
+  "repeatRules": {
+    "indicationRepeatNodeIds": [
+      "3.1",
+      "3.2",
+      "3.3"
+    ],
+    "moaRepeatNodeIds": [
+      "3.5",
+      "3.5.1",
+      "3.5.2",
+      "3.5.3",
+      "3.5.4"
+    ],
+    "preclinicalPipelineRepeatNodeIds": [
+      "3.5.2a",
+      "3.5.2b",
+      "3.5.2c"
+    ],
+    "inDevelopmentNodeIds": [
+      "3.7",
+      "4.3"
+    ]
+  },
+  "modules": {
+    "biology": [
+      {
+        "id": "1.1",
+        "parentId": "1",
+        "title": "Basic Information",
+        "titleZh": "基本信息",
+        "bulletPoints": [
+          "Biological category (e.g. transcription factor, kinase, RBP) and significance",
+          "Structure: PDB ID, solved structures, domains, oligomerization state",
+          "Family members and cross-species homology",
+          "Other biochemical / biophysical properties"
+        ],
+        "bulletPointsZh": [
+          "生物学类别描述（如转录因子、激酶、RBP 等）及其意义",
+          "结构：PDB ID、已解析结构、结构域、寡聚化状态",
+          "家族成员及跨物种同源性",
+          "其他生化 / 生物物理属性"
+        ],
+        "sourceModules": [
+          "biology"
+        ],
+        "primaryModuleId": "biology",
+        "requiredEvidence": true,
+        "allowLlmGapFill": true,
+        "status": "active",
+        "displayOrder": 101,
+        "repeat": {
+          "indication": false,
+          "moa": false,
+          "preclinicalPipeline": false,
+          "inDevelopment": false
+        }
+      },
+      {
+        "id": "1.2",
+        "parentId": "1",
+        "title": "Expression Pattern",
+        "titleZh": "表达模式",
+        "bulletPoints": [
+          "Organ / cell type / sub-cellular expression (intensity & location; focus on protein level and clinically relevant studies)",
+          "Expression during development, homeostasis, and disease states; attention to on-target, off-tissue toxicity potential",
+          "Differential expression across model organisms (if relevant)"
+        ],
+        "bulletPointsZh": [
+          "器官 / 细胞类型 / 亚细胞表达（强度与定位；重点关注蛋白水平和临床相关研究）",
+          "发育、稳态与疾病状态下的表达；关注 on-target、off-tissue 毒性潜力",
+          "跨模式生物的差异表达（如适用）"
+        ],
+        "sourceModules": [
+          "biology"
+        ],
+        "primaryModuleId": "biology",
+        "requiredEvidence": true,
+        "allowLlmGapFill": false,
+        "status": "active",
+        "displayOrder": 102,
+        "repeat": {
+          "indication": false,
+          "moa": false,
+          "preclinicalPipeline": false,
+          "inDevelopment": false
+        }
+      },
+      {
+        "id": "1.3",
+        "parentId": "1",
+        "title": "Biological Functions",
+        "titleZh": "生物学功能",
+        "bulletPoints": [
+          "Biological functions and corresponding domains (enzymatic activity, inhibitory PPI, etc.)",
+          "Interacting partners, molecular pathways, and downstream targets"
+        ],
+        "bulletPointsZh": [
+          "生物学功能及对应结构域（酶活性、抑制性 PPI 等）",
+          "互作伙伴、分子通路和下游靶标"
+        ],
+        "sourceModules": [
+          "biology"
+        ],
+        "primaryModuleId": "biology",
+        "requiredEvidence": true,
+        "allowLlmGapFill": false,
+        "status": "active",
+        "displayOrder": 103,
+        "repeat": {
+          "indication": false,
+          "moa": false,
+          "preclinicalPipeline": false,
+          "inDevelopment": false
+        }
+      },
+      {
+        "id": "1.4",
+        "parentId": "1",
+        "title": "Biological Regulation at Various Levels",
+        "titleZh": "多层次生物学调控",
+        "bulletPoints": [
+          "Transcriptional & post-transcriptional regulation",
+          "Translational & post-translational regulation",
+          "Protein degradation regulation"
+        ],
+        "bulletPointsZh": [
+          "转录与转录后调控",
+          "翻译与翻译后调控",
+          "蛋白降解调控"
+        ],
+        "sourceModules": [
+          "biology"
+        ],
+        "primaryModuleId": "biology",
+        "requiredEvidence": true,
+        "allowLlmGapFill": false,
+        "status": "active",
+        "displayOrder": 104,
+        "repeat": {
+          "indication": false,
+          "moa": false,
+          "preclinicalPipeline": false,
+          "inDevelopment": false
+        }
+      },
+      {
+        "id": "1.5",
+        "parentId": "1",
+        "title": "Special Highlights",
+        "titleZh": "特殊亮点",
+        "bulletPoints": [
+          "Isoforms; structurally / domain-similar protein targets",
+          "Regulatory phosphorylation sites, translocation sites",
+          "Cofactors required for function / interactions"
+        ],
+        "bulletPointsZh": [
+          "同工型；结构 / 结构域相似蛋白靶点",
+          "调控性磷酸化位点、转位位点",
+          "功能 / 互作所需辅因子"
+        ],
+        "sourceModules": [
+          "biology"
+        ],
+        "primaryModuleId": "biology",
+        "requiredEvidence": true,
+        "allowLlmGapFill": false,
+        "status": "missing",
+        "displayOrder": 105,
+        "repeat": {
+          "indication": false,
+          "moa": false,
+          "preclinicalPipeline": false,
+          "inDevelopment": false
+        }
+      }
+    ],
+    "disease": [
+      {
+        "id": "2.1",
+        "parentId": "2",
+        "title": "Participation & Contribution in Disease",
+        "titleZh": "靶点在疾病中的参与与贡献",
+        "bulletPoints": [
+          "Role in signaling pathways; sole regulator vs. network / backup regulators",
+          "Regulation of other proteins; functional complex vs. independent",
+          "Role in stabilization of other macromolecules"
+        ],
+        "bulletPointsZh": [
+          "在信号通路中的作用；单一核心调节者还是多重 / 备份调节网络的一部分",
+          "对其他蛋白的调控；属于功能复合体还是相对独立发挥作用",
+          "对其他大分子稳定性的影响"
+        ],
+        "sourceModules": [
+          "disease"
+        ],
+        "primaryModuleId": "disease",
+        "requiredEvidence": true,
+        "allowLlmGapFill": false,
+        "status": "active",
+        "displayOrder": 201,
+        "repeat": {
+          "indication": false,
+          "moa": false,
+          "preclinicalPipeline": false,
+          "inDevelopment": false
+        }
+      },
+      {
+        "id": "2.2",
+        "parentId": "2",
+        "title": "Dysregulations Contributing to Disease Manifestation",
+        "titleZh": "促成疾病表型的异常失调",
+        "bulletPoints": [
+          "Mutations",
+          "Constitutive activation / deactivation",
+          "Alternative splicing / isoforms / post-transcriptional modifications (disease vs. normal)",
+          "Upregulation"
+        ],
+        "bulletPointsZh": [
+          "突变",
+          "构成性激活 / 失活",
+          "可变剪接 / 同工型 / 转录后修饰（疾病与正常状态对比）",
+          "上调表达"
+        ],
+        "sourceModules": [
+          "disease"
+        ],
+        "primaryModuleId": "disease",
+        "requiredEvidence": true,
+        "allowLlmGapFill": false,
+        "status": "active",
+        "displayOrder": 202,
+        "repeat": {
+          "indication": false,
+          "moa": false,
+          "preclinicalPipeline": false,
+          "inDevelopment": false
+        }
+      },
+      {
+        "id": "2.3",
+        "parentId": "2",
+        "title": "Evidences for Disease-Causing Mechanisms",
+        "titleZh": "致病机制证据",
+        "bulletPoints": [
+          "In vitro / in vivo data directly confirming disease-causing mechanism",
+          "Human genetic evidence (selection of biomarkers, change in tumor size, direct/indirect mechanism)",
+          "Effectiveness of specific targeting(existence of functional isoform, non-canonical activation, PTM) and on-target, off-tissue effect, off-target effect (similar sequence/degron/structure)",
+          "Loss-of-function / gain-of-function studies"
+        ],
+        "bulletPointsZh": [
+          "直接验证致病机制的体外 / 体内数据",
+          "人体遗传学证据（生物标志物选择、肿瘤体积变化、直接/间接机制）",
+          "特异性靶向有效性（是否存在功能性同工型、非经典激活、PTM）以及 on-target、off-tissue 影响和 off-target 影响（相似序列/degron/结构）",
+          "失功能 / 获功能研究"
+        ],
+        "sourceModules": [
+          "disease"
+        ],
+        "primaryModuleId": "disease",
+        "requiredEvidence": true,
+        "allowLlmGapFill": false,
+        "status": "active",
+        "displayOrder": 203,
+        "repeat": {
+          "indication": false,
+          "moa": false,
+          "preclinicalPipeline": false,
+          "inDevelopment": false
+        }
+      },
+      {
+        "id": "2.4",
+        "parentId": "2",
+        "title": "Indications to Cover in This Review",
+        "titleZh": "本报告应覆盖的适应症",
+        "bulletPoints": [
+          "Table: Indication / Target Significance / Target Dysregulation / LoF-GoF studies"
+        ],
+        "bulletPointsZh": [
+          "表格：适应症 / 靶点意义 / 靶点失调 / LoF-GoF 研究"
+        ],
+        "sourceModules": [
+          "disease",
+          "competition"
+        ],
+        "primaryModuleId": "disease",
+        "requiredEvidence": true,
+        "allowLlmGapFill": false,
+        "status": "active",
+        "displayOrder": 204,
+        "repeat": {
+          "indication": false,
+          "moa": false,
+          "preclinicalPipeline": false,
+          "inDevelopment": false
+        }
+      },
+      {
+        "id": "2.5",
+        "parentId": "2",
+        "title": "Druggability",
+        "titleZh": "成药性",
+        "bulletPoints": [
+          "Protein structure & presence of druggable pockets",
+          "Contribution to disease axes (i.e. singular regulator vs multiple/backup regulators, part of large complex vs functional independent, etc)",
+          "Druggable window (expression intensity and location specificities, gene/protein modifications)",
+          "Effectiveness of specific targeting (existence of functional isoform, non-canonical activation) and off-target effect (similar sequence/degron/structure)",
+          "Existing and proposed treatment strategies (single inhibition vs in combination with inhibitors up/downstream, against drug resistant cell lines)"
+        ],
+        "bulletPointsZh": [
+          "蛋白结构与可成药口袋",
+          "对疾病轴的贡献（即单一调节者 vs 多重/备份调节者，大型复合体成员 vs 功能相对独立等）",
+          "可成药窗口（表达强度和定位特异性、基因/蛋白修饰）",
+          "特异性靶向有效性（是否存在功能性同工型、非经典激活）及 off-target 影响（相似序列/degron/结构）",
+          "现有与拟议治疗策略（单药抑制 vs 与上下游抑制剂联合，用于耐药细胞系）"
+        ],
+        "sourceModules": [
+          "disease",
+          "biology"
+        ],
+        "primaryModuleId": "disease",
+        "requiredEvidence": true,
+        "allowLlmGapFill": false,
+        "status": "active",
+        "displayOrder": 205,
+        "repeat": {
+          "indication": false,
+          "moa": false,
+          "preclinicalPipeline": false,
+          "inDevelopment": false
+        }
+      },
+      {
+        "id": "3.1",
+        "parentId": "3",
+        "title": "[Indication X] Target-Disease Axes Overview",
+        "titleZh": "[适应症 X]靶点-疾病轴概览",
+        "bulletPoints": [
+          "For each indication included, summarize clinical treatment guidelines (at least include US)",
+          "For each indication included, identify the effectiveness and safety profile of current SoC and key emerging treatment as benchmark;",
+          "Briefly re-visit the target significance & dysregulation/disease-causing MoA in each indication included."
+        ],
+        "bulletPointsZh": [
+          "针对每个纳入适应症，总结临床治疗指南（至少包含美国）",
+          "针对每个纳入适应症，识别当前 SoC 和关键新兴疗法的有效性与安全性特征作为 benchmark；",
+          "简要回顾各纳入适应症下的靶点重要性、失调情况/致病 MoA。"
+        ],
+        "sourceModules": [
+          "disease",
+          "clinical"
+        ],
+        "primaryModuleId": "disease",
+        "requiredEvidence": true,
+        "allowLlmGapFill": false,
+        "status": "active",
+        "displayOrder": 301,
+        "repeat": {
+          "indication": true,
+          "moa": false,
+          "preclinicalPipeline": false,
+          "inDevelopment": false
+        }
+      },
+      {
+        "id": "3.2",
+        "parentId": "3",
+        "title": "[Indication X] Clinical Development Path & Criteria",
+        "titleZh": "[适应症 X]临床开发路径与标准",
+        "bulletPoints": [
+          "Phase 1 / 2 / 3 table: participants, study design, timeline, surrogate & primary endpoints, key PD/PK markers, control agent selection"
+        ],
+        "bulletPointsZh": [
+          "I/II/III 期表格：受试者、研究设计、时间线、替代终点与主要终点、关键 PD/PK 标志物、对照药物选择"
+        ],
+        "sourceModules": [
+          "disease",
+          "clinical"
+        ],
+        "primaryModuleId": "disease",
+        "requiredEvidence": true,
+        "allowLlmGapFill": false,
+        "status": "missing",
+        "displayOrder": 302,
+        "repeat": {
+          "indication": true,
+          "moa": false,
+          "preclinicalPipeline": false,
+          "inDevelopment": false
+        }
+      },
+      {
+        "id": "3.3",
+        "parentId": "3",
+        "title": "[Indication X] Development Strategy & Competitive Edge",
+        "titleZh": "[适应症 X]开发策略与竞争优势",
+        "bulletPoints": [
+          "Major unmet medical needs (non-responders, patient compliance, etc.)",
+          "Position of pipeline against the target with current SoC / emerging treatment (possibility of combined treatment regime? Different patient population? Better single Tx efficacy / safety / convenience?)",
+          "Contributing MoA of above strategy (MoA with an angle on product development: why such target approach / candidate can yield e.g. better efficacy)"
+        ],
+        "bulletPointsZh": [
+          "主要未满足临床需求（非应答人群、依从性等）",
+          "靶向该靶点的管线相对当前 SoC / 新兴疗法的定位（是否可能联合治疗？不同患者人群？更好的单药疗效 / 安全性 / 便利性？）",
+          "上述策略的 MoA 贡献（从产品开发角度解释该 MoA：为什么这种靶点策略 / 候选物可带来例如更好疗效）"
+        ],
+        "sourceModules": [
+          "disease",
+          "competition",
+          "insights"
+        ],
+        "primaryModuleId": "disease",
+        "requiredEvidence": true,
+        "allowLlmGapFill": false,
+        "status": "missing",
+        "displayOrder": 303,
+        "repeat": {
+          "indication": true,
+          "moa": false,
+          "preclinicalPipeline": false,
+          "inDevelopment": false
+        }
+      }
+    ],
+    "competition": [
+      {
+        "id": "3.4",
+        "parentId": "3",
+        "title": "Pipeline Overview",
+        "titleZh": "管线概览",
+        "bulletPoints": [
+          "Table: Pipeline / Sponsor / TA / MoA / Format / Developmental Status / Notable Events",
+          "Include only asset-specific notable events: terminated programs (reason), licensing & deal info, regulatory milestones (BTD, approval, etc.) must explicitly name the pipeline/asset in that row"
+        ],
+        "bulletPointsZh": [
+          "表格：管线 / 发起方 / TA / MoA / 形式 / 开发状态 / 重要事件",
+          "只写与该行管线/分子直接相关的重要事件：终止原因、授权/交易、监管里程碑等证据必须明确点名该管线/分子"
+        ],
+        "sourceModules": [
+          "competition"
+        ],
+        "primaryModuleId": "competition",
+        "requiredEvidence": true,
+        "allowLlmGapFill": false,
+        "status": "active",
+        "displayOrder": 304,
+        "repeat": {
+          "indication": false,
+          "moa": false,
+          "preclinicalPipeline": false,
+          "inDevelopment": false
+        }
+      },
+      {
+        "id": "3.5",
+        "parentId": "3",
+        "title": "MoA Category Deep-Dives [repeat per MoA]",
+        "titleZh": "MoA 分类深挖（按 MoA 重复）",
+        "bulletPoints": [
+          "Current MoA overview: description, representative pipelines, and why this MoA matters for the target",
+          "Pros / cons and key development constraints for this MoA",
+          "Mechanism illustration: generate and insert a schematic only when evidence supports the mechanism",
+          "Navigation cue: downstream pages cover preclinical metrics, clinical metrics, and detailed drug profiles for this MoA"
+        ],
+        "bulletPointsZh": [
+          "当前 MoA 总览：机制描述、代表性管线，以及该 MoA 对本靶点的重要性",
+          "该 MoA 的优缺点和关键开发限制",
+          "机制图：仅在证据支持时生成并插入机制示意图",
+          "结构提示：后续页面围绕该 MoA 展开临床前指标、临床指标和详细疗法档案"
+        ],
+        "sourceModules": [
+          "competition",
+          "preclinical",
+          "clinical",
+          "insights"
+        ],
+        "primaryModuleId": "competition",
+        "requiredEvidence": false,
+        "allowLlmGapFill": false,
+        "status": "active",
+        "displayOrder": 305,
+        "repeat": {
+          "indication": false,
+          "moa": true,
+          "preclinicalPipeline": false,
+          "inDevelopment": false
+        }
+      },
+      {
+        "id": "3.5.1",
+        "parentId": "3.5",
+        "title": "MoA Overview",
+        "titleZh": "MoA 概览",
+        "bulletPoints": [
+          "Brief description or illustration of MoA",
+          "Pros / Cons"
+        ],
+        "bulletPointsZh": [
+          "作用机制的简要描述或示意",
+          "优劣势"
+        ],
+        "sourceModules": [
+          "competition",
+          "preclinical"
+        ],
+        "primaryModuleId": "competition",
+        "requiredEvidence": true,
+        "allowLlmGapFill": false,
+        "status": "missing",
+        "displayOrder": 306,
+        "repeat": {
+          "indication": false,
+          "moa": true,
+          "preclinicalPipeline": false,
+          "inDevelopment": false
+        }
+      },
+      {
+        "id": "3.6",
+        "parentId": "3",
+        "title": "Pipelines with Newer MoA / Modalities  (if applicable)",
+        "titleZh": "新机制 / 新模态管线（如适用）",
+        "bulletPoints": [
+          "Types of modalities, structures, indications",
+          "How different are the MoAs",
+          "Advantages and disadvantages of new MoA and/or modalities",
+          "In vitro/in vivo data for comparison with existing/in-clinical trial products",
+          "Tox, ADME and efficacy studies",
+          "PD/PK biomarkers, if there are any differences?"
+        ],
+        "bulletPointsZh": [
+          "模态类型、结构特征、适应症",
+          "这些 MoA 的差异程度",
+          "新 MoA 和 / 或新模态的优势与劣势",
+          "用于对比已有/临床试验中产品的体外/体内数据",
+          "毒理、ADME 和疗效研究",
+          "PD/PK 生物标志物，如有，是否存在差异？"
+        ],
+        "sourceModules": [
+          "competition"
+        ],
+        "primaryModuleId": "competition",
+        "requiredEvidence": true,
+        "allowLlmGapFill": false,
+        "status": "missing",
+        "displayOrder": 310,
+        "repeat": {
+          "indication": false,
+          "moa": false,
+          "preclinicalPipeline": false,
+          "inDevelopment": false
+        }
+      },
+      {
+        "id": "3.7",
+        "parentId": "3",
+        "title": "Pipelines Indirectly Affecting the Target  (if applicable)",
+        "titleZh": "间接影响靶点的管线（如适用）",
+        "bulletPoints": [
+          "Drug info, structures, patents, indications",
+          "MoA of indirect regulation of target expression / modification",
+          "Preclinical & clinical data; potential drug-drug interactions"
+        ],
+        "bulletPointsZh": [
+          "药物信息、结构、专利、适应症",
+          "间接调控靶点表达 / 修饰的作用机制",
+          "临床前与临床数据；潜在药物相互作用"
+        ],
+        "sourceModules": [
+          "competition"
+        ],
+        "primaryModuleId": "competition",
+        "requiredEvidence": true,
+        "allowLlmGapFill": false,
+        "status": "missing",
+        "displayOrder": 311,
+        "repeat": {
+          "indication": false,
+          "moa": false,
+          "preclinicalPipeline": false,
+          "inDevelopment": true
+        }
+      }
+    ],
+    "preclinical": [
+      {
+        "id": "3.5.2",
+        "parentId": "3.5",
+        "title": "Key Preclinical Metrics",
+        "titleZh": "关键临床前指标",
+        "bulletPoints": [
+          "Overview table: affinity (KD), in-vitro IC50, cell assay EC50, in-vivo dose, in-vivo T1/2",
+          "LLM-selected key preclinical metrics: biochemical / enzymatic IC50, functional assay EC50 readout, animal model and therapeutic readout, and key in vivo biomarkers",
+          "Per-pipeline preclinical summary, in vitro data, and in vivo data; missing numeric metrics must remain N/A"
+        ],
+        "bulletPointsZh": [
+          "概览表：亲和力（KD）、体外 IC50、细胞实验 EC50、体内剂量、体内 T1/2",
+          "LLM 推荐关键临床前指标：生化 / 酶学 IC50、功能实验 EC50 readout、动物模型与治疗 readout、关键体内生物标志物",
+          "按管线总结临床前概况、体外数据和体内数据；缺失数值必须保留为 N/A"
+        ],
+        "sourceModules": [
+          "preclinical"
+        ],
+        "primaryModuleId": "preclinical",
+        "requiredEvidence": true,
+        "allowLlmGapFill": false,
+        "status": "active",
+        "displayOrder": 307,
+        "repeat": {
+          "indication": false,
+          "moa": true,
+          "preclinicalPipeline": false,
+          "inDevelopment": false
+        }
+      },
+      {
+        "id": "3.5.2a",
+        "parentId": "3.5",
+        "title": "Structure / Binding Data",
+        "titleZh": "结构 / 结合数据",
+        "bulletPoints": [
+          "Only when structure or binding evidence exists: summarize the key structure / binding / mechanism figure-supported findings for the current recommended pipeline",
+          "Describe what the figure shows and the takeaway, not the full experimental procedure"
+        ],
+        "bulletPointsZh": [
+          "仅在存在结构或结合证据时：总结当前推荐管线最关键的结构 / 结合 / 机制图证据及结论",
+          "重点写图能支持的发现与意义，不展开完整实验过程"
+        ],
+        "sourceModules": [
+          "preclinical"
+        ],
+        "primaryModuleId": "preclinical",
+        "requiredEvidence": true,
+        "allowLlmGapFill": false,
+        "status": "active",
+        "displayOrder": 307.1,
+        "repeat": {
+          "indication": false,
+          "moa": false,
+          "preclinicalPipeline": true,
+          "inDevelopment": false
+        }
+      },
+      {
+        "id": "3.5.2b",
+        "parentId": "3.5",
+        "title": "In Vivo Data",
+        "titleZh": "体内数据",
+        "bulletPoints": [
+          "Summarize the strongest in vivo efficacy / PD / safety-supporting findings for the current recommended pipeline",
+          "Group related animal studies and figures on the same slide when they support the same conclusion",
+          "If no figure exists, use the structured model / treatment / measurement results to support the conclusion briefly"
+        ],
+        "bulletPointsZh": [
+          "总结当前推荐管线最关键的体内药效 / PD / 安全性支持证据",
+          "同一结论下的相关动物实验与图片尽量合并到同一页展示",
+          "如果没有图片，则用结构化的模型 / 给药设计 / measurement results 做简洁补充说明"
+        ],
+        "sourceModules": [
+          "preclinical"
+        ],
+        "primaryModuleId": "preclinical",
+        "requiredEvidence": true,
+        "allowLlmGapFill": false,
+        "status": "active",
+        "displayOrder": 307.2,
+        "repeat": {
+          "indication": false,
+          "moa": false,
+          "preclinicalPipeline": true,
+          "inDevelopment": false
+        }
+      },
+      {
+        "id": "3.5.2c",
+        "parentId": "3.5",
+        "title": "In Vitro Data",
+        "titleZh": "体外数据",
+        "bulletPoints": [
+          "Summarize the strongest in vitro / cellular findings for the current recommended pipeline",
+          "Batch related figures and readouts together when they support one mechanistic or efficacy conclusion",
+          "If no figure exists, use the structured model / treatment / measurement results to support the conclusion briefly"
+        ],
+        "bulletPointsZh": [
+          "总结当前推荐管线最关键的体外 / 细胞实验发现",
+          "当多张图或多个 readout 共同支撑一个机制或药效结论时，聚合在同一页展示",
+          "如果没有图片，则用结构化的模型 / 给药设计 / measurement results 做简洁补充说明"
+        ],
+        "sourceModules": [
+          "preclinical"
+        ],
+        "primaryModuleId": "preclinical",
+        "requiredEvidence": true,
+        "allowLlmGapFill": false,
+        "status": "active",
+        "displayOrder": 307.3,
+        "repeat": {
+          "indication": false,
+          "moa": false,
+          "preclinicalPipeline": true,
+          "inDevelopment": false
+        }
+      }
+    ],
+    "clinical": [
+      {
+        "id": "3.5.3",
+        "parentId": "3.5",
+        "title": "Key Clinical Metrics",
+        "titleZh": "关键临床指标",
+        "bulletPoints": [
+          "Overview table: indication / highest stage, data stage, cohorts, design, patient baseline, primary endpoints",
+          "Key AE profile, dosing scheme, control agent selection, PD markers, PK metrics, and annual sales (if marketed)",
+          "Per-pipeline clinical metrics summary"
+        ],
+        "bulletPointsZh": [
+          "概览表：适应症 / 最高阶段、数据阶段、队列、设计、患者基线、主要终点",
+          "关键 AE 特征、给药方案、对照药物选择、PD 标志物、PK 指标及年销售额（如已上市）",
+          "按管线总结临床指标"
+        ],
+        "sourceModules": [
+          "clinical"
+        ],
+        "primaryModuleId": "clinical",
+        "requiredEvidence": true,
+        "allowLlmGapFill": false,
+        "status": "active",
+        "displayOrder": 308,
+        "repeat": {
+          "indication": false,
+          "moa": true,
+          "preclinicalPipeline": false,
+          "inDevelopment": false
+        }
+      }
+    ],
+    "insights": [
+      {
+        "id": "3.5.4",
+        "parentId": "3.5",
+        "title": "[MoA1] For Marketed & Clinical-Stage Therapeutics",
+        "titleZh": "[MoA1]上市及临床阶段疗法",
+        "bulletPoints": [
+          "Basic info: structure, design rationale, patent, market size, line of treatment, formulation / dosing",
+          "Preclinical data: in vitro / in vivo effect, Tox, ADME, efficacy, CMC",
+          "Clinical data by trial: stage, indication, design, endpoints, efficacy, safety, PK/PD biomarkers",
+          "Cross-trial comparison (efficacy trend across stages, across indications)",
+          "For clinical-stage: comparison with current market-leading therapy; concomitant / combination therapy"
+        ],
+        "bulletPointsZh": [
+          "基础信息：结构、设计逻辑、专利、市场规模、治疗线别、剂型 / 给药方式",
+          "临床前数据：体外 / 体内效果、毒理、ADME、疗效、CMC",
+          "逐试验临床数据：阶段、适应症、设计、终点、疗效、安全性、PK/PD 生物标志物",
+          "跨试验比较（跨阶段、跨适应症的疗效趋势）",
+          "对于临床阶段：与当前市场主导疗法对比；伴随 / 联合治疗"
+        ],
+        "sourceModules": [
+          "insights",
+          "competition",
+          "clinical",
+          "preclinical"
+        ],
+        "primaryModuleId": "insights",
+        "requiredEvidence": true,
+        "allowLlmGapFill": false,
+        "status": "missing",
+        "displayOrder": 309,
+        "repeat": {
+          "indication": false,
+          "moa": true,
+          "preclinicalPipeline": false,
+          "inDevelopment": false
+        }
+      },
+      {
+        "id": "4.1",
+        "parentId": "4",
+        "title": "Key Limitations of Existing Therapeutics / Pipelines",
+        "titleZh": "现有疗法 / 管线的关键局限",
+        "bulletPoints": [
+          "Formulation & CMC aspects (if applicable)",
+          "Efficacy aspects (if applicable)",
+          "Safety aspects (if applicable)",
+          "Patient compliance (if applicable)",
+          "Others"
+        ],
+        "bulletPointsZh": [
+          "制剂与 CMC 局限（如适用）",
+          "疗效局限（如适用）",
+          "安全性局限（如适用）",
+          "患者依从性问题（如适用）",
+          "其他限制因素"
+        ],
+        "sourceModules": [
+          "insights"
+        ],
+        "primaryModuleId": "insights",
+        "requiredEvidence": true,
+        "allowLlmGapFill": false,
+        "status": "active",
+        "displayOrder": 401,
+        "repeat": {
+          "indication": false,
+          "moa": false,
+          "preclinicalPipeline": false,
+          "inDevelopment": false
+        }
+      },
+      {
+        "id": "4.2",
+        "parentId": "4",
+        "title": "Risks & Knowledge Gaps",
+        "titleZh": "风险与知识空白",
+        "bulletPoints": [
+          "Risks",
+          "Biology-related (e.g. on-target toxicity)",
+          "Disease-related (e.g. change of treatment paradigm)",
+          "Market-related (e.g. competition from newly emerging targets)",
+          "Knowledge Gaps",
+          "Critical information that is currently lacking",
+          "Causal relationships that what we don’t understand (e.g. next-gen compound failed in trial, and we cannot dissect out the root cause from public data)"
+        ],
+        "bulletPointsZh": [
+          "风险",
+          "生物学相关（如 on-target 毒性）",
+          "疾病相关（如治疗范式变化）",
+          "市场相关（如新兴竞争靶点带来的竞争）",
+          "知识空白",
+          "当前缺失的关键信息",
+          "我们尚未理解的因果关系（例如下一代化合物在试验中失败，但无法从公开数据中拆解根本原因）"
+        ],
+        "sourceModules": [
+          "insights"
+        ],
+        "primaryModuleId": "insights",
+        "requiredEvidence": true,
+        "allowLlmGapFill": false,
+        "status": "active",
+        "displayOrder": 402,
+        "repeat": {
+          "indication": false,
+          "moa": false,
+          "preclinicalPipeline": false,
+          "inDevelopment": false
+        }
+      },
+      {
+        "id": "4.3",
+        "parentId": "4",
+        "title": "Benchmarks for Best-in-Class (BIC) Candidates",
+        "titleZh": "同类最优（BIC）候选标准",
+        "bulletPoints": [
+          "Table: Current BIC / Market-leading product / MoA-Format / TA-Indication / Preclinical metrics / Clinical efficacy endpoints / Clinical safety metrics / Other key metrics",
+          "Commentary on required improvements for next-generation asset"
+        ],
+        "bulletPointsZh": [
+          "表格：当前 BIC / 市场领先产品 / MoA-形式 / TA-适应症 / 临床前指标 / 临床疗效终点 / 临床安全性指标 / 其他关键指标",
+          "关于下一代资产所需改进的评论"
+        ],
+        "sourceModules": [
+          "insights"
+        ],
+        "primaryModuleId": "insights",
+        "requiredEvidence": true,
+        "allowLlmGapFill": false,
+        "status": "missing",
+        "displayOrder": 403,
+        "repeat": {
+          "indication": false,
+          "moa": false,
+          "preclinicalPipeline": false,
+          "inDevelopment": true
+        }
+      }
+    ]
+  },
+  "nodes": [
+    {
+      "id": "1.1",
+      "parentId": "1",
+      "title": "Basic Information",
+      "titleZh": "基本信息",
+      "bulletPoints": [
+        "Biological category (e.g. transcription factor, kinase, RBP) and significance",
+        "Structure: PDB ID, solved structures, domains, oligomerization state",
+        "Family members and cross-species homology",
+        "Other biochemical / biophysical properties"
+      ],
+      "bulletPointsZh": [
+        "生物学类别描述（如转录因子、激酶、RBP 等）及其意义",
+        "结构：PDB ID、已解析结构、结构域、寡聚化状态",
+        "家族成员及跨物种同源性",
+        "其他生化 / 生物物理属性"
+      ],
+      "sourceModules": [
+        "biology"
+      ],
+      "primaryModuleId": "biology",
+      "requiredEvidence": true,
+      "allowLlmGapFill": true,
+      "status": "active",
+      "displayOrder": 101,
+      "repeat": {
+        "indication": false,
+        "moa": false,
+        "preclinicalPipeline": false,
+        "inDevelopment": false
+      }
+    },
+    {
+      "id": "1.2",
+      "parentId": "1",
+      "title": "Expression Pattern",
+      "titleZh": "表达模式",
+      "bulletPoints": [
+        "Organ / cell type / sub-cellular expression (intensity & location; focus on protein level and clinically relevant studies)",
+        "Expression during development, homeostasis, and disease states; attention to on-target, off-tissue toxicity potential",
+        "Differential expression across model organisms (if relevant)"
+      ],
+      "bulletPointsZh": [
+        "器官 / 细胞类型 / 亚细胞表达（强度与定位；重点关注蛋白水平和临床相关研究）",
+        "发育、稳态与疾病状态下的表达；关注 on-target、off-tissue 毒性潜力",
+        "跨模式生物的差异表达（如适用）"
+      ],
+      "sourceModules": [
+        "biology"
+      ],
+      "primaryModuleId": "biology",
+      "requiredEvidence": true,
+      "allowLlmGapFill": false,
+      "status": "active",
+      "displayOrder": 102,
+      "repeat": {
+        "indication": false,
+        "moa": false,
+        "preclinicalPipeline": false,
+        "inDevelopment": false
+      }
+    },
+    {
+      "id": "1.3",
+      "parentId": "1",
+      "title": "Biological Functions",
+      "titleZh": "生物学功能",
+      "bulletPoints": [
+        "Biological functions and corresponding domains (enzymatic activity, inhibitory PPI, etc.)",
+        "Interacting partners, molecular pathways, and downstream targets"
+      ],
+      "bulletPointsZh": [
+        "生物学功能及对应结构域（酶活性、抑制性 PPI 等）",
+        "互作伙伴、分子通路和下游靶标"
+      ],
+      "sourceModules": [
+        "biology"
+      ],
+      "primaryModuleId": "biology",
+      "requiredEvidence": true,
+      "allowLlmGapFill": false,
+      "status": "active",
+      "displayOrder": 103,
+      "repeat": {
+        "indication": false,
+        "moa": false,
+        "preclinicalPipeline": false,
+        "inDevelopment": false
+      }
+    },
+    {
+      "id": "1.4",
+      "parentId": "1",
+      "title": "Biological Regulation at Various Levels",
+      "titleZh": "多层次生物学调控",
+      "bulletPoints": [
+        "Transcriptional & post-transcriptional regulation",
+        "Translational & post-translational regulation",
+        "Protein degradation regulation"
+      ],
+      "bulletPointsZh": [
+        "转录与转录后调控",
+        "翻译与翻译后调控",
+        "蛋白降解调控"
+      ],
+      "sourceModules": [
+        "biology"
+      ],
+      "primaryModuleId": "biology",
+      "requiredEvidence": true,
+      "allowLlmGapFill": false,
+      "status": "active",
+      "displayOrder": 104,
+      "repeat": {
+        "indication": false,
+        "moa": false,
+        "preclinicalPipeline": false,
+        "inDevelopment": false
+      }
+    },
+    {
+      "id": "1.5",
+      "parentId": "1",
+      "title": "Special Highlights",
+      "titleZh": "特殊亮点",
+      "bulletPoints": [
+        "Isoforms; structurally / domain-similar protein targets",
+        "Regulatory phosphorylation sites, translocation sites",
+        "Cofactors required for function / interactions"
+      ],
+      "bulletPointsZh": [
+        "同工型；结构 / 结构域相似蛋白靶点",
+        "调控性磷酸化位点、转位位点",
+        "功能 / 互作所需辅因子"
+      ],
+      "sourceModules": [
+        "biology"
+      ],
+      "primaryModuleId": "biology",
+      "requiredEvidence": true,
+      "allowLlmGapFill": false,
+      "status": "missing",
+      "displayOrder": 105,
+      "repeat": {
+        "indication": false,
+        "moa": false,
+        "preclinicalPipeline": false,
+        "inDevelopment": false
+      }
+    },
+    {
+      "id": "2.1",
+      "parentId": "2",
+      "title": "Participation & Contribution in Disease",
+      "titleZh": "靶点在疾病中的参与与贡献",
+      "bulletPoints": [
+        "Role in signaling pathways; sole regulator vs. network / backup regulators",
+        "Regulation of other proteins; functional complex vs. independent",
+        "Role in stabilization of other macromolecules"
+      ],
+      "bulletPointsZh": [
+        "在信号通路中的作用；单一核心调节者还是多重 / 备份调节网络的一部分",
+        "对其他蛋白的调控；属于功能复合体还是相对独立发挥作用",
+        "对其他大分子稳定性的影响"
+      ],
+      "sourceModules": [
+        "disease"
+      ],
+      "primaryModuleId": "disease",
+      "requiredEvidence": true,
+      "allowLlmGapFill": false,
+      "status": "active",
+      "displayOrder": 201,
+      "repeat": {
+        "indication": false,
+        "moa": false,
+        "preclinicalPipeline": false,
+        "inDevelopment": false
+      }
+    },
+    {
+      "id": "2.2",
+      "parentId": "2",
+      "title": "Dysregulations Contributing to Disease Manifestation",
+      "titleZh": "促成疾病表型的异常失调",
+      "bulletPoints": [
+        "Mutations",
+        "Constitutive activation / deactivation",
+        "Alternative splicing / isoforms / post-transcriptional modifications (disease vs. normal)",
+        "Upregulation"
+      ],
+      "bulletPointsZh": [
+        "突变",
+        "构成性激活 / 失活",
+        "可变剪接 / 同工型 / 转录后修饰（疾病与正常状态对比）",
+        "上调表达"
+      ],
+      "sourceModules": [
+        "disease"
+      ],
+      "primaryModuleId": "disease",
+      "requiredEvidence": true,
+      "allowLlmGapFill": false,
+      "status": "active",
+      "displayOrder": 202,
+      "repeat": {
+        "indication": false,
+        "moa": false,
+        "preclinicalPipeline": false,
+        "inDevelopment": false
+      }
+    },
+    {
+      "id": "2.3",
+      "parentId": "2",
+      "title": "Evidences for Disease-Causing Mechanisms",
+      "titleZh": "致病机制证据",
+      "bulletPoints": [
+        "In vitro / in vivo data directly confirming disease-causing mechanism",
+        "Human genetic evidence (selection of biomarkers, change in tumor size, direct/indirect mechanism)",
+        "Effectiveness of specific targeting(existence of functional isoform, non-canonical activation, PTM) and on-target, off-tissue effect, off-target effect (similar sequence/degron/structure)",
+        "Loss-of-function / gain-of-function studies"
+      ],
+      "bulletPointsZh": [
+        "直接验证致病机制的体外 / 体内数据",
+        "人体遗传学证据（生物标志物选择、肿瘤体积变化、直接/间接机制）",
+        "特异性靶向有效性（是否存在功能性同工型、非经典激活、PTM）以及 on-target、off-tissue 影响和 off-target 影响（相似序列/degron/结构）",
+        "失功能 / 获功能研究"
+      ],
+      "sourceModules": [
+        "disease"
+      ],
+      "primaryModuleId": "disease",
+      "requiredEvidence": true,
+      "allowLlmGapFill": false,
+      "status": "active",
+      "displayOrder": 203,
+      "repeat": {
+        "indication": false,
+        "moa": false,
+        "preclinicalPipeline": false,
+        "inDevelopment": false
+      }
+    },
+    {
+      "id": "2.4",
+      "parentId": "2",
+      "title": "Indications to Cover in This Review",
+      "titleZh": "本报告应覆盖的适应症",
+      "bulletPoints": [
+        "Table: Indication / Target Significance / Target Dysregulation / LoF-GoF studies"
+      ],
+      "bulletPointsZh": [
+        "表格：适应症 / 靶点意义 / 靶点失调 / LoF-GoF 研究"
+      ],
+      "sourceModules": [
+        "disease",
+        "competition"
+      ],
+      "primaryModuleId": "disease",
+      "requiredEvidence": true,
+      "allowLlmGapFill": false,
+      "status": "active",
+      "displayOrder": 204,
+      "repeat": {
+        "indication": false,
+        "moa": false,
+        "preclinicalPipeline": false,
+        "inDevelopment": false
+      }
+    },
+    {
+      "id": "2.5",
+      "parentId": "2",
+      "title": "Druggability",
+      "titleZh": "成药性",
+      "bulletPoints": [
+        "Protein structure & presence of druggable pockets",
+        "Contribution to disease axes (i.e. singular regulator vs multiple/backup regulators, part of large complex vs functional independent, etc)",
+        "Druggable window (expression intensity and location specificities, gene/protein modifications)",
+        "Effectiveness of specific targeting (existence of functional isoform, non-canonical activation) and off-target effect (similar sequence/degron/structure)",
+        "Existing and proposed treatment strategies (single inhibition vs in combination with inhibitors up/downstream, against drug resistant cell lines)"
+      ],
+      "bulletPointsZh": [
+        "蛋白结构与可成药口袋",
+        "对疾病轴的贡献（即单一调节者 vs 多重/备份调节者，大型复合体成员 vs 功能相对独立等）",
+        "可成药窗口（表达强度和定位特异性、基因/蛋白修饰）",
+        "特异性靶向有效性（是否存在功能性同工型、非经典激活）及 off-target 影响（相似序列/degron/结构）",
+        "现有与拟议治疗策略（单药抑制 vs 与上下游抑制剂联合，用于耐药细胞系）"
+      ],
+      "sourceModules": [
+        "disease",
+        "biology"
+      ],
+      "primaryModuleId": "disease",
+      "requiredEvidence": true,
+      "allowLlmGapFill": false,
+      "status": "active",
+      "displayOrder": 205,
+      "repeat": {
+        "indication": false,
+        "moa": false,
+        "preclinicalPipeline": false,
+        "inDevelopment": false
+      }
+    },
+    {
+      "id": "3.1",
+      "parentId": "3",
+      "title": "[Indication X] Target-Disease Axes Overview",
+      "titleZh": "[适应症 X]靶点-疾病轴概览",
+      "bulletPoints": [
+        "For each indication included, summarize clinical treatment guidelines (at least include US)",
+        "For each indication included, identify the effectiveness and safety profile of current SoC and key emerging treatment as benchmark;",
+        "Briefly re-visit the target significance & dysregulation/disease-causing MoA in each indication included."
+      ],
+      "bulletPointsZh": [
+        "针对每个纳入适应症，总结临床治疗指南（至少包含美国）",
+        "针对每个纳入适应症，识别当前 SoC 和关键新兴疗法的有效性与安全性特征作为 benchmark；",
+        "简要回顾各纳入适应症下的靶点重要性、失调情况/致病 MoA。"
+      ],
+      "sourceModules": [
+        "disease",
+        "clinical"
+      ],
+      "primaryModuleId": "disease",
+      "requiredEvidence": true,
+      "allowLlmGapFill": false,
+      "status": "active",
+      "displayOrder": 301,
+      "repeat": {
+        "indication": true,
+        "moa": false,
+        "preclinicalPipeline": false,
+        "inDevelopment": false
+      }
+    },
+    {
+      "id": "3.2",
+      "parentId": "3",
+      "title": "[Indication X] Clinical Development Path & Criteria",
+      "titleZh": "[适应症 X]临床开发路径与标准",
+      "bulletPoints": [
+        "Phase 1 / 2 / 3 table: participants, study design, timeline, surrogate & primary endpoints, key PD/PK markers, control agent selection"
+      ],
+      "bulletPointsZh": [
+        "I/II/III 期表格：受试者、研究设计、时间线、替代终点与主要终点、关键 PD/PK 标志物、对照药物选择"
+      ],
+      "sourceModules": [
+        "disease",
+        "clinical"
+      ],
+      "primaryModuleId": "disease",
+      "requiredEvidence": true,
+      "allowLlmGapFill": false,
+      "status": "missing",
+      "displayOrder": 302,
+      "repeat": {
+        "indication": true,
+        "moa": false,
+        "preclinicalPipeline": false,
+        "inDevelopment": false
+      }
+    },
+    {
+      "id": "3.3",
+      "parentId": "3",
+      "title": "[Indication X] Development Strategy & Competitive Edge",
+      "titleZh": "[适应症 X]开发策略与竞争优势",
+      "bulletPoints": [
+        "Major unmet medical needs (non-responders, patient compliance, etc.)",
+        "Position of pipeline against the target with current SoC / emerging treatment (possibility of combined treatment regime? Different patient population? Better single Tx efficacy / safety / convenience?)",
+        "Contributing MoA of above strategy (MoA with an angle on product development: why such target approach / candidate can yield e.g. better efficacy)"
+      ],
+      "bulletPointsZh": [
+        "主要未满足临床需求（非应答人群、依从性等）",
+        "靶向该靶点的管线相对当前 SoC / 新兴疗法的定位（是否可能联合治疗？不同患者人群？更好的单药疗效 / 安全性 / 便利性？）",
+        "上述策略的 MoA 贡献（从产品开发角度解释该 MoA：为什么这种靶点策略 / 候选物可带来例如更好疗效）"
+      ],
+      "sourceModules": [
+        "disease",
+        "competition",
+        "insights"
+      ],
+      "primaryModuleId": "disease",
+      "requiredEvidence": true,
+      "allowLlmGapFill": false,
+      "status": "missing",
+      "displayOrder": 303,
+      "repeat": {
+        "indication": true,
+        "moa": false,
+        "preclinicalPipeline": false,
+        "inDevelopment": false
+      }
+    },
+    {
+      "id": "3.4",
+      "parentId": "3",
+      "title": "Pipeline Overview",
+      "titleZh": "管线概览",
+      "bulletPoints": [
+        "Table: Pipeline / Sponsor / TA / MoA / Format / Developmental Status / Notable Events",
+        "Include only asset-specific notable events: terminated programs (reason), licensing & deal info, regulatory milestones (BTD, approval, etc.) must explicitly name the pipeline/asset in that row"
+      ],
+      "bulletPointsZh": [
+        "表格：管线 / 发起方 / TA / MoA / 形式 / 开发状态 / 重要事件",
+        "只写与该行管线/分子直接相关的重要事件：终止原因、授权/交易、监管里程碑等证据必须明确点名该管线/分子"
+      ],
+      "sourceModules": [
+        "competition"
+      ],
+      "primaryModuleId": "competition",
+      "requiredEvidence": true,
+      "allowLlmGapFill": false,
+      "status": "active",
+      "displayOrder": 304,
+      "repeat": {
+        "indication": false,
+        "moa": false,
+        "preclinicalPipeline": false,
+        "inDevelopment": false
+      }
+    },
+    {
+      "id": "3.5",
+      "parentId": "3",
+      "title": "MoA Category Deep-Dives [repeat per MoA]",
+      "titleZh": "MoA 分类深挖（按 MoA 重复）",
+      "bulletPoints": [
+        "Current MoA overview: description, representative pipelines, and why this MoA matters for the target",
+        "Pros / cons and key development constraints for this MoA",
+        "Mechanism illustration: generate and insert a schematic only when evidence supports the mechanism",
+        "Navigation cue: downstream pages cover preclinical metrics, clinical metrics, and detailed drug profiles for this MoA"
+      ],
+      "bulletPointsZh": [
+        "当前 MoA 总览：机制描述、代表性管线，以及该 MoA 对本靶点的重要性",
+        "该 MoA 的优缺点和关键开发限制",
+        "机制图：仅在证据支持时生成并插入机制示意图",
+        "结构提示：后续页面围绕该 MoA 展开临床前指标、临床指标和详细疗法档案"
+      ],
+      "sourceModules": [
+        "competition",
+        "preclinical",
+        "clinical",
+        "insights"
+      ],
+      "primaryModuleId": "competition",
+      "requiredEvidence": false,
+      "allowLlmGapFill": false,
+      "status": "active",
+      "displayOrder": 305,
+      "repeat": {
+        "indication": false,
+        "moa": true,
+        "preclinicalPipeline": false,
+        "inDevelopment": false
+      }
+    },
+    {
+      "id": "3.5.1",
+      "parentId": "3.5",
+      "title": "MoA Overview",
+      "titleZh": "MoA 概览",
+      "bulletPoints": [
+        "Brief description or illustration of MoA",
+        "Pros / Cons"
+      ],
+      "bulletPointsZh": [
+        "作用机制的简要描述或示意",
+        "优劣势"
+      ],
+      "sourceModules": [
+        "competition",
+        "preclinical"
+      ],
+      "primaryModuleId": "competition",
+      "requiredEvidence": true,
+      "allowLlmGapFill": false,
+      "status": "missing",
+      "displayOrder": 306,
+      "repeat": {
+        "indication": false,
+        "moa": true,
+        "preclinicalPipeline": false,
+        "inDevelopment": false
+      }
+    },
+    {
+      "id": "3.5.2",
+      "parentId": "3.5",
+      "title": "Key Preclinical Metrics",
+      "titleZh": "关键临床前指标",
+      "bulletPoints": [
+        "Overview table: affinity (KD), in-vitro IC50, cell assay EC50, in-vivo dose, in-vivo T1/2",
+        "LLM-selected key preclinical metrics: biochemical / enzymatic IC50, functional assay EC50 readout, animal model and therapeutic readout, and key in vivo biomarkers",
+        "Per-pipeline preclinical summary, in vitro data, and in vivo data; missing numeric metrics must remain N/A"
+      ],
+      "bulletPointsZh": [
+        "概览表：亲和力（KD）、体外 IC50、细胞实验 EC50、体内剂量、体内 T1/2",
+        "LLM 推荐关键临床前指标：生化 / 酶学 IC50、功能实验 EC50 readout、动物模型与治疗 readout、关键体内生物标志物",
+        "按管线总结临床前概况、体外数据和体内数据；缺失数值必须保留为 N/A"
+      ],
+      "sourceModules": [
+        "preclinical"
+      ],
+      "primaryModuleId": "preclinical",
+      "requiredEvidence": true,
+      "allowLlmGapFill": false,
+      "status": "active",
+      "displayOrder": 307,
+      "repeat": {
+        "indication": false,
+        "moa": true,
+        "preclinicalPipeline": false,
+        "inDevelopment": false
+      }
+    },
+    {
+      "id": "3.5.2a",
+      "parentId": "3.5",
+      "title": "Structure / Binding Data",
+      "titleZh": "结构 / 结合数据",
+      "bulletPoints": [
+        "Only when structure or binding evidence exists: summarize the key structure / binding / mechanism figure-supported findings for the current recommended pipeline",
+        "Describe what the figure shows and the takeaway, not the full experimental procedure"
+      ],
+      "bulletPointsZh": [
+        "仅在存在结构或结合证据时：总结当前推荐管线最关键的结构 / 结合 / 机制图证据及结论",
+        "重点写图能支持的发现与意义，不展开完整实验过程"
+      ],
+      "sourceModules": [
+        "preclinical"
+      ],
+      "primaryModuleId": "preclinical",
+      "requiredEvidence": true,
+      "allowLlmGapFill": false,
+      "status": "active",
+      "displayOrder": 307.1,
+      "repeat": {
+        "indication": false,
+        "moa": false,
+        "preclinicalPipeline": true,
+        "inDevelopment": false
+      }
+    },
+    {
+      "id": "3.5.2b",
+      "parentId": "3.5",
+      "title": "In Vivo Data",
+      "titleZh": "体内数据",
+      "bulletPoints": [
+        "Summarize the strongest in vivo efficacy / PD / safety-supporting findings for the current recommended pipeline",
+        "Group related animal studies and figures on the same slide when they support the same conclusion",
+        "If no figure exists, use the structured model / treatment / measurement results to support the conclusion briefly"
+      ],
+      "bulletPointsZh": [
+        "总结当前推荐管线最关键的体内药效 / PD / 安全性支持证据",
+        "同一结论下的相关动物实验与图片尽量合并到同一页展示",
+        "如果没有图片，则用结构化的模型 / 给药设计 / measurement results 做简洁补充说明"
+      ],
+      "sourceModules": [
+        "preclinical"
+      ],
+      "primaryModuleId": "preclinical",
+      "requiredEvidence": true,
+      "allowLlmGapFill": false,
+      "status": "active",
+      "displayOrder": 307.2,
+      "repeat": {
+        "indication": false,
+        "moa": false,
+        "preclinicalPipeline": true,
+        "inDevelopment": false
+      }
+    },
+    {
+      "id": "3.5.2c",
+      "parentId": "3.5",
+      "title": "In Vitro Data",
+      "titleZh": "体外数据",
+      "bulletPoints": [
+        "Summarize the strongest in vitro / cellular findings for the current recommended pipeline",
+        "Batch related figures and readouts together when they support one mechanistic or efficacy conclusion",
+        "If no figure exists, use the structured model / treatment / measurement results to support the conclusion briefly"
+      ],
+      "bulletPointsZh": [
+        "总结当前推荐管线最关键的体外 / 细胞实验发现",
+        "当多张图或多个 readout 共同支撑一个机制或药效结论时，聚合在同一页展示",
+        "如果没有图片，则用结构化的模型 / 给药设计 / measurement results 做简洁补充说明"
+      ],
+      "sourceModules": [
+        "preclinical"
+      ],
+      "primaryModuleId": "preclinical",
+      "requiredEvidence": true,
+      "allowLlmGapFill": false,
+      "status": "active",
+      "displayOrder": 307.3,
+      "repeat": {
+        "indication": false,
+        "moa": false,
+        "preclinicalPipeline": true,
+        "inDevelopment": false
+      }
+    },
+    {
+      "id": "3.5.3",
+      "parentId": "3.5",
+      "title": "Key Clinical Metrics",
+      "titleZh": "关键临床指标",
+      "bulletPoints": [
+        "Overview table: indication / highest stage, data stage, cohorts, design, patient baseline, primary endpoints",
+        "Key AE profile, dosing scheme, control agent selection, PD markers, PK metrics, and annual sales (if marketed)",
+        "Per-pipeline clinical metrics summary"
+      ],
+      "bulletPointsZh": [
+        "概览表：适应症 / 最高阶段、数据阶段、队列、设计、患者基线、主要终点",
+        "关键 AE 特征、给药方案、对照药物选择、PD 标志物、PK 指标及年销售额（如已上市）",
+        "按管线总结临床指标"
+      ],
+      "sourceModules": [
+        "clinical"
+      ],
+      "primaryModuleId": "clinical",
+      "requiredEvidence": true,
+      "allowLlmGapFill": false,
+      "status": "active",
+      "displayOrder": 308,
+      "repeat": {
+        "indication": false,
+        "moa": true,
+        "preclinicalPipeline": false,
+        "inDevelopment": false
+      }
+    },
+    {
+      "id": "3.5.4",
+      "parentId": "3.5",
+      "title": "[MoA1] For Marketed & Clinical-Stage Therapeutics",
+      "titleZh": "[MoA1]上市及临床阶段疗法",
+      "bulletPoints": [
+        "Basic info: structure, design rationale, patent, market size, line of treatment, formulation / dosing",
+        "Preclinical data: in vitro / in vivo effect, Tox, ADME, efficacy, CMC",
+        "Clinical data by trial: stage, indication, design, endpoints, efficacy, safety, PK/PD biomarkers",
+        "Cross-trial comparison (efficacy trend across stages, across indications)",
+        "For clinical-stage: comparison with current market-leading therapy; concomitant / combination therapy"
+      ],
+      "bulletPointsZh": [
+        "基础信息：结构、设计逻辑、专利、市场规模、治疗线别、剂型 / 给药方式",
+        "临床前数据：体外 / 体内效果、毒理、ADME、疗效、CMC",
+        "逐试验临床数据：阶段、适应症、设计、终点、疗效、安全性、PK/PD 生物标志物",
+        "跨试验比较（跨阶段、跨适应症的疗效趋势）",
+        "对于临床阶段：与当前市场主导疗法对比；伴随 / 联合治疗"
+      ],
+      "sourceModules": [
+        "insights",
+        "competition",
+        "clinical",
+        "preclinical"
+      ],
+      "primaryModuleId": "insights",
+      "requiredEvidence": true,
+      "allowLlmGapFill": false,
+      "status": "missing",
+      "displayOrder": 309,
+      "repeat": {
+        "indication": false,
+        "moa": true,
+        "preclinicalPipeline": false,
+        "inDevelopment": false
+      }
+    },
+    {
+      "id": "3.6",
+      "parentId": "3",
+      "title": "Pipelines with Newer MoA / Modalities  (if applicable)",
+      "titleZh": "新机制 / 新模态管线（如适用）",
+      "bulletPoints": [
+        "Types of modalities, structures, indications",
+        "How different are the MoAs",
+        "Advantages and disadvantages of new MoA and/or modalities",
+        "In vitro/in vivo data for comparison with existing/in-clinical trial products",
+        "Tox, ADME and efficacy studies",
+        "PD/PK biomarkers, if there are any differences?"
+      ],
+      "bulletPointsZh": [
+        "模态类型、结构特征、适应症",
+        "这些 MoA 的差异程度",
+        "新 MoA 和 / 或新模态的优势与劣势",
+        "用于对比已有/临床试验中产品的体外/体内数据",
+        "毒理、ADME 和疗效研究",
+        "PD/PK 生物标志物，如有，是否存在差异？"
+      ],
+      "sourceModules": [
+        "competition"
+      ],
+      "primaryModuleId": "competition",
+      "requiredEvidence": true,
+      "allowLlmGapFill": false,
+      "status": "missing",
+      "displayOrder": 310,
+      "repeat": {
+        "indication": false,
+        "moa": false,
+        "preclinicalPipeline": false,
+        "inDevelopment": false
+      }
+    },
+    {
+      "id": "3.7",
+      "parentId": "3",
+      "title": "Pipelines Indirectly Affecting the Target  (if applicable)",
+      "titleZh": "间接影响靶点的管线（如适用）",
+      "bulletPoints": [
+        "Drug info, structures, patents, indications",
+        "MoA of indirect regulation of target expression / modification",
+        "Preclinical & clinical data; potential drug-drug interactions"
+      ],
+      "bulletPointsZh": [
+        "药物信息、结构、专利、适应症",
+        "间接调控靶点表达 / 修饰的作用机制",
+        "临床前与临床数据；潜在药物相互作用"
+      ],
+      "sourceModules": [
+        "competition"
+      ],
+      "primaryModuleId": "competition",
+      "requiredEvidence": true,
+      "allowLlmGapFill": false,
+      "status": "missing",
+      "displayOrder": 311,
+      "repeat": {
+        "indication": false,
+        "moa": false,
+        "preclinicalPipeline": false,
+        "inDevelopment": true
+      }
+    },
+    {
+      "id": "4.1",
+      "parentId": "4",
+      "title": "Key Limitations of Existing Therapeutics / Pipelines",
+      "titleZh": "现有疗法 / 管线的关键局限",
+      "bulletPoints": [
+        "Formulation & CMC aspects (if applicable)",
+        "Efficacy aspects (if applicable)",
+        "Safety aspects (if applicable)",
+        "Patient compliance (if applicable)",
+        "Others"
+      ],
+      "bulletPointsZh": [
+        "制剂与 CMC 局限（如适用）",
+        "疗效局限（如适用）",
+        "安全性局限（如适用）",
+        "患者依从性问题（如适用）",
+        "其他限制因素"
+      ],
+      "sourceModules": [
+        "insights"
+      ],
+      "primaryModuleId": "insights",
+      "requiredEvidence": true,
+      "allowLlmGapFill": false,
+      "status": "active",
+      "displayOrder": 401,
+      "repeat": {
+        "indication": false,
+        "moa": false,
+        "preclinicalPipeline": false,
+        "inDevelopment": false
+      }
+    },
+    {
+      "id": "4.2",
+      "parentId": "4",
+      "title": "Risks & Knowledge Gaps",
+      "titleZh": "风险与知识空白",
+      "bulletPoints": [
+        "Risks",
+        "Biology-related (e.g. on-target toxicity)",
+        "Disease-related (e.g. change of treatment paradigm)",
+        "Market-related (e.g. competition from newly emerging targets)",
+        "Knowledge Gaps",
+        "Critical information that is currently lacking",
+        "Causal relationships that what we don’t understand (e.g. next-gen compound failed in trial, and we cannot dissect out the root cause from public data)"
+      ],
+      "bulletPointsZh": [
+        "风险",
+        "生物学相关（如 on-target 毒性）",
+        "疾病相关（如治疗范式变化）",
+        "市场相关（如新兴竞争靶点带来的竞争）",
+        "知识空白",
+        "当前缺失的关键信息",
+        "我们尚未理解的因果关系（例如下一代化合物在试验中失败，但无法从公开数据中拆解根本原因）"
+      ],
+      "sourceModules": [
+        "insights"
+      ],
+      "primaryModuleId": "insights",
+      "requiredEvidence": true,
+      "allowLlmGapFill": false,
+      "status": "active",
+      "displayOrder": 402,
+      "repeat": {
+        "indication": false,
+        "moa": false,
+        "preclinicalPipeline": false,
+        "inDevelopment": false
+      }
+    },
+    {
+      "id": "4.3",
+      "parentId": "4",
+      "title": "Benchmarks for Best-in-Class (BIC) Candidates",
+      "titleZh": "同类最优（BIC）候选标准",
+      "bulletPoints": [
+        "Table: Current BIC / Market-leading product / MoA-Format / TA-Indication / Preclinical metrics / Clinical efficacy endpoints / Clinical safety metrics / Other key metrics",
+        "Commentary on required improvements for next-generation asset"
+      ],
+      "bulletPointsZh": [
+        "表格：当前 BIC / 市场领先产品 / MoA-形式 / TA-适应症 / 临床前指标 / 临床疗效终点 / 临床安全性指标 / 其他关键指标",
+        "关于下一代资产所需改进的评论"
+      ],
+      "sourceModules": [
+        "insights"
+      ],
+      "primaryModuleId": "insights",
+      "requiredEvidence": true,
+      "allowLlmGapFill": false,
+      "status": "missing",
+      "displayOrder": 403,
+      "repeat": {
+        "indication": false,
+        "moa": false,
+        "preclinicalPipeline": false,
+        "inDevelopment": true
+      }
+    }
+  ]
+}

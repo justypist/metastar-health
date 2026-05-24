@@ -1,0 +1,1773 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>靶点调研助手 Workflow + Prompt Map</title>
+    <style>
+      :root {
+        --bg: #08111f;
+        --panel: #101a2d;
+        --panel2: #16243a;
+        --line: #2d3f5f;
+        --text: #e5edf8;
+        --muted: #8ea4c4;
+        --blue: #4f8cff;
+        --cyan: #22d3ee;
+        --green: #34d399;
+        --amber: #fbbf24;
+        --purple: #a78bfa;
+        --pink: #f472b6;
+        --red: #fb7185;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family:
+          Inter,
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          'Segoe UI',
+          'Noto Sans SC',
+          sans-serif;
+        background:
+          radial-gradient(
+            circle at 15% 10%,
+            rgba(79, 140, 255, 0.18),
+            transparent 32%
+          ),
+          radial-gradient(
+            circle at 85% 0%,
+            rgba(167, 139, 250, 0.16),
+            transparent 30%
+          ),
+          linear-gradient(180deg, #08111f 0%, #0b1220 100%);
+        color: var(--text);
+      }
+
+      .page {
+        max-width: 1440px;
+        margin: 0 auto;
+        padding: 32px;
+      }
+
+      .hero {
+        border: 1px solid rgba(142, 164, 196, 0.24);
+        background: rgba(16, 26, 45, 0.82);
+        border-radius: 28px;
+        padding: 30px;
+        box-shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
+      }
+
+      h1 {
+        margin: 0 0 10px;
+        font-size: 34px;
+        letter-spacing: -0.03em;
+      }
+
+      .subtitle {
+        margin: 0;
+        color: var(--muted);
+        max-width: 980px;
+        line-height: 1.8;
+      }
+
+      .legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 22px;
+      }
+
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 7px 12px;
+        border: 1px solid rgba(142, 164, 196, 0.22);
+        border-radius: 999px;
+        color: var(--muted);
+        background: rgba(255, 255, 255, 0.035);
+        font-size: 13px;
+      }
+
+      .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--blue);
+      }
+
+      .dot.data {
+        background: var(--cyan);
+      }
+      .dot.prompt {
+        background: var(--purple);
+      }
+      .dot.decision {
+        background: var(--amber);
+      }
+      .dot.output {
+        background: var(--green);
+      }
+      .dot.review {
+        background: var(--pink);
+      }
+
+      .section {
+        margin-top: 24px;
+        border: 1px solid rgba(142, 164, 196, 0.22);
+        background: rgba(16, 26, 45, 0.78);
+        border-radius: 24px;
+        padding: 24px;
+      }
+
+      .section h2 {
+        margin: 0 0 16px;
+        font-size: 20px;
+      }
+
+      .workflow {
+        display: grid;
+        grid-template-columns: 1.05fr 1.35fr 1.55fr 1.35fr 1.2fr;
+        gap: 14px;
+        overflow-x: auto;
+        padding-bottom: 8px;
+      }
+
+      .lane {
+        min-width: 238px;
+        border: 1px solid rgba(142, 164, 196, 0.16);
+        background: rgba(22, 36, 58, 0.72);
+        border-radius: 20px;
+        padding: 14px;
+      }
+
+      .lane-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 12px;
+        color: #c7d7ef;
+        font-weight: 700;
+        font-size: 14px;
+      }
+
+      .node {
+        position: relative;
+        border: 1px solid rgba(142, 164, 196, 0.22);
+        background: linear-gradient(
+          180deg,
+          rgba(255, 255, 255, 0.055),
+          rgba(255, 255, 255, 0.02)
+        );
+        border-radius: 16px;
+        padding: 12px;
+        margin: 10px 0;
+        cursor: pointer;
+        transition:
+          border-color 0.18s ease,
+          box-shadow 0.18s ease,
+          transform 0.18s ease;
+      }
+
+      .node:hover,
+      .node.is-active {
+        border-color: rgba(251, 191, 36, 0.72);
+        box-shadow:
+          0 0 0 1px rgba(251, 191, 36, 0.18),
+          0 14px 32px rgba(0, 0, 0, 0.24);
+        transform: translateY(-1px);
+      }
+
+      .node::after {
+        content: '↓';
+        position: absolute;
+        left: 50%;
+        bottom: -19px;
+        transform: translateX(-50%);
+        color: rgba(142, 164, 196, 0.5);
+        font-size: 13px;
+      }
+
+      .node:last-child::after {
+        content: '';
+      }
+
+      .node.data {
+        border-color: rgba(34, 211, 238, 0.34);
+      }
+
+      .node.prompt {
+        border-color: rgba(167, 139, 250, 0.42);
+        box-shadow: inset 0 0 0 1px rgba(167, 139, 250, 0.08);
+      }
+
+      .node.decision {
+        border-color: rgba(251, 191, 36, 0.42);
+      }
+
+      .node.output {
+        border-color: rgba(52, 211, 153, 0.42);
+      }
+
+      .node.review {
+        border-color: rgba(244, 114, 182, 0.42);
+      }
+
+      .node-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 6px;
+        font-weight: 800;
+        color: #f8fbff;
+        line-height: 1.35;
+      }
+
+      .node small {
+        display: block;
+        color: var(--muted);
+        line-height: 1.6;
+      }
+
+      .tag-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 9px;
+      }
+
+      .tag {
+        display: inline-flex;
+        padding: 3px 7px;
+        border-radius: 999px;
+        background: rgba(79, 140, 255, 0.12);
+        color: #bdd2ff;
+        font-size: 11px;
+        border: 1px solid rgba(79, 140, 255, 0.2);
+      }
+
+      .prompt-tag {
+        background: rgba(167, 139, 250, 0.13);
+        color: #ddd6fe;
+        border-color: rgba(167, 139, 250, 0.28);
+      }
+
+      .output-tag {
+        background: rgba(52, 211, 153, 0.12);
+        color: #bbf7d0;
+        border-color: rgba(52, 211, 153, 0.24);
+      }
+
+      .risk-tag {
+        background: rgba(251, 191, 36, 0.12);
+        color: #fde68a;
+        border-color: rgba(251, 191, 36, 0.26);
+      }
+
+      .matrix {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(220px, 1fr));
+        gap: 12px;
+      }
+
+      .card {
+        border: 1px solid rgba(142, 164, 196, 0.18);
+        background: rgba(22, 36, 58, 0.62);
+        border-radius: 18px;
+        padding: 15px;
+      }
+
+      .card h3 {
+        margin: 0 0 8px;
+        font-size: 15px;
+      }
+
+      .card p,
+      .card li {
+        color: var(--muted);
+        line-height: 1.65;
+        font-size: 13px;
+      }
+
+      .card ul {
+        margin: 8px 0 0;
+        padding-left: 18px;
+      }
+
+      .callout {
+        border: 1px solid rgba(251, 191, 36, 0.28);
+        background: rgba(251, 191, 36, 0.08);
+        border-radius: 18px;
+        padding: 14px 16px;
+        color: #fdebb2;
+        line-height: 1.7;
+      }
+
+      details {
+        margin-top: 14px;
+      }
+
+      summary {
+        cursor: pointer;
+        color: #dbeafe;
+        font-weight: 700;
+      }
+
+      pre {
+        white-space: pre-wrap;
+        word-break: break-word;
+        border: 1px solid rgba(142, 164, 196, 0.2);
+        background: rgba(5, 11, 22, 0.86);
+        border-radius: 16px;
+        padding: 16px;
+        color: #c7d7ef;
+        line-height: 1.55;
+        font-size: 12px;
+        overflow-x: auto;
+      }
+
+      .rendered-flow {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(150px, 1fr));
+        gap: 14px;
+        align-items: stretch;
+        margin-top: 18px;
+      }
+
+      .flow-step {
+        position: relative;
+        min-height: 128px;
+        border: 1px solid rgba(142, 164, 196, 0.2);
+        background: rgba(22, 36, 58, 0.7);
+        border-radius: 18px;
+        padding: 14px;
+      }
+
+      .flow-step::after {
+        content: '→';
+        position: absolute;
+        right: -14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: rgba(142, 164, 196, 0.58);
+        font-weight: 800;
+      }
+
+      .flow-step:nth-child(6n)::after,
+      .flow-step:last-child::after {
+        content: '';
+      }
+
+      .flow-step.prompt-step {
+        border-color: rgba(167, 139, 250, 0.38);
+      }
+
+      .flow-step.review-step {
+        border-color: rgba(244, 114, 182, 0.38);
+      }
+
+      .flow-step.output-step {
+        border-color: rgba(52, 211, 153, 0.38);
+      }
+
+      .flow-step.loop-step {
+        border-color: rgba(251, 191, 36, 0.45);
+        background:
+          linear-gradient(
+            180deg,
+            rgba(251, 191, 36, 0.08),
+            rgba(255, 255, 255, 0.02)
+          ),
+          rgba(22, 36, 58, 0.7);
+      }
+
+      .flow-index {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 24px;
+        height: 24px;
+        border-radius: 999px;
+        background: rgba(79, 140, 255, 0.16);
+        color: #c7d7ff;
+        font-size: 12px;
+        font-weight: 800;
+        margin-bottom: 10px;
+      }
+
+      .flow-title {
+        font-weight: 800;
+        margin-bottom: 6px;
+      }
+
+      .flow-desc {
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.6;
+      }
+
+      .loop-panel {
+        margin-top: 14px;
+        border: 1px solid rgba(251, 191, 36, 0.32);
+        border-radius: 20px;
+        background: rgba(251, 191, 36, 0.06);
+        padding: 16px;
+      }
+
+      .loop-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #fde68a;
+        font-weight: 800;
+        margin-bottom: 12px;
+      }
+
+      .loop-chain {
+        display: grid;
+        grid-template-columns: 1fr 40px 1fr 40px 1fr 40px 1fr;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .loop-card {
+        border: 1px solid rgba(142, 164, 196, 0.18);
+        background: rgba(8, 17, 31, 0.52);
+        border-radius: 16px;
+        padding: 13px;
+        min-height: 100px;
+      }
+
+      .loop-card h3 {
+        margin: 0 0 6px;
+        font-size: 14px;
+      }
+
+      .loop-card p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.6;
+      }
+
+      .loop-arrow {
+        text-align: center;
+        color: rgba(251, 191, 36, 0.82);
+        font-weight: 900;
+      }
+
+      .svg-map {
+        margin-top: 18px;
+        border: 1px solid rgba(142, 164, 196, 0.18);
+        border-radius: 22px;
+        background:
+          radial-gradient(
+            circle at 18% 18%,
+            rgba(79, 140, 255, 0.12),
+            transparent 26%
+          ),
+          radial-gradient(
+            circle at 78% 68%,
+            rgba(52, 211, 153, 0.08),
+            transparent 28%
+          ),
+          rgba(8, 17, 31, 0.62);
+        overflow-x: auto;
+        padding: 16px;
+      }
+
+      .svg-map svg {
+        display: block;
+        min-width: 1180px;
+        width: 100%;
+        height: auto;
+      }
+
+      .svg-box {
+        fill: rgba(22, 36, 58, 0.96);
+        stroke: rgba(142, 164, 196, 0.34);
+        stroke-width: 1.4;
+      }
+
+      .svg-prompt {
+        stroke: rgba(167, 139, 250, 0.72);
+      }
+
+      .svg-review {
+        stroke: rgba(244, 114, 182, 0.76);
+      }
+
+      .svg-output {
+        stroke: rgba(52, 211, 153, 0.76);
+      }
+
+      .svg-decision {
+        fill: rgba(251, 191, 36, 0.08);
+        stroke: rgba(251, 191, 36, 0.76);
+      }
+
+      .svg-loop {
+        fill: rgba(251, 191, 36, 0.06);
+        stroke: rgba(251, 191, 36, 0.42);
+        stroke-dasharray: 6 6;
+      }
+
+      .svg-title {
+        fill: #f8fbff;
+        font-size: 15px;
+        font-weight: 800;
+      }
+
+      .svg-sub {
+        fill: #9db2d1;
+        font-size: 12px;
+      }
+
+      .svg-note {
+        fill: #fde68a;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .svg-arrow {
+        stroke: rgba(142, 164, 196, 0.74);
+        stroke-width: 2;
+        fill: none;
+        marker-end: url(#arrow);
+      }
+
+      .svg-arrow-yes {
+        stroke: rgba(52, 211, 153, 0.85);
+      }
+
+      .svg-arrow-no {
+        stroke: rgba(251, 191, 36, 0.85);
+      }
+
+      .svg-arrow-loop {
+        stroke: rgba(251, 191, 36, 0.92);
+        stroke-width: 2.4;
+        fill: none;
+        marker-end: url(#arrowLoop);
+      }
+
+      .svg-hotspot {
+        fill: rgba(255, 255, 255, 0);
+        stroke: transparent;
+        stroke-width: 2;
+        cursor: pointer;
+        pointer-events: all;
+      }
+
+      .svg-hotspot:hover,
+      .svg-hotspot.is-active {
+        stroke: rgba(251, 191, 36, 0.86);
+        fill: rgba(251, 191, 36, 0.06);
+      }
+
+      .prompt-detail {
+        margin-top: 18px;
+        border: 1px solid rgba(167, 139, 250, 0.28);
+        background: rgba(8, 17, 31, 0.72);
+        border-radius: 22px;
+        padding: 18px;
+      }
+
+      .prompt-detail-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 14px;
+      }
+
+      .prompt-detail-title {
+        margin: 0 0 6px;
+        font-size: 18px;
+      }
+
+      .prompt-detail-desc {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.7;
+        font-size: 13px;
+      }
+
+      .prompt-empty {
+        color: var(--muted);
+        line-height: 1.7;
+      }
+
+      .prompt-list {
+        display: grid;
+        gap: 14px;
+      }
+
+      .prompt-card {
+        border: 1px solid rgba(142, 164, 196, 0.18);
+        background: rgba(22, 36, 58, 0.56);
+        border-radius: 18px;
+        padding: 14px;
+      }
+
+      .prompt-card h3 {
+        margin: 0 0 8px;
+        font-size: 15px;
+      }
+
+      .prompt-card-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 10px;
+      }
+
+      .prompt-card pre {
+        margin: 0;
+        max-height: 520px;
+      }
+
+      @media (max-width: 980px) {
+        .page {
+          padding: 18px;
+        }
+
+        .workflow {
+          grid-template-columns: 1fr;
+        }
+
+        .matrix {
+          grid-template-columns: 1fr;
+        }
+
+        .rendered-flow {
+          grid-template-columns: 1fr;
+        }
+
+        .flow-step::after {
+          content: '↓';
+          right: 50%;
+          top: auto;
+          bottom: -17px;
+          transform: translateX(50%);
+        }
+
+        .flow-step:nth-child(6n)::after {
+          content: '↓';
+        }
+
+        .flow-step:last-child::after {
+          content: '';
+        }
+
+        .loop-chain {
+          grid-template-columns: 1fr;
+        }
+
+        .loop-arrow {
+          transform: rotate(90deg);
+        }
+
+        .prompt-detail-header {
+          flex-direction: column;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <section class="hero">
+        <h1>靶点调研助手 Workflow + Prompt Map</h1>
+        <p class="subtitle">
+          流程图概览：从靶点输入、数据检索、LLM AI
+          推荐、模板大纲、报告写作、多层审阅到 PDF/HTML/OSS 交付，串起所有关键
+          prompt 触发点。点击任一流程块，下方会展示对应的完整 System/User
+          prompt。
+        </p>
+        <div class="legend">
+          <span class="chip"><span class="dot data"></span>数据/工具</span>
+          <span class="chip"><span class="dot prompt"></span>LLM Prompt</span>
+          <span class="chip"><span class="dot decision"></span>决策/阈值</span>
+          <span class="chip"><span class="dot review"></span>审阅/改写</span>
+          <span class="chip"><span class="dot output"></span>交付物</span>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>一图看懂主流程</h2>
+        <div class="workflow">
+          <div class="lane">
+            <div class="lane-title">
+              <span class="dot data"></span>1. 输入与任务
+            </div>
+            <div class="node data" data-prompt-key="input">
+              <div class="node-title">靶点输入</div>
+              <small
+                >用户输入 target，可带 alias、语言、模块选择、上传文件。</small
+              >
+              <div class="tag-row">
+                <span class="tag">target</span>
+                <span class="tag">aliases</span>
+                <span class="tag">language</span>
+              </div>
+            </div>
+            <div class="node data" data-prompt-key="task-init">
+              <div class="node-title">任务初始化</div>
+              <small>创建 task，初始化模块状态，准备并发执行。</small>
+              <div class="tag-row">
+                <span class="tag">taskId</span>
+                <span class="tag">module status</span>
+              </div>
+            </div>
+            <div class="node data" data-prompt-key="history">
+              <div class="node-title">历史结果复用</div>
+              <small
+                >查找同靶点历史报告与可复用模块，减少等待和重复成本。</small
+              >
+              <div class="tag-row">
+                <span class="tag">historical report</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="lane">
+            <div class="lane-title">
+              <span class="dot data"></span>2. 数据检索与标准化
+            </div>
+            <div class="node data" data-prompt-key="module-execution">
+              <div class="node-title">五大核心模块并发</div>
+              <small
+                >biology、disease、competition、preclinical、clinical
+                并发执行；insights 后置汇总。</small
+              >
+              <div class="tag-row">
+                <span class="tag">Promise.allSettled</span>
+                <span class="tag">module fallback</span>
+              </div>
+            </div>
+            <div class="node data" data-prompt-key="retrieval">
+              <div class="node-title">数据源与工具</div>
+              <small
+                >综述文献、drug 管线、preclinical 数据、临床试验结果、GTEx/HPA
+                等。</small
+              >
+              <div class="tag-row">
+                <span class="tag">search_review</span>
+                <span class="tag">search_drug</span>
+                <span class="tag">Zhihuiya API</span>
+              </div>
+            </div>
+            <div class="node data" data-prompt-key="standardization">
+              <div class="node-title">标准化 DataItem</div>
+              <small
+                >统一为 DataItemResponse，补齐
+                sourceUrl、metadata、figureData、section hints。</small
+              >
+              <div class="tag-row">
+                <span class="tag">DataItemResponse</span>
+                <span class="tag">GridFS / FetchData</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="lane">
+            <div class="lane-title">
+              <span class="dot prompt"></span>3. AI 推荐与 Prompt 链
+            </div>
+            <div class="node prompt" data-prompt-key="indication">
+              <div class="node-title">P1 推荐适应症</div>
+              <small
+                >LLM 从 active clinical / marketed Top50 候选池中选择最值得展开的
+                Top 2-10 个适应症，并规范化临床名称。</small
+              >
+              <div class="tag-row">
+                <span class="tag prompt-tag"
+                  >resolve24RecommendedIndications</span
+                >
+                <span class="tag prompt-tag">selected</span>
+                <span class="tag prompt-tag">selectionBrief</span>
+              </div>
+            </div>
+            <div class="node prompt" data-prompt-key="content-precheck">
+              <div class="node-title">P2 内容预评估</div>
+              <small
+                >判断靶点相关性、图片/表格价值、写作重要性、证据质量，作为推荐评审输入。</small
+              >
+              <div class="tag-row">
+                <span class="tag prompt-tag">isTargetRelevant</span>
+                <span class="tag prompt-tag">writingImportanceScore</span>
+                <span class="tag prompt-tag">evidenceQualityScore</span>
+              </div>
+            </div>
+            <div class="node prompt" data-prompt-key="evidence-review">
+              <div class="node-title">P3 统一证据评审</div>
+              <small
+                >Stage 3 核心 prompt。LLM 对每条 evidence
+                输出推荐结论、0-100 分数、证据等级和业务标签。</small
+              >
+              <div class="tag-row">
+                <span class="tag prompt-tag">selectionVerdict</span>
+                <span class="tag prompt-tag">priorityScore</span>
+                <span class="tag prompt-tag">evidenceGrade</span>
+              </div>
+            </div>
+            <div class="node prompt" data-prompt-key="section-coverage">
+              <div class="node-title">P4 Section 覆盖评审</div>
+              <small
+                >LLM 判断每个 section 的 covered / fallback /
+                missing，输出最佳证据、风险证据和缺口。</small
+              >
+              <div class="tag-row">
+                <span class="tag prompt-tag">coverageStatus</span>
+                <span class="tag prompt-tag">bestEvidenceIds</span>
+                <span class="tag prompt-tag">missingPoints</span>
+              </div>
+            </div>
+            <div class="node decision" data-prompt-key="score-threshold">
+              <div class="node-title">60 分推荐阈值</div>
+              <small
+                >priorityScore / recommendationScore ≥ 60 → 默认 AI
+                推荐；分数由 prompt 中的锚点案例约束。</small
+              >
+              <div class="tag-row">
+                <span class="tag risk-tag">90-100 决策锚点</span>
+                <span class="tag risk-tag">75-89 强支撑</span>
+                <span class="tag risk-tag">60-74 可纳入</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="lane">
+            <div class="lane-title">
+              <span class="dot prompt"></span>4. 大纲与写作
+            </div>
+            <div class="node prompt" data-prompt-key="moa-triage">
+              <div class="node-title">P5 MoA Triage</div>
+              <small
+                >LLM 判断竞争格局中应展开哪些 MoA 组，驱动模板 repeat
+                页。</small
+              >
+              <div class="tag-row">
+                <span class="tag prompt-tag">coreMoas</span>
+                <span class="tag prompt-tag">newMoas</span>
+              </div>
+            </div>
+            <div class="node decision" data-prompt-key="template-outline">
+              <div class="node-title">模板锁定大纲</div>
+              <small
+                >默认使用 metastar_v2025，结构由 report-template.ts 固定，LLM
+                不自由重排报告结构；内部证据不足时可用 Gemini grounding 补充固定 bullet。</small
+              >
+              <div class="tag-row">
+                <span class="tag risk-tag">templateNodeId</span>
+                <span class="tag risk-tag">repeatKey</span>
+                <span class="tag prompt-tag">Gemini grounding</span>
+              </div>
+            </div>
+            <div class="node prompt" data-prompt-key="outline-review">
+              <div class="node-title">P6 统一大纲审阅</div>
+              <small>LLM 审阅多模块大纲的重复、缺口、边界和覆盖风险。</small>
+              <div class="tag-row">
+                <span class="tag prompt-tag">outline review</span>
+              </div>
+            </div>
+            <div class="node prompt" data-prompt-key="slide-strategy">
+              <div class="node-title">P7 Slide 写作策略</div>
+              <small
+                >为每页生成写作角度、必用证据、覆盖计划、避免重复、结构建议和动态写作提示。</small
+              >
+              <div class="tag-row">
+                <span class="tag prompt-tag">slideWritingStrategy</span>
+                <span class="tag prompt-tag">writingHints</span>
+              </div>
+            </div>
+            <div class="node prompt" data-prompt-key="body-writing">
+              <div class="node-title">P8 正文写作</div>
+              <small
+                >按 standard / preclinical / competition 分支写当前
+                slide；写作前可规划 RAG、Web 和生成图工具调用，并追加专家草稿写作契约、动态写作提示和引用/图片硬性规范。随后进入“审阅→重写”闭环。</small
+              >
+              <div class="tag-row">
+                <span class="tag prompt-tag">Markdown</span>
+                <span class="tag prompt-tag">[n] citation</span>
+                <span class="tag prompt-tag">draft contract</span>
+                <span class="tag prompt-tag">tool planning</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="lane">
+            <div class="lane-title">
+              <span class="dot output"></span>5. 审阅与交付
+            </div>
+            <div class="node review" data-prompt-key="image-review">
+              <div class="node-title">P9 Review · 图片审阅</div>
+              <small
+                >多模态模型审阅插图是否真实、可读、匹配当前 section，识别 AI
+                图文字错误。</small
+              >
+              <div class="tag-row">
+                <span class="tag prompt-tag">imageReview</span>
+                <span class="tag prompt-tag">textQuality</span>
+                <span class="tag prompt-tag">shouldRegenerateImage</span>
+              </div>
+            </div>
+            <div class="node review" data-prompt-key="section-review">
+              <div class="node-title">P9 Review · Section 审阅</div>
+              <small
+                >独立审阅当前
+                slide：检查事实幻觉、引用缺失、章节越界、空话和表格滥用。</small
+              >
+              <div class="tag-row">
+                <span class="tag prompt-tag">sectionReview</span>
+              </div>
+            </div>
+            <div class="node review" data-prompt-key="chapter-global-review">
+              <div class="node-title">P9 Review · Chapter / Global 审阅</div>
+              <small
+                >检查章节连贯性、跨章节重复、引用规范、全局矛盾与重大缺口。</small
+              >
+              <div class="tag-row">
+                <span class="tag prompt-tag">chapterReview</span>
+                <span class="tag prompt-tag">globalReview</span>
+              </div>
+            </div>
+            <div class="node review" data-prompt-key="rewrite">
+              <div class="node-title">P10 Rewrite</div>
+              <small
+                >如审阅不通过，按审稿意见重写当前 slide 或局部内容；最多迭代 3
+                轮，仍不通过则保留最佳版本并继续后续审阅。</small
+              >
+              <div class="tag-row">
+                <span class="tag prompt-tag">sectionRewrite</span>
+                <span class="tag prompt-tag">reportRewrite</span>
+                <span class="tag risk-tag">max 3 rounds</span>
+              </div>
+            </div>
+            <div class="node review" data-prompt-key="style-polish">
+              <div class="node-title">P11 Final Style Polish</div>
+              <small>不改变事实和引用编号，只润色语言、结构和交付表达。</small>
+              <div class="tag-row">
+                <span class="tag prompt-tag">style polish</span>
+              </div>
+            </div>
+            <div class="node output" data-prompt-key="delivery">
+              <div class="node-title">报告交付</div>
+              <small
+                >Markdown → HTML → PDF，引用链接渲染后上传
+                OSS，返回可下载报告。</small
+              >
+              <div class="tag-row">
+                <span class="tag output-tag">MD</span>
+                <span class="tag output-tag">HTML</span>
+                <span class="tag output-tag">PDF</span>
+                <span class="tag output-tag">OSS URL</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Prompt 与流程的对应关系</h2>
+        <div class="matrix">
+          <div class="card">
+            <h3>Stage 3 推荐类 Prompt</h3>
+            <p>
+              决定哪些数据默认参与后续大纲和报告写作，是当前 AI 推荐的核心。
+            </p>
+            <ul>
+              <li>P1 推荐适应症</li>
+              <li>P2 内容预评估</li>
+              <li>P3 统一证据评审</li>
+              <li>P4 Section 覆盖评审</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Stage 4-5 大纲类 Prompt</h3>
+            <p>控制报告结构、repeat 章节、MoA 展开和跨模块边界。</p>
+            <ul>
+              <li>P5 MoA Triage</li>
+              <li>P6 统一大纲审阅</li>
+              <li>Legacy outline fallback</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Stage 7 写作类 Prompt</h3>
+            <p>
+              把已推荐数据写成可交付的 slide 内容，并进入最多 3
+              轮“审阅→重写”闭环。
+            </p>
+            <ul>
+              <li>P7 Slide 写作策略</li>
+              <li>P8 正文写作</li>
+              <li>Preclinical / Competition 分支写作</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Review / Polish Prompt</h3>
+            <p>负责发现幻觉、重复、图片问题和风格问题，并驱动改写闭环。</p>
+            <ul>
+              <li>
+                P9 Review：图片 review / section review / chapter review /
+                global review
+              </li>
+              <li>P10 Rewrite：按审阅意见重写，最多 3 轮</li>
+              <li>P11 Final Style Polish</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>核心设计价值</h2>
+        <div class="callout">
+          这套工作流的核心价值不是“把检索结果简单拼成报告”，而是把同一靶点的历史检索、历史模块数据与历史报告挂载为可复用底座。
+          当命中历史结果后，每次生成都会在既有证据和报告结构基础上继续进行信息补充、多层
+          review 与重写迭代； 新增证据会重新进入 AI
+          推荐、覆盖度判断、写作、审阅和最多 3
+          轮重写闭环。这样同一个靶点的报告不是一次性交付物，
+          而是会随着检索积累、证据补充和审阅反馈持续进化的研究资产。
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>端到端闭环流程图</h2>
+        <p class="subtitle">
+          该视图聚焦从证据检索到报告交付的完整闭环，重点展示历史挂载、推荐分支、写作审阅重写循环和报告沉淀回流。
+        </p>
+        <div class="svg-map">
+          <svg
+            viewBox="0 0 1660 820"
+            role="img"
+            aria-label="靶点调研助手端到端工作流"
+          >
+            <defs>
+              <marker
+                id="arrow"
+                markerWidth="10"
+                markerHeight="10"
+                refX="8"
+                refY="3"
+                orient="auto"
+                markerUnits="strokeWidth"
+              >
+                <path d="M0,0 L0,6 L9,3 z" fill="rgba(142,164,196,0.82)" />
+              </marker>
+              <marker
+                id="arrowLoop"
+                markerWidth="10"
+                markerHeight="10"
+                refX="8"
+                refY="3"
+                orient="auto"
+                markerUnits="strokeWidth"
+              >
+                <path d="M0,0 L0,6 L9,3 z" fill="rgba(251,191,36,0.95)" />
+              </marker>
+            </defs>
+
+            <rect
+              x="18"
+              y="24"
+              width="1620"
+              height="150"
+              rx="22"
+              fill="rgba(79,140,255,0.045)"
+              stroke="rgba(79,140,255,0.18)"
+            />
+            <text x="42" y="52" class="svg-note">1. 证据底座与检索入口</text>
+
+            <rect
+              x="18"
+              y="214"
+              width="1620"
+              height="142"
+              rx="22"
+              fill="rgba(167,139,250,0.045)"
+              stroke="rgba(167,139,250,0.18)"
+            />
+            <text x="42" y="242" class="svg-note">2. AI 推荐决策</text>
+
+            <rect
+              x="18"
+              y="396"
+              width="1620"
+              height="172"
+              rx="22"
+              fill="rgba(244,114,182,0.04)"
+              stroke="rgba(244,114,182,0.18)"
+            />
+            <text x="42" y="424" class="svg-note">3. 报告生成与质量闭环</text>
+
+            <rect
+              x="18"
+              y="612"
+              width="1620"
+              height="150"
+              rx="22"
+              fill="rgba(52,211,153,0.045)"
+              stroke="rgba(52,211,153,0.18)"
+            />
+            <text x="42" y="646" class="svg-note">4. 报告沉淀与持续进化</text>
+
+            <rect
+              x="62"
+              y="74"
+              width="156"
+              height="68"
+              rx="15"
+              class="svg-box"
+            />
+            <text x="84" y="102" class="svg-title">靶点输入</text>
+            <text x="84" y="125" class="svg-sub">
+              target / alias / language
+            </text>
+
+            <polygon
+              points="340,64 440,108 340,152 240,108"
+              class="svg-decision"
+            />
+            <text x="300" y="103" class="svg-title">命中历史?</text>
+            <text x="296" y="126" class="svg-sub">同靶点资产池</text>
+
+            <rect
+              x="502"
+              y="54"
+              width="210"
+              height="108"
+              rx="18"
+              class="svg-box svg-output"
+            />
+            <text x="530" y="88" class="svg-title">历史底座挂载</text>
+            <text x="530" y="113" class="svg-sub">历史检索 / 模块数据</text>
+            <text x="530" y="138" class="svg-sub">历史报告结构</text>
+
+            <rect
+              x="502"
+              y="204"
+              width="210"
+              height="92"
+              rx="18"
+              class="svg-box"
+            />
+            <text x="530" y="238" class="svg-title">新增检索补充</text>
+            <text x="530" y="263" class="svg-sub">五模块并发 + 标准化</text>
+
+            <rect
+              x="782"
+              y="232"
+              width="228"
+              height="94"
+              rx="18"
+              class="svg-box svg-prompt"
+            />
+            <text x="810" y="263" class="svg-title">P1-P4 AI 推荐</text>
+            <text x="810" y="288" class="svg-sub">
+              适应症 / 证据评审 / 覆盖度
+            </text>
+            <text x="810" y="313" class="svg-sub">
+              selectionVerdict + score
+            </text>
+
+            <polygon
+              points="1146,222 1252,279 1146,336 1040,279"
+              class="svg-decision"
+            />
+            <text x="1108" y="273" class="svg-title">≥ 60 分?</text>
+            <text x="1096" y="298" class="svg-sub">默认写作候选</text>
+
+            <rect
+              x="1304"
+              y="236"
+              width="188"
+              height="86"
+              rx="17"
+              class="svg-box"
+            />
+            <text x="1328" y="269" class="svg-title">风险 / 缺口保留</text>
+            <text x="1328" y="294" class="svg-sub">不默认进入正文</text>
+
+            <rect
+              x="84"
+              y="454"
+              width="192"
+              height="82"
+              rx="18"
+              class="svg-box svg-prompt"
+            />
+            <text x="108" y="486" class="svg-title">P5-P6 大纲决策</text>
+            <text x="108" y="511" class="svg-sub">MoA triage + 模板锁定</text>
+
+            <rect
+              x="344"
+              y="454"
+              width="174"
+              height="82"
+              rx="18"
+              class="svg-box svg-prompt"
+            />
+            <text x="368" y="486" class="svg-title">P7 写作策略</text>
+            <text x="368" y="511" class="svg-sub">目标 / 事实 / 引用计划</text>
+
+            <rect
+              x="586"
+              y="454"
+              width="174"
+              height="82"
+              rx="18"
+              class="svg-box svg-prompt"
+            />
+            <text x="610" y="486" class="svg-title">P8 正文写作</text>
+            <text x="610" y="511" class="svg-sub">按模块分支生成 slide</text>
+
+            <rect
+              x="828"
+              y="424"
+              width="324"
+              height="124"
+              rx="22"
+              class="svg-loop"
+            />
+            <text x="866" y="452" class="svg-note">质量闭环 · 最多 3 轮</text>
+            <rect
+              x="860"
+              y="472"
+              width="116"
+              height="48"
+              rx="12"
+              class="svg-box svg-review"
+            />
+            <text x="881" y="501" class="svg-title">P9 Review</text>
+            <rect
+              x="1004"
+              y="472"
+              width="116"
+              height="48"
+              rx="12"
+              class="svg-box svg-review"
+            />
+            <text x="1021" y="501" class="svg-title">P10 Rewrite</text>
+
+            <rect
+              x="1210"
+              y="436"
+              width="210"
+              height="100"
+              rx="18"
+              class="svg-box svg-review"
+            />
+            <text x="1234" y="470" class="svg-title">P9 Chapter / Global</text>
+            <text x="1234" y="495" class="svg-sub">
+              重复 / 矛盾 / 引用 / 缺口
+            </text>
+            <text x="1234" y="520" class="svg-sub">全局一致性审阅</text>
+
+            <rect
+              x="1210"
+              y="678"
+              width="178"
+              height="62"
+              rx="16"
+              class="svg-box svg-review"
+            />
+            <text x="1234" y="715" class="svg-title">P11 Style Polish</text>
+
+            <rect
+              x="1430"
+              y="670"
+              width="178"
+              height="78"
+              rx="18"
+              class="svg-box svg-output"
+            />
+            <text x="1454" y="702" class="svg-title">报告交付</text>
+            <text x="1454" y="727" class="svg-sub">Markdown / HTML / PDF</text>
+
+            <rect
+              x="62"
+              y="674"
+              width="214"
+              height="78"
+              rx="18"
+              class="svg-box svg-output"
+            />
+            <text x="88" y="706" class="svg-title">报告沉淀</text>
+            <text x="88" y="731" class="svg-sub">进入同靶点历史底座</text>
+
+            <path d="M218 108 L240 108" class="svg-arrow" />
+            <path d="M440 108 L502 108" class="svg-arrow svg-arrow-yes" />
+            <text x="456" y="96" class="svg-note">命中</text>
+            <path
+              d="M340 152 L340 250 L502 250"
+              class="svg-arrow svg-arrow-no"
+            />
+            <text x="354" y="236" class="svg-note">未命中</text>
+            <path d="M712 108 L748 108 L748 264 L782 264" class="svg-arrow" />
+            <path d="M712 250 L782 250" class="svg-arrow" />
+            <path d="M1010 279 L1040 279" class="svg-arrow" />
+            <path d="M1252 279 L1304 279" class="svg-arrow svg-arrow-no" />
+            <text x="1268" y="266" class="svg-note">否</text>
+            <path
+              d="M1146 336 L1146 384 L180 384 L180 454"
+              class="svg-arrow svg-arrow-yes"
+            />
+            <text x="1164" y="374" class="svg-note">是：进入写作主线</text>
+            <path d="M276 495 L344 495" class="svg-arrow" />
+            <path d="M518 495 L586 495" class="svg-arrow" />
+            <path d="M760 495 L860 495" class="svg-arrow" />
+            <path d="M976 496 L1004 496" class="svg-arrow" />
+            <path
+              d="M1062 520 C1062 570 918 570 918 520"
+              class="svg-arrow-loop"
+            />
+            <path d="M1152 496 L1210 496" class="svg-arrow" />
+            <path d="M1315 536 L1315 678" class="svg-arrow" />
+            <path d="M1388 710 L1430 710" class="svg-arrow" />
+            <path
+              d="M1430 742 L1430 790 L276 790 L276 714"
+              class="svg-arrow svg-arrow-yes"
+            />
+            <text x="940" y="810" class="svg-note">
+              交付后沉淀为下一次生成的历史资产
+            </text>
+            <path
+              d="M62 714 L6 714 L6 8 L607 8 L607 54"
+              class="svg-arrow-loop"
+            />
+
+            <rect
+              x="62"
+              y="74"
+              width="156"
+              height="68"
+              rx="15"
+              class="svg-hotspot"
+              data-prompt-key="input"
+            />
+            <polygon
+              points="340,64 440,108 340,152 240,108"
+              class="svg-hotspot"
+              data-prompt-key="history"
+            />
+            <rect
+              x="502"
+              y="54"
+              width="210"
+              height="108"
+              rx="18"
+              class="svg-hotspot"
+              data-prompt-key="history"
+            />
+            <rect
+              x="502"
+              y="204"
+              width="210"
+              height="92"
+              rx="18"
+              class="svg-hotspot"
+              data-prompt-key="retrieval"
+            />
+            <rect
+              x="782"
+              y="232"
+              width="228"
+              height="94"
+              rx="18"
+              class="svg-hotspot"
+              data-prompt-key="ai-recommendation"
+            />
+            <polygon
+              points="1146,222 1252,279 1146,336 1040,279"
+              class="svg-hotspot"
+              data-prompt-key="score-threshold"
+            />
+            <rect
+              x="1304"
+              y="236"
+              width="188"
+              height="86"
+              rx="17"
+              class="svg-hotspot"
+              data-prompt-key="risk-gap"
+            />
+            <rect
+              x="84"
+              y="454"
+              width="192"
+              height="82"
+              rx="18"
+              class="svg-hotspot"
+              data-prompt-key="outline-decision"
+            />
+            <rect
+              x="344"
+              y="454"
+              width="174"
+              height="82"
+              rx="18"
+              class="svg-hotspot"
+              data-prompt-key="slide-strategy"
+            />
+            <rect
+              x="586"
+              y="454"
+              width="174"
+              height="82"
+              rx="18"
+              class="svg-hotspot"
+              data-prompt-key="body-writing"
+            />
+            <rect
+              x="860"
+              y="472"
+              width="116"
+              height="48"
+              rx="12"
+              class="svg-hotspot"
+              data-prompt-key="review-loop"
+            />
+            <rect
+              x="1004"
+              y="472"
+              width="116"
+              height="48"
+              rx="12"
+              class="svg-hotspot"
+              data-prompt-key="rewrite"
+            />
+            <rect
+              x="1210"
+              y="436"
+              width="210"
+              height="100"
+              rx="18"
+              class="svg-hotspot"
+              data-prompt-key="chapter-global-review"
+            />
+            <rect
+              x="1210"
+              y="678"
+              width="178"
+              height="62"
+              rx="16"
+              class="svg-hotspot"
+              data-prompt-key="style-polish"
+            />
+            <rect
+              x="1430"
+              y="670"
+              width="178"
+              height="78"
+              rx="18"
+              class="svg-hotspot"
+              data-prompt-key="delivery"
+            />
+            <rect
+              x="62"
+              y="674"
+              width="214"
+              height="78"
+              rx="18"
+              class="svg-hotspot"
+              data-prompt-key="history"
+            />
+          </svg>
+        </div>
+        <div class="prompt-detail" id="prompt-detail" aria-live="polite">
+          <div class="prompt-detail-header">
+            <div>
+              <h3 class="prompt-detail-title" id="prompt-detail-title">
+                点击流程块查看对应 Prompt
+              </h3>
+              <p class="prompt-detail-desc" id="prompt-detail-desc">
+                支持上方主流程卡片和端到端 SVG 流程图。没有 LLM
+                调用的节点会展示对应的无 prompt 说明。
+              </p>
+            </div>
+            <div class="tag-row" id="prompt-detail-tags"></div>
+          </div>
+          <div class="prompt-empty" id="prompt-empty">请选择一个流程块。</div>
+          <div class="prompt-list" id="prompt-list"></div>
+        </div>
+        <div class="loop-panel">
+          <div class="loop-title">写作质量闭环（每个 slide 最多 3 轮）</div>
+          <div class="loop-chain">
+            <div class="loop-card">
+              <h3>1. 写作</h3>
+              <p>
+                P8 生成当前 slide 正文，必须使用选中证据、全局引用编号和 slide
+                writing strategy。
+              </p>
+            </div>
+            <div class="loop-arrow">→</div>
+            <div class="loop-card">
+              <h3>2. 审阅</h3>
+              <p>
+                P9 Review 分层检查图片、section、chapter 和 global 质量，输出
+                summary / decision / issues，并把 evidence_gap 转成后续定向补证。
+              </p>
+            </div>
+            <div class="loop-arrow">→</div>
+            <div class="loop-card">
+              <h3>3. 重写</h3>
+              <p>
+                P10 Rewrite 只按审稿意见改写当前 slide
+                或局部内容，不新增无来源事实，不跨章节扩写。
+              </p>
+            </div>
+            <div class="loop-arrow">↺</div>
+            <div class="loop-card">
+              <h3>最多 3 轮</h3>
+              <p>
+                若 P9 Section Review 通过则进入下一页；若 3
+                轮后仍有问题，保留最佳版本并交给 P9 Chapter / Global Review
+                兜底。
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+    <script type="application/octet-stream" id="prompt-step-data" data-encoding="base64">
+eyIxIjp7Im51bWJlciI6MSwidGl0bGUiOiLku7vliqHliJ3lp4vljJbkuI7mqKHlnZflubblj5HmiafooYwiLCJib2R5Ijoi5pegIExMTSBwcm9tcHTjgILlkI7nq6/liJvlu7rku7vliqHlkI7lubblj5HmiafooYwgYmlvbG9neeOAgWRpc2Vhc2XjgIFjb21wZXRpdGlvbuOAgXByZWNsaW5pY2Fs44CBY2xpbmljYWzvvIxpbnNpZ2h0cyDlnKjmoLjlv4PmqKHlnZflkI7miafooYzjgIIifSwiMiI6eyJudW1iZXIiOjIsInRpdGxlIjoi5o6o6I2Q6YCC5bqU55eH6YCJ5oupIiwiYm9keSI6Iuadpea6kO+8mmByZXNvbHZlMjRSZWNvbW1lbmRlZEluZGljYXRpb25zKClg44CC5b2T5YmN55yf5a6e6YC76L6R5piv5Zyo5bey5Y6L57yp55qEIGFjdGl2ZSBjbGluaWNhbCAvIG1hcmtldGVkIFRvcDUwIOWAmemAieaxoOS4remAieaLqeWQjue7reimgemHjeeCueWxleW8gOeahCBUb3AgMi0xMCDkuKrpgILlupTnl4fjgIJcblxuIyMjIFN5c3RlbVxuXG5gYGB0ZXh0XG7kvaDotJ/otKPkuLrpnbbngrnosIPnoJTmiqXlkYrpgInmi6nlkI7nu63opoHph43ngrnlsZXlvIDnmoQgVG9wIDIg5YiwIDEwIOS4qumHjeimgemAguW6lOeXh+OAglxuXG7noazmgKfopoHmsYLvvJpcbjEuIOWPquiDveS7juaPkOS+m+eahOWAmemAieaxoOS4remAieaLqe+8jOS4jeiDveWHreepuuWPkeaYjuaWsOmAguW6lOeXh+OAglxuMi4g6ZyA6KaB57u85ZCI5YiG5p6Q5bm25o6S5bqP77ya6Z2254K5LeeWvueXheeUn+eJqeWtpuebuOWFs+aAp+OAgeWkseiwgy9Mb0YtR29GIOivgeaNruOAgeeWvueXheacuuWItuS4juW9k+WJjeayu+eWl+W5sumihOaWueWQkeaYr+WQpuWMuemFjeOAgeeuoee6v+a0u+i3g+W6puOAgeS4tOW6iuW8gOWPkeS7t+WAvOWSjOacqua7oei2s+mcgOaxguOAglxuMy4g5b+F6aG75o6S6Zmk6L+H5rOb55qE5LiK5L2N5qCH562+77yM5L6L5aaCIENhbmNlcuOAgXNvbGlkIHR1bW9y44CBdW5zcGVjaWZpZWTjgIF2aXJhbCBpbmZlY3Rpb27jgIFhdXRvaW1tdW5lIGRpc2Vhc2Ug6L+Z57G777yb5aaC5p6c5a2Y5Zyo5pu05YW35L2T55qE5LqM57qn6YCC5bqU55eH77yM5b+F6aG75LyY5YWI6YCJ5pu05YW35L2T55qE44CCXG40LiDmnIDnu4jmoIfnrb7lv4XpobvotrPlpJ/lhbfkvZPvvIzog73lpJ/nm7TmjqXkvZzkuLrlkI7nu63mjInpgILlupTnl4flsZXlvIDnmoQgc2xpZGUg5qCH6aKY44CCXG41LiDlpoLmnpzmn5Dnlr7nl4XkuI7pnbbngrnlvLrnm7jlhbPjgIHkvYbmsrvnlpfmlrnlkJHkuI3ljLnphY3vvIjkvovlpoIgTG9GIOe7vOWQiOW+geWNtOWPquaciemdtueCueaKkeWItuWJgueuoee6v++8ie+8jOW6lOmZjeadg++8jOaUvuWcqOeWvueXheeUn+eJqeWtpuaIluWuieWFqOaAp+iuqOiuuuS4re+8jOiAjOS4jeaYr+S9nOS4uuW8gOWPkemAguW6lOeXh+mHjeeCueWxleW8gOOAglxuNi4g5LiK5ri45YCZ6YCJ5rGg5bey57uP57uf5LiA6ZmQ5Yi25Li6IGFjdGl2ZSBjbGluaWNhbCDmiJblt7LkuIrluILkuJTku43lnKjlvIDlj5HnmoTnrqHnur/jgIJzZWxlY3Rpb25CcmllZiDmmK/kuIrmuLjnrZvpgIkgdG9vbCDnmoTkuJPlrrbnuqfljovnvKnovpPlh7rvvIzkvaDpnIDopoHkvJjlhYjln7rkuo7lhbbkuK3nmoTnlr7nl4UtTW9BLei1hOS6py3kuLTluorpmLbmrrUt5Li05bqK5YmN6K+B5o2u55+p6Zi15YGa57u85ZCI5Yik5pat44CCXG43LiDlsL3ph4/ov5Tlm54gMiDliLAgMTAg5Liq6YCC5bqU55eH44CC6K+B5o2u5by655qE6YCC5bqU55eH6L6D5bCR5pe25Y+v5Lul5bCR6YCJ77yb5aaC5p6c5aSa5Liq6YCC5bqU55eH6YO95pyJ5oiY55Wl6YeN6KaB5oCn5LiU6K+B5o2u5YWF5YiG77yM5pyA5aSa5Y+v5L+d55WZIDEwIOS4quOAglxuOC4g6L+U5Zue55qEIGxhYmVsIOmcgOimgeeUseS9oOWfuuS6jueUn+eJqeWMu+WtpuWRveWQjeS5oOaDr+mHjeaWsOinhOiMg+WMlu+8jOiAjOS4jeaYr+WOn+agt+WkjeWItuaVsOaNruW6k+WAmemAieWQjeensOOAgmtleSDlv4Xpobvkv53mjIHlgJnpgInmsaDkuK3nmoQga2V577ybbGFiZWwg6KaB5pS55YaZ5oiQ5bi46KeE5Li05bqK6YCC5bqU55eH5ZCN56ew77yM5aSE55CG5YCS6KOF5ZCN44CB57yp5YaZ44CB5ZCM5LmJ6K+N44CB5aSN5pWw44CB5LiK5L2N5qG25qCH562+44CBb250b2xvZ3kg6aOO5qC85ZCN56ew562J5ZCE56eN5LiN6KeE6IyD5ZG95ZCN44CCXG45LiByYXRpb25hbGUg5ZKMIGV2aWRlbmNlQ292ZXJhZ2Ug6YO95L+d5oyB5LiA5Y+l6K+d77yM6YG/5YWN6ZW/6Kej6YeK44CCXG4xMC4g5Y+q6L+U5ZueIEpTT07vvIzmoLzlvI/lpoLkuIvvvJpcbntcInNlbGVjdGVkXCI6W3tcImtleVwiOlwiY2FuZGlkYXRlLWtleVwiLFwibGFiZWxcIjpcIuinhOiMg+mAguW6lOeXh+WQjeensFwiLFwicmF0aW9uYWxlXCI6XCLlhaXpgInljp/lm6BcIixcImV2aWRlbmNlQ292ZXJhZ2VcIjpcIuivgeaNruimhuebluaRmOimgVwifV19XG5gYGBcblxuIyMjIFVzZXJcblxuYGBgdGV4dFxu55uu5qCH6Z2254K577yae3t0YXJnZXR9fVxu5oql5ZGK6K+t6KiA77yae3tsYW5ndWFnZX19XG5cbuWAmemAiemAguW6lOeXh+axoO+8iOS7hSBhY3RpdmUgY2xpbmljYWwv5bey5LiK5biC5LiU5LuN5Zyo5byA5Y+R566h57q/77yM5Y6L57ypIFRvcDUw77yJ77yaXG57e2NhbmRpZGF0ZVBheWxvYWRKc29ufX1cblxu5LiT5a6257qn562b6YCJIGJyaWVm77yaXG57e3NlbGVjdGlvbkJyaWVmSnNvbn19XG5gYGAifSwiMyI6eyJudW1iZXIiOjMsInRpdGxlIjoiTW9BIFRyaWFnZSIsImJvZHkiOiLmnaXmupDvvJpgZ2V0T3JDcmVhdGVUZW1wbGF0ZU1vYVRyaWFnZURlY2lzaW9uKClgXG5cbiMjIyBTeXN0ZW1cblxuYGBgdGV4dFxu5L2g6LSf6LSj5Li66Z2254K56LCD56CU5oql5ZGK5Yik5patIE1vQSDliIbnu4TjgIJcblxu5L2g55qE5Lu75Yqh5piv5YGa5oiY55Wl5YiG57uE77yM6ICM5LiN5piv6L+H5bqm5Y676YeN44CC5Y+q6KaB5LiN5ZCMIE1vQSDmoIfnrb7ku6PooajkuI3lkIzlvIDlj5HnrZbnlaXjgIHpnbbngrnlpI3lkIjniankvp3otZbjgIHpgInmi6nmgKfpo47pmanmiJbmqKHmgIHlt67lvILvvIzmiqXlkYrlsLHpnIDopoHkv53nlZnkuLrkuI3lkIznmoTph43lpI3nq6DoioLjgIJcblxu6KeE5YiZ77yaXG4xLiDovpPlhaXljIXlkKvnq57kuonmoLzlsYAgQUkg5o6o6I2Q55qEIGFjdGl2ZSBjbGluaWNhbCAvIOW3suS4iuW4gueuoee6v++8jOS7peWPiueUseaOqOiNkOS4tOW6iuWJjei1hOS6p+aYoOWwhOWbnuadpeeahOernuS6ieagvOWxgOihjO+8m+S4tOW6iuWJjeaYoOWwhOi1hOS6p+WPr+iDveaYryBjZWFzZWTvvIzkvYbku43pnIDopoHkv53nlZnlhbYgTW9BIOivgeaNrueUqOS6juS4tOW6iuWJjei3r+eUseOAglxuMi4gY29yZU1vYXMg6KGo56S66YeN6KaB44CB6Z2254K555u45YWz44CB5YC85b6X5ZyoIDMuNSDns7vliJflsZXlvIDnmoQgTW9B44CCXG4zLiBuZXdNb2FzIOihqOekuuecn+ato+WFt+acieaWsOacuuWItuaIluaWsOaooeaAgeW3ruW8guOAgeW6lOi/m+WFpSAzLjYg55qEIE1vQSAvIG1vZGFsaXR544CCXG40LiDlj6rlkIjlubbnnJ/mraPlkIzkuYnor43miJbnuq/moLzlvI/lt67lvILvvIzkuI3opoHku4Xlm6DkuLrlhbHkuqvlkIzkuIDkuKrpnbbngrnlrrbml4/lsLHlkIjlubbjgIJcbjUuIHNlbGVjdGlvbkJyaWVmIOaYr+S4iua4uOetm+mAiSB0b29sIOeahOS4k+Wutue6p+WOi+e8qei+k+WHuu+8jOS9oOmcgOimgeS8mOWFiOWfuuS6juWFtuS4reeahCBNb0Eg6L2044CB55a+55eF6L2044CBYWN0aXZlIGNsaW5pY2FsIOeuoee6v+aVsOmHj+OAgeS4tOW6iuWJjeivgeaNruWSjOeWvueXhS1Nb0Eg55+p6Zi15YGa5Yik5pat44CCXG42LiDlpoLmnpzovpPlhaXmlK/mjIHkuI3lkIzlubLpooTnrZbnlaXvvIznnJ/mraPmnLrliLbmiJbmqKHmgIHkuI3lkIznmoTnsbvliKvlv4Xpobvkv53nlZnjgIJcbjcuIOi/lOWbnueahCBhc3NldHMg5pWw57uE5Y+q6IO95L2/55So6L6T5YWl5Lit55qEIGFzc2V0TmFtZe+8jOS4jeiDveiZmuaehOi1hOS6p++8m01vQSDlkI3np7Dlj6/ku6UgY2Fub25pY2FsIOWMlu+8jOS9huW/hemhu+iDveeUsei+k+WFpeagh+etvuaUr+aSkeOAglxuOC4g5o6S6ZmkIG90aGVyIC8gdW5rbm93biAvIHVuY2xlYXIg562J5L2O5L+h5oGv5qCH562+77yb6Zmk6Z2e56Gu5a6e5Luj6KGo5paw5qih5oCB77yM5ZCm5YiZ5LiN6KaB5oqK5rOb5rOb55qEIG1vZGFsaXR5IOW9k+S9nCBNb0HjgIJcbjkuIOWQjOS4gOS4qui1hOS6p+acgOWkmuWPquiDveWHuueOsOWcqCBjb3JlTW9hcyDmiJYgbmV3TW9hcyDnmoTkuIDkuKrliIbnu4TkuK3jgIJcbjEwLiDlvZMgc2VsZWN0aW9uQW5hbHlzaXMg5Lit5a2Y5ZyoIDIg5Liq5Y+K5Lul5LiK5pyJ6K+B5o2u5pSv5oyB55qEIE1vQSDovbTml7bvvIxjb3JlTW9hcyDkuI4gbmV3TW9hcyDlkIjorqHlv4XpobvlsL3ph4/ov5Tlm54gMiDliLAgMTAg5Liq5YiG57uE44CC5Y+q5pyJ5YW25LuW6L205YWo5piv5rOb5YyW44CB56a76Z225Zmq5aOw5oiW57y65bCR5Y+v55So566h57q/5pSv5oyB5pe277yM5omN5YWB6K645Y+q6L+U5ZueIDEg5Liq44CCXG4xMS4g5LyY5YWI5L2/55So5YW35L2T5py65Yi25qCH562+6ICM5LiN5piv5a695rOb57G75Yir44CC5a+55LqOIGtpbmFzZSDpnbbngrnvvIzlj6ropoHmnInni6znq4vnrqHnur/mlK/mjIHvvIzpnbbngrnjgIHkuprlnovjgIFjeWNsaW4g5aSN5ZCI54mp44CB6YCJ5oup5oCn5ZKM5qih5oCB5beu5byC6YO95bqU5YiG5byA5L+d55WZ44CCXG4xMi4gZGVncmFkZXIgLyBQUk9UQUMgLyBtb2xlY3VsYXIgZ2x1ZSAvIEFEQyAvIFJOQSB0aGVyYXB5IC8gY2VsbCB0aGVyYXB5IOetieaWsOaooeaAgeWPquimgeacieeuoee6v+aUr+aMge+8jOmAmuW4uOW6lOWSjOWwj+WIhuWtkCBpbmhpYml0b3Ig5YiG5byA44CCXG4xMy4g5L2/55SoIHNlbGVjdGlvbkJyaWVmLm1vYUF4ZXMg5ZKMIG1hdHJpeCDmgaLlpI3ph43opoHovbTvvIzljbPkvb/lgJnpgIkgbW9hTGFiZWwg5a2X56ym5Liy5a2Y5Zyo6L+R5LmJ6KGo6L6+77yM5Lmf5bqU5oyJIGFjdGl2ZSBwaXBlbGluZSDmlbDph4/jgIHnlr7nl4Xopobnm5bjgIFyZWNvbW1lbmRhdGlvblNjb3JlIOWSjOaooeaAgeW3ruW8gumAieaLqeacgOW8uueahOW3ruW8guWMliBNb0Eg6L2044CCXG4xNC4g5Y+q6L+U5ZueIEpTT07vvJp7XCJjb3JlTW9hc1wiOlt7XCJtb2FMYWJlbFwiOlwiXCIsXCJhc3NldHNcIjpbXCJcIl19XSxcIm5ld01vYXNcIjpbe1wibW9hTGFiZWxcIjpcIlwiLFwiYXNzZXRzXCI6W1wiXCJdfV19XG5gYGBcblxuIyMjIFVzZXJcblxuYGBgdGV4dFxu55uu5qCH6Z2254K577yae3t0YXJnZXR9fVxuQWN0aXZlIGNsaW5pY2FsIOWAmemAieeuoee6v++8mlxue3ttb2FDYW5kaWRhdGVQYXlsb2FkSnNvbn19XG5cbuS4k+Wutue6p+etm+mAiSBicmllZu+8mlxue3tzZWxlY3Rpb25CcmllZkpzb259fVxuYGBgIn0sIjQiOnsibnVtYmVyIjo0LCJ0aXRsZSI6Iuaooeadv+WMluWkp+e6sueUn+aIkCIsImJvZHkiOiLmnaXmupDvvJpgYnVpbGRNb2R1bGVUZW1wbGF0ZU91dGxpbmUoKWAgLyBgZ2VuZXJhdGVUZW1wbGF0ZU91dGxpbmVCdWxsZXRQb2ludHMoKWDvvIzpu5jorqTmqKHmnb/niYjmnKwgYG1ldGFzdGFyX3YyMDI1YOOAglxuXG7lvZPliY3mqKHmnb/plIHlrprot6/lvoTkvb/nlKggYHJlcG9ydC10ZW1wbGF0ZS50c2Ag5Lit55qEIGBtZXRhc3Rhcl92MjAyNWAg5qih5p2/6IqC54K555Sf5oiQ5Zu65a6a56ug6IqC57uT5p6E44CBcmVwZWF0IHNsaWRlIGJsdWVwcmludCDkuI7nq6DoioLpobrluo/jgIJMTE0gKirkuI3oh6rnlLHnlJ/miJDnq6DoioLmoIfpopjmiJbph43mjpLnu5PmnoQqKu+8jOS9huS8mumAmui/hyBgZ2VuZXJhdGVUZW1wbGF0ZU91dGxpbmVCdWxsZXRQb2ludHMoKWAg5Li65Zu65a6a5qih5p2/IHNsaWRlIOeUn+aIkOKAnOWKqOaAgeivgeaNruihpeWFhSBidWxsZXTigJ3jgILmnIDnu4ggb3V0bGluZSDnlLHku6PnoIHlsIbmqKHmnb/ljp/lp4sgcG9pbnQg5LiOIExMTSDnlJ/miJDnmoQgYFtIbl1gIOihpeWFheWQiOW5tuW+l+WIsOOAglxuXG4jIyMgU3lzdGVtXG5cbmBgYHRleHRcbuS9oOato+WcqOS4uumdtueCueiwg+eglOaKpeWRiueUn+aIkOKAnOaooeadv+mUgeWumuaooeW8j+KAneeahOWKqOaAgeWkp+e6siBidWxsZXTjgIJcblxue3tsZWdhY3lNb2R1bGVHdWlkYW5jZX19XG5cbnt7dGFyZ2V0SWRlbnRpdHlHdWFyZH19XG5cbnt7b3V0bGluZVByZXNlbnRhdGlvblN0eWxlR3VpZGFuY2V9fVxuXG57e2N1c3RvbWVyUHB0T3V0bGluZUNoZWNrbGlzdH19XG5cbnt7b3V0bGluZUV2aWRlbmNlRXh0cmFjdGlvbkd1aWRhbmNlfX1cblxue3tjdXN0b21lclBwdEZld1Nob3RHdWlkYW5jZX19XG5cbuinhOWIme+8mlxuMS4g56ug6IqC5qCH6aKY5Zyo5aSW6YOo5Zu65a6a77yM5L2g5Y+q5Li65Zu65a6a5qih5p2/IGJ1bGxldFBvaW50cyDnlJ/miJDor4Hmja7ooaXlhYXjgIJcbjIuIOavj+S4qiBzbGlkZSDlrp7kvovnmoTmqKHmnb/kuLvpopjngrnpg73lv4Xpobvoh7PlsJHooqvopobnm5bkuIDmrKHvvIzkuJTmlbTkvZPpobrluo/lv4XpobvkuI4gdGVtcGxhdGVIaW50cyDkv53mjIHkuIDoh7TvvIzkuI3og73pgZfmvI/jgIJcbjMuIOWmguaenOafkOS4quaooeadv+S4u+mimOeCueWcqOivgeaNruWxgumdouiHqueEtuWMheWQq+S4pOS4queLrOeri+WtkOeCue+8jOWPr+S7peaLhuaIkOacgOWkmiAyIOadoeihpeWFhe+8jOS9hui/meS4pOadoemDveW/hemhu+S4peagvOiQveWcqOivpeS4u+mimOeCueiMg+WbtOWGheOAglxuNC4g6KaB54K55b+F6aG75Z+65LqO5o+Q5L6b55qE6K+B5o2u5LiO5o6o6I2Q5pGY6KaB77yM5LiN6IO95Yet56m65omp5YaZ44CCXG41LiDkuI3lhYHorrjlhpnlh7rmqKHmnb/kuLvpopjngrnojIPlm7TkuYvlpJbnmoTlhoXlrrnvvIzkuI3lhYHorrjmiorkuKTkuKrmqKHmnb/kuLvpopjngrnlkIjlubbmiJDkuIDmnaHvvIzkuZ/kuI3lhYHorrjotoXov4cgbWF4QnVsbGV0Q291bnTjgIJcbjYuIOavj+adoeihpeWFhemDveW/hemhu+eUqOWFtuadpea6kOaooeadv+eCuee8luWPt+WJjee8gOagh+iusO+8jOagvOW8j+S4peagvOS4uiBbSDFd44CBW0gyXSDov5nnsbvlvaLlvI/vvIzkvovlpoIgXCJbSDFdIEtBVDZBIOS4jiBLQVQ2QiDlkIzmupDmgKfmnIDpq5hcIuOAglxuNy4gYnVsbGV0IOmhuuW6j+W/hemhu+aMieaooeadv+eCuee8luWPt+mdnumAkuWHj+aOkuWIl++8jOWNs+aJgOaciSBbSDFdIOW/hemhu+WHuueOsOWcqCBbSDJdIOS5i+WJje+8jOS+neasoeexu+aOqOOAglxuOC4g6YG15b6q5pei5a6a6LSo6YeP5qCH5YeG77ya5YW35L2T44CB5pWw5o2u6amx5Yqo44CB6L6555WM5riF5pmw44CB5L+h5oGv5a+G5bqm6auY77yM6YG/5YWN4oCc6YeN6KaB4oCd4oCc5YC85b6X5YWz5rOo4oCd4oCc5YW35pyJ5r2c5Yqb4oCd6L+Z57G75rKh5pyJ6K+B5o2u5pSv5pKR55qE56m65rOb6KGo6L+w44CCXG45LiDlj6ropoHor4Hmja7mlK/mjIHvvIzkvJjlhYjlhpnlrprph4/kv6Hmga/jgIHlhbflkI3pgJrot68v5qih5Z6LL+WFrOWPuC/or5XpqozvvIzku6Xlj4rlr7nlhrPnrZbnnJ/mraPmnInnlKjnmoTliKTmlq3op5LluqbjgIJcbjEwLiDnm7jpgrsgdGVtcGxhdGVOb2RlIOS5i+mXtOS4jeimgeaYjuaYvumHjeWkje+8m+WmguaenOafkOadoeS6i+WunuacrOi0qOS4iuWxnuS6juWIq+eahOiKgueCue+8jOi/memHjOWPquS/neeVmeS4juW9k+WJjeiKgueCueebtOaOpeebuOWFs+eahOinkuW6puOAglxuMTEuIHRlbXBsYXRlSGludHMg5ZKMIG5vZGVHdWlkYW5jZSDpg73mmK/noazovrnnlYzvvJvnpoHmraLmlLnlhpnjgIHnv7vor5HjgIHph43mjpLmiJblkIzkuYnmm7/mjaIgdGVtcGxhdGVIaW50c+OAguezu+e7n+S8muS/neeVmeWOn+Wni+aooeadvyBwb2ludO+8jOW5tuaKiuS9oOeahOihpeWFhei/veWKoOWIsCBwb2ludCDlkI7jgIJcbjEyLiDlj6rov5Tlm54gSlNPTu+8mntcInNlY3Rpb25zXCI6W3tcInNsaWRlSWRcIjpcInRlbXBsYXRlOjEuMVwiLFwidGVtcGxhdGVOb2RlSWRcIjpcIjEuMVwiLFwiYnVsbGV0UG9pbnRzXCI6W1wiW0gxXSAuLi5cIixcIltIMl0gLi4uXCJdfV19XG4xMy4g5q+P5p2h6KGl5YWF5b+F6aG75piv6YCC5ZCI5aSn57qy5bGV56S655qE55+t5Y+l77yM5LiN6KaB5YaZ5oiQ6ZW/5q615q2j5paH44CCXG4xNC4g56aB5q2i6L6T5Ye65Lu75L2V5YaF6YOo5YWD5L+h5oGv5oiW5Y2g5L2N56ym77yM5L6L5aaCIFtbVEFSR0VUXV3jgIFbW0FTU0VUX0FdXeOAgXByb21wdOOAgXN0eWxlIHJlZmVyZW5jZSDnrYnlrZfmoLfjgIJcbjE1LiDovpPlh7ror63oqIDlj6rog73mmK/kuK3mlofvvIznpoHmraLovpPlh7rlrozmlbToi7Hmloflj6XlrZDmiJboi7HmlofmrrXokL3vvJvkuJPmnInlkI3or43jgIHln7rlm6Av6I2v54mp5ZCN44CB6K+V6aqM57yW5Y+35ZKM5qCH5YeG57yp5YaZ6Zmk5aSW44CCXG5gYGBcblxuIyMjIFVzZXJcblxuYGBgdGV4dFxu6Z2254K577yae3t0YXJnZXR9fVxu5qih5Z2X77yae3ttb2R1bGVJZH19XG7lvZPliY3lt7LpgInor4Hmja7mlbDvvJp7e3NlbGVjdGVkRGF0YUNvdW50fX1cbuaJueasoe+8mnt7c2NvcGVMYWJlbH19XG7lvoXnlJ/miJDoioLngrnvvJpcbnt7c2VjdGlvbnNXaXRoRXZpZGVuY2VKc29ufX1cbmBgYFxuXG4jIyMgQ2h1bmsgTWVyZ2UgVXNlclxuXG5gYGB0ZXh0XG7or7flsIbku6XkuIvliIbmibnnlJ/miJDnmoTmqKHmnb/lpKfnurIgSlNPTiDlkIjlubbkuLrkuIDkuKrlkIjms5UgSlNPTiDlr7nosaHjgIJcblxu6KeE5YiZ77yaXG4xLiDlj6rovpPlh7ogSlNPTu+8jOe7k+aehOW/hemhu+aYryB7XCJzZWN0aW9uc1wiOlsuLi5dfeOAglxuMi4g5L+d55WZ5q+P5LiqIHNlY3Rpb24g55qEIHNsaWRlSWTjgIF0ZW1wbGF0ZU5vZGVJZCDlkowgYnVsbGV0UG9pbnRz77yb6Zmk6Z2eIHNsaWRlSWQg6YeN5aSN77yM5LiN6KaB5pS55YaZ5YaF5a6544CCXG4zLiDlpoLmnpwgc2xpZGVJZCDph43lpI3vvIzkv53nlZnnrKzkuIDkuKrlrozmlbQgc2VjdGlvbuOAglxuNC4g5LiN6KaB6L6T5Ye66Kej6YeK5paH5a2X5oiWIE1hcmtkb3duIOS7o+eggeWdl+OAglxuXG57e3BhcnRpYWxUZW1wbGF0ZU91dGxpbmVKc29uUmVzdWx0c319XG5gYGBcblxuIyMjIEdlbWluaSBHcm91bmRpbmcgRmFsbGJhY2sgVXNlclxuXG7mnaXmupDvvJpgYnVpbGRHZW1pbmlUZW1wbGF0ZVNsaWRlQnVsbGV0UHJvbXB0KClg44CC5b2T5YaF6YOo6K+B5o2u5LiN6Laz5pe277yM5Luj56CB5Lya5L2/55SoIEdlbWluaSBHb29nbGUgU2VhcmNoIGdyb3VuZGluZyDkuLrlm7rlrprmqKHmnb8gYnVsbGV0IOihpeivgeOAglxuXG5gYGB0ZXh0XG7lvZPlhoXpg6jor4Hmja7kuI3otrPml7bvvIzor7fkvb/nlKggR29vZ2xlIFNlYXJjaCBncm91bmRpbmcg6KGl5YWF5YWs5byA6K+B5o2u77yM54S25ZCO5Li66Z2254K56LCD56CU5oql5ZGK55qE5Zu65a6a5qih5p2/IGJ1bGxldFBvaW50cyDnlJ/miJDnroDnn63or4Hmja7ooaXlhYXjgIJcbuWPqui/lOWbnuWQiOazlSBKU09O77yae1wiYnVsbGV0UG9pbnRzXCI6W1wiW0gxXSAuLi5cIixcIltIMl0gLi4uXCJdfVxuXG5UYXJnZXQ6IHt7dGFyZ2V0fX1cbk1vZHVsZToge3ttb2R1bGVJZH19XG5TbGlkZSBJRDoge3tzbGlkZUlkfX1cblRlbXBsYXRlIG5vZGUgSUQ6IHt7dGVtcGxhdGVOb2RlSWR9fVxuRml4ZWQgc2xpZGUgdGl0bGU6IHt7c2xpZGVUaXRsZX19XG5cbuaooeadv+Wwj+agh+mimCAvIOS4u+mimOi+ueeVjOOAguW/hemhu+aMiemhuuW6j+imhuebluavj+S4gOS4quWwj+agh+mimO+8jOS4lOavj+adoeingueCueWPquiDveWGmeWvueW6lOWwj+agh+mimOiMg+WbtOWGheeahOWGheWuue+8mlxue3t0ZW1wbGF0ZUhpbnRzV2l0aEhJbmRleH19XG5cbuiKgueCuei+ueeVjOivtOaYju+8mlxue3tub2RlR3VpZGFuY2V9fVxuXG7op4LngrnmlbDph4/vvJrmnIDlsJEge3ttaW5CdWxsZXRDb3VudH19IOadoe+8jOacgOWkmiB7e21heEJ1bGxldENvdW50fX0g5p2h44CC6buY6K6k5q+P5Liq5qih5p2/5bCP5qCH6aKY5YaZIDEg5p2h6KeC54K577yb5Y+q5pyJ6K+B5o2u56Gu5a6e5pSv5oyB5pe277yM5omN5YWB6K645p+Q5Liq5bCP5qCH6aKY5ouG5oiQIDIg5p2h44CCXG7kuI3opoHmlLnlhpnjgIHnv7vor5HmiJbovpPlh7rmlrDnmoQgc2xpZGUg5qCH6aKY77yb5LiN6KaB5pS55YaZ5qih5p2/5bCP5qCH6aKY44CC5Y+q6L+U5Zue5bqU6L+95Yqg5Zyo5q+P5Liq5Zu65a6a5qih5p2/IHBvaW50IOWQjumdoueahOihpeWFheWGheWuueOAglxu5q+P5p2h6KeC54K55b+F6aG75LulIFtIMV3jgIFbSDJdIOetieWJjee8gOW8gOWktO+8jOmhuuW6j+W/hemhu+aMieWwj+agh+mimOe8luWPt+mAkuWinuaIluS/neaMgeS4jeWPmOOAglxu5LyY5YWI5L2/55So5YW35L2T6K+B5o2u44CB5a6a6YeP5pWw5o2u44CB5YW35ZCN6YCa6LevL+aooeWeiy/or5Xpqowv5YWs5Y+444CC5YaF6YOo6K+B5o2u5LiN6Laz5pe255SoIEdvb2dsZSBTZWFyY2ggZ3JvdW5kaW5nIOihpeWFhe+8jOS9huS4jeimgeW8leeUqOW+ruS/oeWFrOS8l+WPty/lhazkvJflj7fmnaXmupDjgIJcbmJ1bGxldFBvaW50cyDkuK3kuI3opoHovpPlh7rljp/lp4sgVVJM44CB5p2l5rqQ5YiX6KGo44CBTWFya2Rvd24g6ZO+5o6l5oiW5Y+C6ICD5paH54yu5YiX6KGo44CCXG5cbuWGhemDqOivgeaNru+8mlxue3tpbnRlcm5hbEV2aWRlbmNlSnNvbn19XG5cbuaOqOiNkOmAguW6lOeXh++8mlxue3tyZWNvbW1lbmRlZEluZGljYXRpb25zSnNvbn19XG5cbumAguW6lOeXh+WAmemAie+8mlxue3tpbmRpY2F0aW9uQ2FuZGlkYXRlc0pzb259fVxuYGBgIn0sIjUiOnsibnVtYmVyIjo1LCJ0aXRsZSI6IkxlZ2FjeSDmqKHlnZflpKfnurIgZmFsbGJhY2siLCJib2R5Ijoi5p2l5rqQ77yaYGdlbmVyYXRlT3V0bGluZVdpdGhMTE0oKWDjgILku4XpnZ7mqKHmnb/ku7vliqHmiJYgZmFsbGJhY2sg5L2/55So44CCXG5cbiMjIyBTeXN0ZW1cblxuYGBgdGV4dFxu5L2g5piv5LiT5Lia55qE55Sf54mp5Yy76I2v56CU56m25oql5ZGK5aSn57qy6K6+6K6h5LiT5a6244CC6K+35qC55o2u55uu5qCH6Z2254K544CB5qih5Z2X57G75Z6L5ZKM6YCJ5Lit55qE6K+B5o2u77yM55Sf5oiQ57uT5p6E5riF5pmw44CB5Y+v55u05o6l55So5LqO5ZCO57ut5YaZ5L2c55qE5oql5ZGK5aSn57qy44CCXG5cbuimgeaxgu+8mlxuLSDovpPlh7ogSlNPTiDmlbDnu4TjgIJcbi0g5q+P5Liq5aSn57qy6aG55YyF5ZCrIHRpdGxl44CBZGVzY3JpcHRpb27jgIFrZXlQb2ludHPjgIFlc3RpbWF0ZWRMZW5ndGjjgIFkYXRhUmVxdWlyZW1lbnRz44CCXG4tIOWkp+e6suW/hemhu+WbtOe7leW9k+WJjeaooeWdl+i+ueeVjO+8jOS4jeimgei3qOaooeWdl+mHjeWkjeWGmeS9nOOAglxuLSDkvJjlhYjopobnm5bog73ooqvpgInkuK3mlbDmja7mlK/mkpHnmoTlhoXlrrnjgIJcbi0g5LiN6KaB55Sf5oiQ5rKh5pyJ5pWw5o2u5pSv5oyB55qE56m65rOb56ug6IqC44CCXG4tIOS9v+eUqOaMh+Wumui+k+WHuuivreiogOOAglxuYGBgXG5cbiMjIyBVc2VyXG5cbmBgYHRleHRcbuebruagh+mdtueCue+8mnt7dGFyZ2V0fX1cbuaooeWdl+exu+Wei++8mnt7bW9kdWxlVHlwZX19XG7ovpPlh7ror63oqIDvvJp7e2xhbmd1YWdlfX1cbueUqOaIt+ihpeWFheimgeaxgu+8mnt7dXNlckNvbW1lbnR9fVxuXG7pgInkuK3mlbDmja7mkZjopoHvvJpcbnt7c2VsZWN0ZWREYXRhU3VtbWFyeX19XG5cbuivt+eUn+aIkOivpeaooeWdl+aKpeWRiuWkp+e6siBKU09O44CCXG5gYGAifSwiNiI6eyJudW1iZXIiOjYsInRpdGxlIjoi5YaF5a656Z2254K555u45YWz5oCn562b6YCJIiwiYm9keSI6Iuadpea6kO+8mmBzY3JlZW5UYXJnZXRSZWxldmFuY2VGb3JDb250ZW50RXZhbHVhdGlvbigpYFxuXG5cblxuIyMjIFVzZXJcblxuYGBgdGV4dFxu5L2g5piv5LiA5L2N6LWE5rex55Sf54mp5Yy76I2v56CU56m25LiT5a6244CC5L2g55qE5Lu75Yqh5Y+q5pyJ5LiA5Liq77ya5Yik5pat5q+P56+H5paH54yu5piv5ZCm55yf5q2j6K6o6K6656CU56m26Z2254K5IFwie3t0YXJnZXR9fVwi44CCXG5cbuW9k+WJjeaooeWdl++8mnt7bW9kdWxlTGFiZWx9fVxuXG7liKTmlq3op4TliJnvvJpcbjEuIOebtOaOpeebuOWFs++8muaWh+eMruebtOaOpeiuqOiuuiBcInt7dGFyZ2V0fX1cIiDnmoTnu5PmnoTjgIHooajovr7jgIHlip/og73jgIHmnLrliLbjgIHnlr7nl4XlhbPogZTvvIzov5Tlm54gaXNUYXJnZXRSZWxldmFudD10cnVlXG4yLiDpl7TmjqXnm7jlhbPvvJrmlofnjK7orqjorrrnmoTnlpfms5Uv6I2v54mpL+avkue0oC/nl4Xmr5Lku6UgXCJ7e3RhcmdldH19XCIg5L2c5Li65Yqf6IO95oCn5Y+X5L2T44CB5oqX5Y6f44CB5YWl6IOe6YCa6YGT5oiW5YiG5bGC5qCH5b+X54mp77yM5Lmf6L+U5ZueIGlzVGFyZ2V0UmVsZXZhbnQ9dHJ1ZVxuMy4g5LiN55u45YWz77ya5paH54yu5a6e6ZmF6K6o6K6655qE5piv5ZCN56ew5oiW57yp5YaZ55u45Ly85L2G5LiN5ZCM55qE6Z2254K577yM6L+U5ZueIGlzVGFyZ2V0UmVsZXZhbnQ9ZmFsc2XvvIzlubblsL3ph4/lhpnlh7ogYWN0dWFsVGFyZ2V0XG40LiDkv53lrojnrZbnlaXvvJrlpoLmnpzml6Dms5Xnoa7lrprmmK/lkKbkuLror6/ljLnphY3vvIzkvJjlhYjkv53nlZnvvIzov5Tlm54gaXNUYXJnZXRSZWxldmFudD10cnVlXG41LiDmnKzpmLbmrrXkuI3opoHlgZrlrozmlbTor4TliIbvvIzkuI3opoHovpPlh7rmjqjojZDnrYnnuqdcblxu5b6F5Yik5pat5paH54yu77yaXG57e2NvbnRlbnRMaXN0fX1cblxu6K+36L6T5Ye6IEpTT07vvJpcbntcbiAgXCJldmFsdWF0aW9uc1wiOiBbXG4gICAge1xuICAgICAgXCJpbmRleFwiOiAxLFxuICAgICAgXCJwbWlkXCI6IFwieHh4XCIsXG4gICAgICBcImlzVGFyZ2V0UmVsZXZhbnRcIjogdHJ1ZSxcbiAgICAgIFwiYWN0dWFsVGFyZ2V0XCI6IFwie3t0YXJnZXR9fVwiLFxuICAgICAgXCJyZWFzb25cIjogXCLkuIDlj6Xor53or7TmmI7liKTmlq3kvp3mja5cIlxuICAgIH1cbiAgXVxufVxuXG7lj6rov5Tlm54gSlNPTu+8jOS4jeimgeWFtuS7luWGheWuueOAglxuYGBgIn0sIjciOnsibnVtYmVyIjo3LCJ0aXRsZSI6IuWGheWuuei0oeeMruW6puivhOS8sCIsImJvZHkiOiLmnaXmupDvvJpgZXZhbHVhdGVDb250ZW50Q29udHJpYnV0aW9uKClgXG5cblxuXG4jIyMgVXNlclxuXG5gYGB0ZXh0XG7kvaDmmK/kuIDkvY3otYTmt7HnmoTnlJ/nianljLvoja/noJTnqbbkuJPlrrblkozmj5DnpLror43lt6XnqIvluIjjgILor7fln7rkuo7jgJDlhoXlrrnotKHnjK7luqbor4TliIbkvZPns7vjgJHlr7nku6XkuIvmlofnjK7lhoXlrrnov5vooYzkuJPkuJror4TkvLDjgIJcblxuKirnoJTnqbbpnbbngrkqKjoge3t0YXJnZXR9fVxuKiror4TkvLDmqKHlnZcqKjoge3ttb2R1bGVMYWJlbH19XG5cbiMjIOmdtueCueS4gOiHtOaAp+WkjeaguFxu6L+Z5Lqb5paH54yu5bey5a6M5oiQ5LiA6L2u6aKE562b77yM5b2T5YmN5om55qyh6buY6K6k5bqU5Li655u45YWz5paH54yu44CC5L2g5Y+q6ZyA6KaB5YGa5pyA57uI5aSN5qC477yaXG4tIOWmguaenOehruiupOaWh+eMruehruWunuiuqOiuuiBcInt7dGFyZ2V0fX1cIiDmiJbku6UgXCJ7e3RhcmdldH19XCIg5L2c5Li65Yqf6IO95oCn5Y+X5L2TL+aKl+WOny/nlJ/nianmoIflv5fnianvvIzmraPluLjor4TliIZcbi0g5aaC5p6c5LuN54S25Y+R546w5piv5ZCM5ZCN57yp5YaZ6K+v5Yy56YWN5Yiw5YW25LuW6Z2254K577yM55u05o6l5Yik5Li6IGlzVGFyZ2V0UmVsZXZhbnQ9ZmFsc2XvvIzmiYDmnInor4TliIblvZIgMO+8jOW5tuWGmeaYjiBhY3R1YWxUYXJnZXRcblxuIyMg6K+E5YiG5L2T57O76K+05piOXG4tIOWGmeS9nOmHjeimgeaApyA9IOagh+etvuexu+WIq+adg+mHjSgwLTUwKSArIOWGheWuuea3seW6puivhOWIhigwLTUwKVxuLSDor4Hmja7otKjph48gPSDmlofnjK7otKjph4/liIYoMC04MCkgKyDmnJ/liIrnrYnnuqfliqDmiJAoMC0yMClcbi0gcmVjb21tZW5kYXRpb25TY29yZSDor7fnu5nov57nu63liIbvvIzkuI3opoHlj6rokL3lnKjlsJHmlbDlm7rlrprpmIjlgLxcbi0g57O757uf5Lya5Z+65LqOIHJlY29tbWVuZGF0aW9uU2NvcmUg6Ieq5Yqo5pig5bCE5pif57qn77yM5peg6ZyA6aKd5aSW6L6T5Ye6IHJlY29tbWVuZGF0aW9uU3RhcnNcbi0gZGVjaXNpb25UYWdzIOivt+S9v+eUqOS4muWKoeivreS5ieefreagh+etvu+8jOS4jeimgei/lOWbnuaXp+eahOWbuuWumuiLseaWh+agh+etvlxuXG4jIyDlvoXor4TkvLDmlofnjK7lhoXlrrlcbnt7Y29udGVudExpc3R9fVxuXG7or7fov5Tlm55KU09O5qC85byP77yM5a+55q+P56+H5paH54yu6L+b6KGM6K+E5Lyw77yaXG57XG4gIFwiZXZhbHVhdGlvbnNcIjogW1xuICAgIHtcbiAgICAgIFwiaW5kZXhcIjogMSxcbiAgICAgIFwicG1pZFwiOiBcInh4eFwiLFxuICAgICAgXCJpc1RhcmdldFJlbGV2YW50XCI6IHRydWUvZmFsc2UsXG4gICAgICBcImFjdHVhbFRhcmdldFwiOiBcIuWmguaenOS4jeebuOWFs++8jOWhq+WGmeaWh+eMruWunumZheiuqOiuuueahOmdtueCueWQjeensO+8m+WmguaenOebuOWFs++8jOWhq+WGmXt7dGFyZ2V0fX1cIixcbiAgICAgIFwiY2F0ZWdvcnlUYWdcIjogXCLor4bliKvnmoTlhoXlrrnnsbvliKtcIixcbiAgICAgIFwid3JpdGluZ0ltcG9ydGFuY2VcIjoge1xuICAgICAgICBcImNhdGVnb3J5V2VpZ2h0XCI6IDAtNTAsXG4gICAgICAgIFwiY29udGVudERlcHRoXCI6IHtcbiAgICAgICAgICBcImNvbXBsZXRlbmVzc1wiOiAwLTI1LFxuICAgICAgICAgIFwiZmlndXJlU3VwcG9ydFwiOiAwLTE1LFxuICAgICAgICAgIFwid3JpdGFiaWxpdHlcIjogMC0xMFxuICAgICAgICB9LFxuICAgICAgICBcInRvdGFsXCI6IDAtMTAwXG4gICAgICB9LFxuICAgICAgXCJldmlkZW5jZVF1YWxpdHlcIjoge1xuICAgICAgICBcImpvdXJuYWxUaWVyXCI6IFwiUy9BKy9BL0IvQy9EXCIsXG4gICAgICAgIFwiYmFzZVNjb3JlXCI6IDAtNTAsXG4gICAgICAgIFwidGllckJvbnVzXCI6IDAtMjAsXG4gICAgICAgIFwidG90YWxcIjogMC0xMDBcbiAgICAgIH0sXG4gICAgICBcInJlY29tbWVuZGF0aW9uU2NvcmVcIjogXCIwLTEwMCDnmoTnu7zlkIjmjqjojZDliIbvvIzor7fnu5nlh7rov57nu63liIbvvIzkuI3opoHlj6rokL3lnKjlsJHmlbDlm7rlrprpmIjlgLxcIixcbiAgICAgIFwiZXZpZGVuY2VHcmFkZVwiOiBcIkRlY2lzaW9uIEFuY2hvci9TdHJvbmcgU3VwcG9ydC9Db250ZXh0dWFsIFN1cHBvcnQvUmlzayBFdmlkZW5jZS9HYXAgU2lnbmFsXCIsXG4gICAgICBcImV2aWRlbmNlRGlyZWN0bmVzc1wiOiBcImRpcmVjdC9pbmRpcmVjdC9hc3NvY2lhdGl2ZS9taXNzaW5nXCIsXG4gICAgICBcImRlY2lzaW9uVGFnc1wiOiBbXCLkuK3mlofkuJrliqHmoIfnrb5cIl0sXG4gICAgICBcInJlYXNvblwiOiBcIueugOi/sOaOqOiNkOeQhueUse+8iOWMheWQq+ivpeWGheWuueWvuXt7dGFyZ2V0fX3miqXlkYrlhpnkvZznmoTlhbfkvZPku7flgLzvvJvoi6XkuI3nm7jlhbPor7TmmI7lrp7pmYXpnbbngrnvvIlcIlxuICAgIH1cbiAgXVxufVxuXG7lj6rov5Tlm55KU09O77yM5LiN6KaB5YW25LuW5YaF5a6544CC5LiN6KaB6L6T5Ye65Zu65a6a5o6o6I2Q5qGj5L2N5paH5qGI44CB6buY6K6k5Yu+6YCJ5Yik5pat5oiW5pen55qE6Iux5paH5qCH562+44CCXG5gYGAifSwiOCI6eyJudW1iZXIiOjgsInRpdGxlIjoi57uf5LiA6K+B5o2u6K+E5a6h5LiO5o6o6I2Q5Yaz562WIiwiYm9keSI6Iuadpea6kO+8mmByZXZpZXdBbGxNb2R1bGVPdXRsaW5lcygpYCAvIOe7n+S4gCBldmlkZW5jZSByZXZpZXfjgIJcblxuIyMjIFN5c3RlbVxuXG5gYGB0ZXh0XG7kvaDmmK/kuIDkvY3otYTmt7Hoja/kvIEgQkQv6L2s5YyW5Yy75a2mL+mdtueCueWwveiwg+ivhOWuoeS4k+WutuOAguivt+WvueWAmemAieivgeaNruWBmue7k+aehOWMluivhOWuoe+8jOWPquiDveWfuuS6jui+k+WFpeS6i+WunuWIpOaWre+8jOS4jeimgee8lumAoOS4jeWtmOWcqOeahOaVsOaNruOAguWvueKAnOmjjumZqeivgeaNruKAneWSjOKAnOe8uuWPo+S/oeWPt+KAneimgeS4juKAnOm7mOiupOaOqOiNkOKAneS4peagvOWMuuWIhuOAglxuYGBgXG5cbiMjIyBVc2VyXG5cbmBgYHRleHRcbuivt+aMiSBKU09OIOi+k+WHuuavj+adoeivgeaNrueahOivhOWuoee7k+aenOOAguimgeaxgu+8mlxuMS4g5b+F6aG76KaG55uW5q+P5LiqIGl0ZW1JZOOAglxuMi4g5a+5IGxpdGVyYXR1cmUg5qih5Z2X77yM6ZyA6KaB57uZ5Ye65pyA5ZCI6YCC55qEIHNlY3Rpb25JZCAvIHNlY3Rpb25JZHPvvJvlr7nmiYDmnInmqKHlnZfvvIxzZWN0aW9uSWQg5LiOIHNlY3Rpb25JZHMg6YO95Y+q6IO95LuOIHNlY3Rpb25DYXRhbG9nIOS4remAieaLqeOAglxuMy4gZGVjaXNpb25UYWdzIOW/hemhu+aYr+WPr+WxleekuueahOS4muWKoeivreS5ieagh+etvu+8jOS4jeimgei/lOWbnuepuuazm+agh+etvu+8m2RlY2lzaW9uVGFncyDkuI4gZGVjaXNpb25UYWdEZXRhaWxzW10ubGFiZWwg6KaB5L+d5oyB5LiA6Ie044CCXG40LiDlpoLmnpzkuI3mmK/pu5jorqTmjqjojZDvvIzlv4Xpobvnu5nlh7ogbm9uUmVjb21tZW5kYXRpb25SZWFzb27jgIJcbjUuIGNvdmVyYWdlU3RhdHVzIOWcqOi/memHjOihqOekuuKAnOivpeadoeivgeaNruWvueWFtiBzZWN0aW9uIOeahOaUr+aSkeW8uuW6puKAne+8mmNvdmVyZWQ96Laz5Lul55u05o6l5pSv5pKR6K+lIHNlY3Rpb27vvIxmYWxsYmFjaz3lj6rog73pg6jliIbmlK/mkpHmiJbkuLvopoHmib/mi4Xpo47pmanmj5DphpLvvIxtaXNzaW5nPeS4u+imgeeUqOS6jueVjOWumue8uuWPo+aIluS4jeW7uuiuruS9nOS4uuivpSBzZWN0aW9uIOaUr+aSkeOAglxuNi4g5b+F6aG76L6T5Ye6IHByaW9yaXR5U2NvcmUg5ZKMIHJlY29tbWVuZGF0aW9uUmVhc29u77yb5Y+q5pyJIHNlbGVjdGlvblZlcmRpY3Qg5LiN5pivIHJlY29tbWVuZGVkL3N1cHBvcnRpbmcg5pe277yM5omN5b+F6aG76L6T5Ye6IG5vblJlY29tbWVuZGF0aW9uUmVhc29u44CCXG43LiDkuI3lhYHorrjnvJbpgKDovpPlhaXkuK3kuI3lrZjlnKjnmoTor5XpqoznvJblj7fjgIHnu4jngrnjgIHnlpfmlYjmlbDmja7jgIHlhazlj7jmiJblronlhajkuovku7bjgIJcbjguIOW/hemhu+S4peagvOmBteWuiCBtb2R1bGVSdWJyaWMg5Lit55qE5qih5Z2X5Yik5a6a6YeN54K544CCXG45LiBldmlkZW5jZUdyYWRlIOWPquiDveS7juS7peS4iyA1IOS4quiLseaWh+aemuS4vuS4remAieaLqe+8mkRlY2lzaW9uIEFuY2hvcuOAgVN0cm9uZyBTdXBwb3J044CBQ29udGV4dHVhbCBTdXBwb3J044CBUmlzayBFdmlkZW5jZeOAgUdhcCBTaWduYWzjgIJcbjEwLiDkuI3opoHoh6rnlLHnlJ/miJDmiJbmlLnlhpkgZXZpZGVuY2VHcmFkZUxhYmVs77yM57O757uf5Lya5L6d5o2uIGV2aWRlbmNlR3JhZGUg6Ieq5Yqo5pig5bCE57uf5LiA55qE5bGV56S6562J57qn77yIQS9CL0MvRO+8ieOAglxuMTEuIHByaW9yaXR5U2NvcmUg5omT5YiG6ZSa54K577yaXG4gICAtIDkwLTEwMO+8muiDveaUueWPmOWGs+etlueahOmUmueCueivgeaNru+8jOS+i+WmguS6uuexu+mBl+S8oOWtpuWboOaenCArIOWFseWumuS9jeOAgVBoYXNlIDMvUkNUIOS4u+imgee7iOeCuemYs+aAp++8jOaIluebtOaOpeW9seWTjSBnby9uby1nbyDnmoTph43lpKflronlhagv57uI5q2i6aOO6Zmp44CCXG4gICAtIDc1LTg577ya5by65pSv5pKR6K+B5o2u77yM5L6L5aaC5Lil6LCo5L2T5YaF55a+55eF5qih5Z6L5LiU5pyJ5YmC6YeP5Y+N5bqU44CB6auY6LSo6YeP5Li05bqK5L+h5Y+35LiU5pyJ5a+554WnL+S4iuS4i+aWh++8jOaIluaIkOeGn+WQjOmdtueCueeuoee6vyBiZW5jaG1hcmvjgIJcbiAgIC0gNjAtNzTvvJrlj6/nurPlhaXlhpnkvZznmoTmlK/mkpHor4Hmja7vvIzkvovlpoLnm7jlhbPmnLrliLbjgIFiaW9tYXJrZXLjgIHkuLTluorliY3or4Hmja7vvIzog73luK7liqkgc2VjdGlvbiDkvYbkuI3og73ljZXni6zplJrlrprlhrPnrZbjgII2MCDmmK/pu5jorqTnurPlhaXpmIjlgLzjgIJcbiAgIC0gNDAtNTnvvJrog4zmma/jgIHlvLHnm7jlhbPmiJbnvLrlj6PlrprkuYnor4Hmja7vvIzkvovlpoLlhbPogZTnu4TlrabjgIHlsI/moLfmnKzml6Dlr7nnhafnoJTnqbbjgIHnu4jngrnkuI3lrozmlbTnmoTkvJrorq7mkZjopoHjgIHnlr7nl4Xog4zmma/mnZDmlpnjgIJcbiAgIC0gMC0zOe+8muS9juebuOWFs+OAgemHjeWkjeOAgemdtueCueS4jeWMuemFjeOAgeWFs+mUruS6i+Wunue8uuWkse+8jOaIluS/oeaBr+mHj+S4jei2s+S7peaUr+aSkeWQjue7reWGmeS9nOOAglxuICAgcmlza19vbmx5IOivgeaNruWPquacieWcqOmjjumZqeWFt+S9k+S4lOS8muaUueWPmOWGs+etluaXtuaJjeWPr+e7memrmOWIhu+8m+WQpuWImeaMieWFtuWvueaKpeWRiumjjumZqeWIpOaWreeahOWinumHj+S7t+WAvOaJk+WIhuOAglxuMTIuIOi+k+WHuuagvOW8j++8mlxue1xuICBcImV2YWx1YXRpb25zXCI6IFtcbiAgICB7XG4gICAgICBcIml0ZW1JZFwiOiBcInh4eFwiLFxuICAgICAgXCJzZWN0aW9uSWRcIjogXCLlj6/pgIlcIixcbiAgICAgIFwic2VjdGlvbklkc1wiOiBbXCLlj6/pgIlcIl0sXG4gICAgICBcInNlbGVjdGlvblZlcmRpY3RcIjogXCJyZWNvbW1lbmRlZC9zdXBwb3J0aW5nL3Jpc2tfb25seS9nYXBfb25seS9ub3Rfc2VsZWN0ZWRcIixcbiAgICAgIFwicHJpb3JpdHlTY29yZVwiOiAwLTEwMCxcbiAgICAgIFwicmVjb21tZW5kYXRpb25SZWFzb25cIjogXCLkuK3mlofvvIznroDmtIHlhbfkvZNcIixcbiAgICAgIFwibm9uUmVjb21tZW5kYXRpb25SZWFzb25cIjogXCLkuK3mlofvvIzlj6/kuLrnqbpcIixcbiAgICAgIFwiZXZpZGVuY2VHcmFkZVwiOiBcIkRlY2lzaW9uIEFuY2hvci9TdHJvbmcgU3VwcG9ydC9Db250ZXh0dWFsIFN1cHBvcnQvUmlzayBFdmlkZW5jZS9HYXAgU2lnbmFsXCIsXG4gICAgICBcImV2aWRlbmNlR3JhZGVEZXNjcmlwdGlvblwiOiBcIuS4reaWh+ino+mHilwiLFxuICAgICAgXCJkZWNpc2lvblRhZ3NcIjogW1wi5Lit5paH55+t5qCH562+XCJdLFxuICAgICAgXCJkZWNpc2lvblRhZ0RldGFpbHNcIjogW1xuICAgICAgICB7XG4gICAgICAgICAgXCJpZFwiOiBcInRhZ19pZFwiLFxuICAgICAgICAgIFwibGFiZWxcIjogXCLkuK3mlofmoIfnrb5cIixcbiAgICAgICAgICBcImRlc2NyaXB0aW9uXCI6IFwi5Lit5paH6K+05piOXCIsXG4gICAgICAgICAgXCJzZXZlcml0eVwiOiBcInN1Y2Nlc3MvcHJpbWFyeS93YXJuaW5nL2Rhbmdlci9kZWZhdWx0L3NlY29uZGFyeVwiXG4gICAgICAgIH1cbiAgICAgIF0sXG4gICAgICBcImNvdmVyYWdlU3RhdHVzXCI6IFwiY292ZXJlZC9mYWxsYmFjay9taXNzaW5nXCIsXG4gICAgICBcImNvdmVyYWdlQXNzZXNzbWVudFwiOiBcIuS4reaWh+ivtOaYjlwiXG4gICAgfVxuICBdXG59XG5cbui+k+WFpeaVsOaNru+8mlxue1xuICBcInRhcmdldFwiOiBcInt7dGFyZ2V0fX1cIixcbiAgXCJtb2R1bGVUeXBlXCI6IFwie3ttb2R1bGVUeXBlfX1cIixcbiAgXCJtb2R1bGVGb2N1c1wiOiBcInt7bW9kdWxlRm9jdXN9fVwiLFxuICBcIm1vZHVsZVJ1YnJpY1wiOiBcInt7bW9kdWxlUnVicmljfX1cIixcbiAgXCJzZWxlY3Rpb25HdWlkYW5jZVwiOiB7XG4gICAgXCJyZWNvbW1lbmRlZFwiOiBcIum7mOiupOaOqOiNkO+8jOW6lOivpeebtOaOpei/m+WFpeivpeaooeWdl+eahOm7mOiupOWFpemAiee7k+aenO+8jOeUqOS6juWQjue7rSBvdXRsaW5lL3JlcG9ydCDlhpnkvZzjgIJcIixcbiAgICBcInN1cHBvcnRpbmdcIjogXCLph43opoHmlK/mkpHmnZDmlpnvvIzpgJrluLjkuZ/lgLzlvpfpu5jorqTnurPlhaXvvIzkvYbkvJjlhYjnuqfkvY7kuo4gcmVjb21tZW5kZWTjgIJcIixcbiAgICBcInJpc2tfb25seVwiOiBcIuS4u+imgeeUqOS6juaPkOekuumjjumZqeOAgeWksei0peOAgeiAkOiNr+OAgeWuieWFqOaIluernuS6ieWOi+WKm++8jOS4jeW6lOWGkuWFheato+WQkeaOqOiNkOOAglwiLFxuICAgIFwiZ2FwX29ubHlcIjogXCLkuLvopoHnlKjkuo7or7TmmI7lvZPliY3or4Hmja7nvLrlj6PvvIzluK7liqnnlYzlrprov5jnvLrku4DkuYjvvIzogIzpnZ7mlK/mkpHnu5PorrrjgIJcIixcbiAgICBcIm5vdF9zZWxlY3RlZFwiOiBcIuS4jeW7uuiurum7mOiupOe6s+WFpe+8jOS7t+WAvOaciemZkOaIluS4juW9k+WJjemXrumimOS4jeWkn+i0tOWQiOOAglwiXG4gIH0sXG4gIFwiZXZpZGVuY2VHcmFkZUd1aWRlXCI6IFtcbiAgICBcIkRlY2lzaW9uIEFuY2hvciA9PiBkaXNwbGF5IGxldmVsIEE6IGNvcmUgZXZpZGVuY2UgdGhhdCBjYW4gZGlyZWN0bHkgYW5jaG9yIHByaW9yaXRpemF0aW9uIG9yIGdvL25vLWdvIGp1ZGdtZW50XCIsXG4gICAgXCJTdHJvbmcgU3VwcG9ydCA9PiBkaXNwbGF5IGxldmVsIEI6IHN0cm9uZyBzdXBwb3J0aW5nIGV2aWRlbmNlIHRoYXQgc3RpbGwgbmVlZHMgdG8gYmUgY29tYmluZWQgd2l0aCBvdGhlciBpbnB1dHNcIixcbiAgICBcIkNvbnRleHR1YWwgU3VwcG9ydCA9PiBkaXNwbGF5IGxldmVsIEM6IGNvbnRleHR1YWwgb3IgYmFja2dyb3VuZCBzdXBwb3J0IHJhdGhlciB0aGFuIGEgcHJpbWFyeSBhbmNob3JcIixcbiAgICBcIlJpc2sgRXZpZGVuY2UgPT4gZGlzcGxheSBsZXZlbCBEOiBldmlkZW5jZSBtYWlubHkgdXNlZCBmb3IgcmlzaywgZmFpbHVyZSwgc2FmZXR5LCByZXNpc3RhbmNlLCBvciBjb21wZXRpdGl2ZSBwcmVzc3VyZSBhc3Nlc3NtZW50XCIsXG4gICAgXCJHYXAgU2lnbmFsID0+IGRpc3BsYXkgbGV2ZWwgRDogZXZpZGVuY2UgbWFpbmx5IHVzZWQgdG8gZGVmaW5lIHdoYXQgaXMgc3RpbGwgbWlzc2luZ1wiXG4gIF0sXG4gIFwic2VjdGlvbkNhdGFsb2dcIjogXCJ7e3NlY3Rpb25DYXRhbG9nfX1cIixcbiAgXCJpdGVtc1wiOiBcInt7ZXZpZGVuY2VSZXZpZXdJdGVtUGF5bG9hZFtdfX1cIlxufVxuYGBgIn0sIjkiOnsibnVtYmVyIjo5LCJ0aXRsZSI6IueroOiKguimhuebluW6puivhOWuoSIsImJvZHkiOiLmnaXmupDvvJpgZXZhbHVhdGVTZWN0aW9uQ292ZXJhZ2VXaXRoTExNKClgXG5cbiMjIyBTeXN0ZW1cblxuYGBgdGV4dFxu5L2g5piv5LiA5L2N6LWE5rex6Z2254K55bC96LCD6K+E5a6h6LSf6LSj5Lq677yM6ZyA6KaB5qC55o2u5YCZ6YCJ6K+B5o2u55qE5pW05L2T5YiG5biD77yM5Yik5pat5q+P5LiqIHNlY3Rpb24g55qE6KaG55uW54q25oCB44CB57y65Y+j5LiO57uT6K6644CCXG5gYGBcblxuIyMjIFVzZXJcblxuYGBgdGV4dFxu6K+36L6T5Ye65q+P5LiqIHNlY3Rpb24g55qEIGNvdmVyYWdlIOivhOWuoee7k+aenOOAguimgeaxgu+8mlxuMS4gYmVzdEV2aWRlbmNlSWRzIOWSjCByaXNrRXZpZGVuY2VJZHMg5Y+q6IO95byV55So6L6T5YWlIHJldmlld2VkSXRlbXMg6YeM55qEIGl0ZW1JZOOAglxuMi4g5aaC5p6cIGNvdmVyYWdlU3RhdHVzPWNvdmVyZWTvvIzoh7PlsJHnu5nlh7rkuIDkuKogYmVzdEV2aWRlbmNlSWRz44CCXG4zLiDlpoLmnpwgY292ZXJhZ2VTdGF0dXM9bWlzc2luZ++8jOW/hemhu+e7meWHuiBtaXNzaW5nUG9pbnRz44CCXG40LiDkuI3lvpfnvJbpgKDovpPlhaXkuK3kuI3lrZjlnKjnmoQgaXRlbUlkIOaIluWunumqjOS6i+WunuOAglxuXG5KU09OIOagvOW8j++8mlxue1xuICBcInNlY3Rpb25zXCI6IFtcbiAgICB7XG4gICAgICBcInNlY3Rpb25JZFwiOiBcInh4eFwiLFxuICAgICAgXCJjb3ZlcmFnZVN0YXR1c1wiOiBcImNvdmVyZWQvZmFsbGJhY2svbWlzc2luZ1wiLFxuICAgICAgXCJjb3ZlcmFnZUFzc2Vzc21lbnRcIjogXCLkuK3mlofor7TmmI5cIixcbiAgICAgIFwiY29uY2x1c2lvblwiOiBcIuS4reaWh+e7k+iuulwiLFxuICAgICAgXCJzdXBwb3J0aW5nUG9pbnRzXCI6IFtcIi4uLlwiXSxcbiAgICAgIFwicmlza1NpZ25hbHNcIjogW1wiLi4uXCJdLFxuICAgICAgXCJtaXNzaW5nUG9pbnRzXCI6IFtcIi4uLlwiXSxcbiAgICAgIFwiYmVzdEV2aWRlbmNlSWRzXCI6IFtcIml0ZW1JZFwiXSxcbiAgICAgIFwicmlza0V2aWRlbmNlSWRzXCI6IFtcIml0ZW1JZFwiXSxcbiAgICAgIFwiZHJhZnRDb25jbHVzaW9uXCI6IFwi5Lit5paH6I2J56i/57uT6K66XCJcbiAgICB9XG4gIF1cbn1cblxu6L6T5YWl77yaXG57XG4gIFwidGFyZ2V0XCI6IFwie3t0YXJnZXR9fVwiLFxuICBcIm1vZHVsZVR5cGVcIjogXCJ7e21vZHVsZVR5cGV9fVwiLFxuICBcInNlY3Rpb25zXCI6IFwie3tzZWN0aW9uQ2F0YWxvZ319XCIsXG4gIFwicmV2aWV3ZWRJdGVtc1wiOiBbXG4gICAge1xuICAgICAgXCJpdGVtSWRcIjogXCJ7e2l0ZW1JZH19XCIsXG4gICAgICBcInNlY3Rpb25JZFwiOiBcInt7c2VjdGlvbklkfX1cIixcbiAgICAgIFwic2VjdGlvbklkc1wiOiBbXCJ7e3NlY3Rpb25JZH19XCJdLFxuICAgICAgXCJzZWxlY3Rpb25WZXJkaWN0XCI6IFwie3tzZWxlY3Rpb25WZXJkaWN0fX1cIixcbiAgICAgIFwicHJpb3JpdHlTY29yZVwiOiBcInt7cHJpb3JpdHlTY29yZX19XCIsXG4gICAgICBcImV2aWRlbmNlR3JhZGVcIjogXCJ7e2V2aWRlbmNlR3JhZGV9fVwiLFxuICAgICAgXCJkZWNpc2lvblRhZ3NcIjogW1wie3t0YWd9fVwiXSxcbiAgICAgIFwicmVjb21tZW5kYXRpb25SZWFzb25cIjogXCJ7e3JlY29tbWVuZGF0aW9uUmVhc29ufX1cIixcbiAgICAgIFwibm9uUmVjb21tZW5kYXRpb25SZWFzb25cIjogXCJ7e25vblJlY29tbWVuZGF0aW9uUmVhc29ufX1cIlxuICAgIH1cbiAgXVxufVxuYGBgIn0sIjEwIjp7Im51bWJlciI6MTAsInRpdGxlIjoi5Li05bqK5YmN5YCZ6YCJ562b6YCJIiwiYm9keSI6Iuadpea6kO+8mmBzY3JlZW5QcmVjbGluaWNhbE1vZGVscygpYFxuXG5cblxuIyMjIFVzZXJcblxuYGBgdGV4dFxu5L2g5piv5LiA5L2N6LWE5rex6I2v54mp56CU5Y+R5LiO6L2s5YyW5Yy75a2m5LiT5a6244CC6K+35a+56Z2254K5IFwie3t0YXJnZXR9fVwiIOeahOS4tOW6iuWJjSBtb2RlbCDlgJnpgInlgZrigJzovbvph4/nspfnrZvigJ3jgILlvZPliY3nm67moIfmmK/lnKjlsZXlvIAgc3R1ZHkv5oyH5qCH6K+m5oOF5YmN77yM5LyY5YWI5oyR5Ye65pyA5YC85b6X6L+b5YWl5ZCO57ut5YiG57G75LiO5a6M5pW06K+E5Lyw55qEIG1vZGVs44CCXG5cbueyl+etm+WOn+WIme+8mlxuMS4g5LyY5YWI5L+d55WZ55yf5q2j5Y+v6IO95pSv5pKR5py65Yi244CB6I2v5pWI44CB6L2s5YyW44CB6ICQ6I2vL+WuieWFqOWIpOaWreeahCBtb2RlbO+8jOWwpOWFtuaYr+S4jumdtueCuSBcInt7dGFyZ2V0fX1cIiDnm7TmjqXnm7jlhbPnmoTor4Hmja7jgIJcbjIuIOabtOS8mOWFiOS/neeVmeadpeiHquW8gOWPkemYtuauteabtOmdoOWJjeeahOeuoee6v+ivgeaNru+8mlwiY2xpbmljYWxQaGFzZSA+PSBQaGFzZSAxXCIg55qEIG1vZGVsIOW6lOaYvuiRl+S8mOWFiOS6jue6ryBwcmVjbGluaWNhbCAvIOacquefpemYtuauteOAglxuMy4g5LyY5YWI5L+d55WZ5L+h5oGv5a6M5pW055qEIG1vZGVs77ya5a6e6aqM55uu55qE5riF5qWa44CBbWVhc3VyZW1lbnQgaW5kaWNhdG9ycyDmm7TlhbfkvZPjgIHlm77lg48vZmlndXJlIOS/oeWPt+abtOWkmuOAgeeWvueXhS/pnbbngrnlhbPogZTmm7TmmI7noa7jgIJcbjQuIOWmguaenOS4jeWQjCBtb2RlbCDkuYvpl7TotKjph4/mjqXov5HvvIzkvJjlhYjkv53nlZnmm7Tog73ooaXotrPliqjnianmqKHlnosv57uG6IOe5qih5Z6L6K+B5o2u55qE5p2h55uu44CCXG41LiDlr7nkv6Hmga/pnZ7luLjnqIDoloTjgIHmmI7mmL7ph43lpI3jgIHlh6DkuY7msqHmnIkgcmVhZG91dCDnur/ntKLnmoQgbW9kZWwg6ZmN5L2O5YiG5pWw44CCXG42LiDov5nmmK8gbW9kZWwg57qn57KX562b77yM5LiN6KaB6L6T5Ye65a6M5pW0IGV2aWRlbmNlIGdyYWRlIC8gdmVyZGljdCAvIHN0YXJz44CCXG43LiDlv4Xpobvku4Xln7rkuo7ovpPlhaXlrZfmrrXliKTmlq3vvIznpoHmraLnvJbpgKDlrp7pqoznu5PorrrjgIJcblxu6K+36L+U5ZueIEpTT07vvJpcbntcbiAgXCJldmFsdWF0aW9uc1wiOiBbXG4gICAge1xuICAgICAgXCJjYW5kaWRhdGVJZFwiOiBcInh4eFwiLFxuICAgICAgXCJjb2Fyc2VTY29yZVwiOiAwLTEwMCxcbiAgICAgIFwia2VlcEZvckZ1bGxSZXZpZXdcIjogdHJ1ZSxcbiAgICAgIFwicmVhc29uXCI6IFwi5LiA5Y+l5Lit5paH6K+05piO6K+lIG1vZGVsIOaYr+WQpuWAvOW+l+i/m+WFpeWQjue7reWxleW8gOS4juWujOaVtOeyvuivhFwiXG4gICAgfVxuICBdXG59XG5cbui+k+WFpeaVsOaNru+8mlxue3twcmVjbGluaWNhbE1vZGVsQ2FuZGlkYXRlc0pzb259fVxuYGBgIn0sIjExIjp7Im51bWJlciI6MTEsInRpdGxlIjoi5Li05bqK5YmN5a6e6aqM5YiG57G7IiwiYm9keSI6Iuadpea6kO+8mmBjbGFzc2lmeVByZWNsaW5pY2FsU3R1ZGllcygpYFxuXG4jIyMgU3lzdGVtXG5cbmBgYHRleHRcbuS9oOaYr+S4gOS9jeiwqOaFjueahOiNr+eJqeeglOWPkeS4tOW6iuWJjeivgeaNruWIhuexu+S4k+WutuOAguivt+e7k+WQiCBzdHVkeSDmlofmnKzjgIHlm77ms6jlkozpmo/mtojmga/kvKDlhaXnmoTlj6/op4Hlm77niYflhoXlrrnvvIzlsIbmr4/mnaHkuLTluorliY3mlbDmja7liIbnsbvliLDmnIDlkIjpgILnmoTkuK3mlofnsbvliKvjgIJcblxu5YiG57G76KaB5rGC77yaXG4xLiDlj6rog73pgInmi6nmnIDljLnphY3nmoTkuIDkuKrnsbvliKvjgIJcbjIuIOS8mOWFiOivhuWIq+S4juKAnOacieaViOaAp+KAneWSjOKAnOWuieWFqOaAp+KAneebtOaOpeebuOWFs+eahOe7k+aenOaVsOaNru+8m+WmguaenOWbvueJhy/lm77ms6jkuI7lvZPliY0gc3R1ZHkg55qE5oyH5qCH5pSv5oyB5YWz57O75byx77yM5YiZ6ZmN5L2O5Yik5pat572u5L+h5bqm44CCXG4zLiDkuI3opoHlm6DkuLrorrrmlofmlbTkvZPkuLvpopjmiJblhbbku5Ygc3R1ZHkg55qE5YaF5a655bCx57uZ5b2T5YmN5p2h55uu6ZSZ6K+v5YiG57G744CCXG40LiDigJznu5PmnoQv57uT5ZCI5pWw5o2u4oCd5LuF55So5LqO55u05o6l5bGV56S657uT5ZCI44CB5Lqy5ZKM5Yqb44CB6YCJ5oup5oCn44CB5YWx5pm2L+WGt+WGu+eUtemVnOOAgVNQUi9NU1QvSVRD44CBS0QvS2njgIHnu5PlkIjkvY3ngrnmiJYgZG9ja2luZyBwb3NlIOeahOivgeaNru+8m+aZrumAmumAmui3r+WbvuOAgeacuuWItuekuuaEj+WbvuS4jeimgeW9kuWFpeivpeexu+OAglxuXG7liIbnsbvnsbvliKvvvJpcbjEuIOS9k+WkluiNr+aViFxuMi4g5L2T5YaF6I2v5pWIXG4zLiDoja/ku6PliqjlipvlraZcbjQuIOWuieWFqOaAp+WIhuaekFxuNS4g57uT5p6EL+e7k+WQiOaVsOaNrlxuNi4g5py65Yi256CU56m2XG43LiDnlJ/nianmoIflv5fnianmlbDmja5cbjguIOWFtuS7luWIhuaekFxuYGBgXG5cbiMjIyBVc2VyXG5cbmBgYHRleHRcbuebruagh+mdtueCue+8mnt7dGFyZ2V0fX1cblxu5b6F5YiG57G75Li05bqK5YmN5pWw5o2u77yaXG57e3ByZWNsaW5pY2FsSXRlbXNKc29ufX1cblxu5aaC5pyJ5Zu+54mH77yM5Zu+54mH5Lya5L2c5Li65aSa5qih5oCB6L6T5YWl6ZqP5raI5oGv5LiA6LW35Lyg5YWl44CCXG5cbuivt+i/lOWbniBKU09O77yaXG57XG4gIFwiY2xhc3NpZmljYXRpb25zXCI6IFtcbiAgICB7XCJpbmRleFwiOiAxLCBcImlkXCI6IFwieHh4XCIsIFwiY2F0ZWdvcnlcIjogXCLnsbvliKvlkI3np7BcIiwgXCJyZWFzb25cIjogXCLnroDnn63or7TmmI7vvIzmjIflh7rkvp3mja7nmoTmmK/lk6rnsbtzdHVkeee7k+aenC/lm77ms6gv5Zu+54mHXCJ9XG4gIF1cbn1cblxu5Y+q6L+U5ZueSlNPTu+8jOS4jeimgeWFtuS7luWGheWuueOAglxuYGBgIn0sIjEyIjp7Im51bWJlciI6MTIsInRpdGxlIjoi5Li05bqK6K+V6aqM5YiG57G7IiwiYm9keSI6Iuadpea6kO+8mmBjbGFzc2lmeUNsaW5pY2FsVHJpYWxzKClgXG5cblxuXG4jIyMgVXNlclxuXG5gYGB0ZXh0XG7kvaDmmK/kuIDkvY3kuLTluornoJTnqbbkuJPlrrbjgILor7flr7nku6XkuIvlhbPkuo7pnbbngrkgXCJ7e3RhcmdldH19XCIg55qE5Li05bqK6K+V6aqM6L+b6KGM5YiG57G744CCXG5cbuWIhuexu+exu+WIq++8mlxuMS4gKirmnInmlYjmgKcqKiAtIOS4u+imgeeglOeptuiNr+eJqeeWl+aViO+8jOWmgk9SUuOAgVBGU+OAgU9T44CB57yT6Kej546H44CB55a+55eF5o6n5Yi2546H562JXG4yLiAqKuWuieWFqOaApyoqIC0g5Li76KaB56CU56m25a6J5YWo5oCnL+iAkOWPl+aAp++8jOWmgknmnJ/liYLph4/pgJLlop7jgIFNVETjgIFETFRz44CB5LiN6Imv5Y+N5bqU562JXG4zLiAqKue7vOWQiCoqIC0g5ZCM5pe25YWz5rOo5pyJ5pWI5oCn5ZKM5a6J5YWo5oCn77yM5oiW5peg5rOV5piO56Gu5Yy65YiGXG5cbuW+heWIhuexu+S4tOW6iuivlemqjO+8mlxue3t0cmlhbExpc3R9fVxuXG7or7fov5Tlm54gSlNPTu+8mlxue1xuICBcImNsYXNzaWZpY2F0aW9uc1wiOiBbXG4gICAge1wiaW5kZXhcIjogMSwgXCJ0cmlhbElkXCI6IFwieHh4XCIsIFwiY2F0ZWdvcnlcIjogXCLmnInmlYjmgKcv5a6J5YWo5oCnL+e7vOWQiFwiLCBcInJlYXNvblwiOiBcIueugOefreeQhueUsVwifVxuICBdXG59XG5cbuWPqui/lOWbnkpTT07vvIzkuI3opoHlhbbku5blhoXlrrnjgIJcbmBgYCJ9LCIxMyI6eyJudW1iZXIiOjEzLCJ0aXRsZSI6Iue7n+S4gOWkp+e6suWuoemYhSIsImJvZHkiOiLmnaXmupDvvJpgcmV2aWV3QWxsTW9kdWxlT3V0bGluZXMoKWBcblxuIyMjIFN5c3RlbVxuXG5gYGB0ZXh0XG7kvaDmmK/pnbbngrnnoJTnqbbmiqXlkYrmgLvnvJbjgILor7flrqHpmIXlpJrmqKHlnZflpKfnurLmmK/lkKblrZjlnKjph43lpI3jgIHnvLrlj6PjgIHot6jnq6DoioLovrnnlYzmt7fkubHlkozmlbDmja7mlK/mkpHkuI3otrPpl67popjjgIJcblxu6KaB5rGC77yaXG4tIOi+k+WHuiBKU09O44CCXG4tIOS/neaMgeaooeadv+S4u+e7k+aehO+8jOS4jeimgemaj+aEj+mHjeaOkuWbuuWumueroOiKguOAglxuLSDlj6rnu5nlh7rlj6/miafooYzkv67mlLnlu7rorq7jgIJcbi0g6YeN54K55qOA5p+l77ya56ug6IqC6L6555WM44CB6YeN5aSN5YaF5a6544CB5pWw5o2u6KaG55uW44CB6aOO6Zmp5LiO57y65Y+j5piv5ZCm5pS+5Zyo5q2j56Gu5L2N572u44CCXG5gYGBcblxuIyMjIFVzZXJcblxuYGBgdGV4dFxu55uu5qCH6Z2254K577yae3t0YXJnZXR9fVxu6L6T5Ye66K+t6KiA77yae3tsYW5ndWFnZX19XG5cbuW9k+WJjeWkmuaooeWdl+Wkp+e6su+8mlxue3thbGxNb2R1bGVPdXRsaW5lc0pzb259fVxuXG7mqKHlnZfmlbDmja7opobnm5bmkZjopoHvvJpcbnt7bW9kdWxlRXZpZGVuY2VTdW1tYXJ5fX1cblxu6K+36L+U5ZueIEpTT07vvJpcbntcbiAgXCJvdmVyYWxsQXNzZXNzbWVudFwiOiBcInN0cmluZ1wiLFxuICBcIm1vZHVsZUZpbmRpbmdzXCI6IFtcbiAgICB7XG4gICAgICBcIm1vZHVsZUlkXCI6IFwic3RyaW5nXCIsXG4gICAgICBcImlzc3Vlc1wiOiBbXCJzdHJpbmdcIl0sXG4gICAgICBcInJlY29tbWVuZGVkQWN0aW9uc1wiOiBbXCJzdHJpbmdcIl1cbiAgICB9XG4gIF0sXG4gIFwiZHVwbGljYXRlUmlza3NcIjogW1wic3RyaW5nXCJdLFxuICBcImNvdmVyYWdlR2Fwc1wiOiBbXCJzdHJpbmdcIl1cbn1cbmBgYCJ9LCIxNCI6eyJudW1iZXIiOjE0LCJ0aXRsZSI6IlNsaWRlIOWGmeS9nOetlueVpSIsImJvZHkiOiLmnaXmupDvvJpgYnVpbGRTbGlkZVdyaXRpbmdTdHJhdGVneVByb21wdCgpYFxuXG4jIyMgU3lzdGVtXG5cbmBgYHRleHRcbuS9oOi0n+i0o+S4uueUn+eJqeWMu+iNr+mdtueCuSByZXZpZXcgZGVjayDnlJ/miJDigJzlvZPliY0gc2xpZGUg5LiT5a625YaZ5L2c562W55Wl4oCd44CCXG7lj6rov5Tlm57kuIDkuKrkuKXmoLwgSlNPTiDlr7nosaHvvIzkuI3opoHlhpnmraPmlofjgIJcblxuSlNPTiBzY2hlbWE6XG57XG4gIFwid3JpdGluZ0FuZ2xlXCI6IFwic3RyaW5nXCIsXG4gIFwibXVzdFVzZUV2aWRlbmNlXCI6IFtcInN0cmluZ1wiXSxcbiAgXCJjb3ZlcmFnZVBsYW5cIjogW1wic3RyaW5nXCJdLFxuICBcImF2b2lkUmVwZWF0aW5nXCI6IFtcInN0cmluZ1wiXSxcbiAgXCJwcmVmZXJyZWRTdHJ1Y3R1cmVcIjogXCJzdHJpbmdcIixcbiAgXCJldmlkZW5jZUdhcFBvbGljeVwiOiBcInN0cmluZ1wiLFxuICBcImVtcGhhc2lzUGxhblwiOiBbXCJzdHJpbmdcIl0sXG4gIFwid3JpdGluZ0hpbnRzXCI6IFtcbiAgICB7IFwidHlwZVwiOiBcImV2YWx1YXRpb258cHJpb3JpdHl8cm91dGluZ3xwaHJhc2luZ3xjb25mbGljdFwiLCBcInJ1bGVcIjogXCJzdHJpbmdcIiB9XG4gIF1cbn1cblxu562W55Wl6KeE5YiZ77yaXG4tIOWGmeS9nOinkuW6puW/hemhu+i0tOWQiOW9k+WJjSBzbGlkZe+8jOiAjOS4jeaYr+WPquWll+eUqOeroOiKgumAmueUqOinhOWImeOAglxuLSDlv4Xpobvku6Xmj5DkvpvnmoTkuJPlrrblhrPnrZbpl67popjkvZzkuLrmnKzpobXpppbopoHliKTmlq3pl67popjjgIJcbi0gYmlvbG9neSBzbGlkZSDlj6/ku6XmnInlv4XopoHlub/luqbvvIzkvYbmr4/kuKrpk7rlvIDngrnlv4Xpobvlr7nlupTlhbfkvZPkuovlrp7nsbvlnovmiJbmmI7noa7or4Hmja7nvLrlj6PjgIJcbi0gZGlzZWFzZeOAgWNsaW5pY2Fs44CBY29tcGV0aXRpb27jgIFpbnNpZ2h0cyDmm7TlvLrosIPlj5boiI3lkozlhrPnrZblkKvkuYnjgIJcbi0g6KGo6L6+L+W8guW4uOihqOi+viBzbGlkZSDkuI3og73ljovnvKnov4flpLTvvJrlv4Xpobvkv53nlZkgR1RFeC9IUEEv6KGo6L6+5Zu+6LCx5Zu+54mH77yM5Lul5Y+K6K6p6L+Z5Lqb5Zu+54mH5Y+v6Kej6YeK55qE6KGo6L6+5pWw5YC85LqL5a6e44CCXG4tIOWPquacieW9k+W9k+WJjeivgeaNruWtmOWcqOacrOmhteeJueaciemjjumZqeaXtuaJjeeUn+aIkCB3cml0aW5nSGludHPvvJrkvovlpoLnn5vnm77mlbDmja7jgIHogZTnlKgv5Y2V6I2v6L6555WM44CB6K+B5o2u6ZuG5Lit5LqO5ZCM5LiAIHNwb25zb3LjgIHlronlhajnuqLml5fjgIHlvLHor4Hmja7miJblrrnmmJPotornlYzliLDnm7jpgrsgc2xpZGUg55qE5YaF5a6544CCXG4tIOavj+adoSB3cml0aW5nSGludCDlv4XpobvmmK/nu5nkuIvmuLjmraPmloflhpnkvZznmoTlj6/miafooYzmjIfku6TvvIzkuI3mmK/ms5vms5vop4Llr5/vvJvkuI3opoHph43lpI0gc3lzdGVtIHByb21wdCDlt7Lnu4/mnInnmoTpgJrnlKjop4TliJnjgIJcbi0gd3JpdGluZ0hpbnRzIOexu+Wei+ivreS5ie+8mmNvbmZsaWN0PeaYvuW8j+WkhOeQhuefm+ebvu+8m3BocmFzaW5nPeimgeaxgi/npoHmraLmjqrovp7vvJtwcmlvcml0eT3osIPmlbTlkYjnjrDpobrluo/miJbmnYPph43vvJtyb3V0aW5nPemZkOWumiBzbGlkZSDovrnnlYzvvJtldmFsdWF0aW9uPeiwg+aVtOiCr+Wumueoi+W6puaIluWuoeaFjuaOqui+nuOAglxuLSDnrZbnlaXopoHnn63jgIHlj6/miafooYzvvJvmlbDnu4TkuK3nmoTmr4/kuIDmnaHpg73lupTog73nm7TmjqXnuqbmnZ/mraPmloflhpnkvZzjgIJcblxud3JpdGluZ0hpbnRzIGZldy1zaG90IOaooeW8j++8mlxuLSDlpoLmnpzor5Xpqozlj6rlnKjogZTnlKjkuK3mmL7npLrnlpfmlYjvvIzkvYbmnKzpobXlrrnmmJPooqvor6/lhpnmiJDljZXoja/pnbbngrnpqozor4HvvIzovpPlh7ogY29uZmxpY3QgKyBwaHJhc2luZ++8jOS+i+Wmgu+8mntcInR5cGVcIjpcImNvbmZsaWN0XCIsXCJydWxlXCI6XCLmmI7noa7or7TmmI7nlpfmlYjkv6Hlj7fmnaXoh6rogZTnlKjmsrvnlpfvvJvpmaTpnZ7mnInljZXoja/lr7nnhafvvIzlkKbliJnkuI3og73lvZLlm6Dkuo7ljZXni6zmipHliLbor6XpnbbngrnjgIJcIn0g5ZKMIHtcInR5cGVcIjpcInBocmFzaW5nXCIsXCJydWxlXCI6XCLnpoHmraLlhpnmiJDigJzor4HmmI7or6XpnbbngrnlhbflpIfljZXoja/ku7flgLzigJ3jgIJcIn1cbi0g5aaC5p6c6Ziz5oCn55aX5pWI5ZCM5pe25Ly06ZqPIHNldmVyZSBzYWZldHlGbGFn77yM6L6T5Ye6IHByaW9yaXR5ICsgY29uZmxpY3TvvIzkvovlpoLvvJp7XCJ0eXBlXCI6XCJwcmlvcml0eVwiLFwicnVsZVwiOlwi5a6J5YWo5oCn6ZmQ5Yi25b+F6aG757Sn6Lef55aX5pWI57uT6K665ZGI546w77yM5LiN6KaB5pS+5Zyo5q615bC+6L275o+P5reh5YaZ44CCXCJ9IOWSjCB7XCJ0eXBlXCI6XCJjb25mbGljdFwiLFwicnVsZVwiOlwi55So5YW35L2TIEFFL0RMVC/nu4jmraLkv6Hmga/lubPooaHnlpfmlYjliKTmlq3jgIJcIn1cbi0g5aaC5p6c6K+B5o2u6ZuG5Lit5LqOIHNwb25zb3LjgIHku4XmnIkgcmVnaXN0cnnjgIHmiJbnm7TmjqXmgKflvLHvvIzovpPlh7ogZXZhbHVhdGlvbu+8jOS+i+Wmgu+8mntcInR5cGVcIjpcImV2YWx1YXRpb25cIixcInJ1bGVcIjpcIumZjeS9jue7k+iuuuehruWumuaAp++8jOW5tuWcqOe7k+iuuumZhOi/keeCueaYjuivgeaNrumbhuS4reaIluS7heS4uuazqOWGjOS/oeaBr+eahOmZkOWItuOAglwifeOAglxuYGBgXG5cbiMjIyBVc2VyXG5cbmBgYHRleHRcbuebruagh+mdtueCue+8mnt7dGFyZ2V0fX1cbui+k+WHuuivreiogO+8mnt7b3V0cHV0TGFuZ3VhZ2V9fVxuXG7nq6DoioLvvJpcbnt7Y2hhcHRlcklkQW5kVGl0bGV9fVxuXG5TbGlkZe+8mlxu5qCH6aKY77yae3tzbGlkZVRpdGxlfX1cbuaooeadv+iKgueCue+8mnt7dGVtcGxhdGVOb2RlSWR9fVxu5qih5p2/6IqC54K55qCH6aKY77yae3t0ZW1wbGF0ZU5vZGVUaXRsZX19XG7ph43lpI3nsbvlnovvvJp7e3JlcGVhdFR5cGV9fVxu6YeN5aSN5qCH562+77yae3tyZXBlYXRMYWJlbH19XG7kuIrkuIDkuKrmqKHmnb/oioLngrnvvJp7e3ByZXZpb3VzVGVtcGxhdGVOb2RlfX1cbuS4i+S4gOS4quaooeadv+iKgueCue+8mnt7bmV4dFRlbXBsYXRlTm9kZX19XG5cbuWkp+e6suimgeeCue+8mlxue3tvcmRlcmVkU2xpZGVCdWxsZXRQb2ludHN9fVxuXG7kuJPlrrblhrPnrZbpl67popjvvJpcbnt7ZXhwZXJ0RGVjaXNpb25MZW5zfX1cblxu6K+B5o2u5pGY6KaB77yaXG7or4Hmja7mlbDph4/vvJp7e3JlbGV2YW50RGF0YUNvdW50fX1cbnt7c291cmNlRGlnZXN0fX1cblxu5YmN5paH5pGY6KaB77yaXG57e3ByZXZpb3VzU2xpZGVzQ29udGV4dH19XG5gYGAifSwiMTUiOnsibnVtYmVyIjoxNSwidGl0bGUiOiLmoIflh4bmraPmloflhpnkvZwiLCJib2R5Ijoi5p2l5rqQ77yaYGdlbmVyYXRlUmVwb3J0Q29udGVudEZvclNsaWRlKClgIOagh+WHhuWIhuaUr++8m+WunumZhSBMTE0g6LCD55So5Lya57uP6L+HIGB0YXJnZXQtcmVzZWFyY2gtcmVwb3J0LWFnZW50LnNlcnZpY2UudHNgIOeahCBgYnVpbGRBZ2VudFN5c3RlbVByb21wdCgpYO+8jOWcqOWIhuaUryBzeXN0ZW0gcHJvbXB0IOWQjui/veWKoOe7n+S4gOeahOS4k+WutuiNieeov+WGmeS9nOWlkee6puOAglxuXG4jIyMgU3lzdGVtXG5cbmBgYHRleHRcbuS9oOaYr+i1hOa3seeUn+eJqeWMu+iNr+WSqOivouaKpeWRiuS9nOiAhe+8jOaThemVv+WwhumdtueCueOAgeeWvueXheOAgeS4tOW6iuWSjOernuS6ieivgeaNruWGmeaIkOe7k+aehOa4heaZsOOAgeWPr+ivu+aAp+mrmOOAgeWPr+ebtOaOpeS6pOS7mOeahCBNYXJrZG93biDmiqXlkYrlhoXlrrnjgIJcblxu5YaZ5L2c6KaB5rGC77yaXG4tIOS9v+eUqOaMh+Wumui+k+WHuuivreiogOOAglxuLSDlj6rlhpnlvZPliY0gc2xpZGXvvIzkuI3opoHlhpnlhbbku5bnq6DoioLjgIJcbi0g5Lil5qC86YG15a6IIHNsaWRlIOWGmeS9nOetlueVpeS4jueroOiKgui+ueeVjOOAglxuLSDlv4Xpobvln7rkuo7mj5DkvpvmlbDmja7lhpnkvZzvvIzkuI3lvpfnvJbpgKDkuovlrp7jgIHmlbDlgLzjgIHlhazlj7jjgIHpgILlupTnl4fjgIHkuLTluorpmLbmrrXmiJblvJXnlKjjgIJcbi0g5byV55So5b+F6aG75L2/55So57uZ5a6a55qE5YWo5bGA57yW5Y+35qC85byPIGBbbl1g44CCXG4tIOS8mOWFiOWGmeWFt+S9k+S6i+WunuOAgeWumumHj+aVsOaNruOAgeaYjuehruacuuWItuWSjOWPr+aTjeS9nOWIpOaWreOAglxuLSDpgb/lhY3nqbrms5vmjqrovp7vvIzkvovlpoLigJzlhbfmnInph43opoHmhI/kuYnigJ3igJzliY3mma/lub/pmJTigJ3kvYbml6Dor4Hmja7mlK/mkpHjgIJcbi0g5Y+v5L2/55SoIE1hcmtkb3duIOihqOagvO+8jOS9huihqOagvOW/hemhu+acjeWKoeS6juS/oeaBr+WOi+e8qe+8jOS4jeimgeWghuegjOOAglxuLSDlpoLmnpzor4Hmja7kuI3otrPvvIzlupTmmI7noa7lhpnlh7ror4Hmja7nvLrlj6PvvIzogIzkuI3mmK/noazlhpnnu5PorrrjgIJcbmBgYFxuXG4jIyMgQWdlbnQgU3lzdGVtIFByb21wdCBPdmVybGF5XG5cbmBgYHRleHRcbiMjIOS4k+WutuiNieeov+WGmeS9nOWlkee6plxuLSDmnKzmrKHovpPlh7rmmK/nrKzkuIDniYjkuJPlrrbojYnnqL/vvIzkuI3mmK/mnIDnu4jmtqboibLnqL/jgIJcbi0g5Lul5LiK5ri4IHByb21wdCDkuK3nmoTigJzlvZPliY0gU2xpZGUg5LiT5a625YaZ5L2c562W55Wl4oCd5Li65pyA6auY5LyY5YWI57qm5p2f77yM55So5a6D5Yaz5a6a5pys6aG16KeS5bqm44CB6K+B5o2u5bm/5bqm5ZKM57uT5p6E44CCXG4tIOWmguaenOetlueVpeS4reWMheWQq+KAnOWKqOaAgeWGmeS9nOaPkOekuuKAne+8jOWwhuWFtuinhuS4uuacrOmhteacgOmrmOS8mOWFiOe6p+e6puadn++8mmNvbmZsaWN0IOW/hemhu+aYvuW8j+W9kuWboOWSjOWvueavlO+8jHBocmFzaW5nIOW/hemhu+mBteWuiOimgeaxgi/npoHnlKjmjqrovp7vvIxwcmlvcml0eSDlhrPlrprlkYjnjrDpobrluo/vvIxyb3V0aW5nIOmZkOWumui+ueeVjO+8jGV2YWx1YXRpb24g5Yaz5a6a6IKv5a6a56iL5bqm5ZKMIGhlZGdl44CCXG4tIOS9v+eUqOmdtueCuSByZXZpZXcgZGVjayDlhpnkvZzmioDog73vvJrnrZbnlaXopoHmsYLlj5boiI3ml7blhYjnu5nliKTmlq3vvJvnrZbnlaXopoHmsYLnlJ/nianlrablub/luqbml7bmjInnu5PmnoTljJbor4Hmja7pk7rlvIDjgIJcbi0g6YG/5YWN5qih5p2/5YyW5aWX6K+d77yM5L6L5aaC4oCc5Y+R5oyl6YeN6KaB5L2c55So4oCd4oCc5o+Q5L6b55CG6K665Z+656GA4oCd4oCc5YW35pyJ6YeN6KaB5oSP5LmJ4oCd77yb6Zmk6Z2e5ZCM5LiA5Y+l5YaF5pyJ5YW35L2T6K+B5o2u5pSv5pKR44CCXG4tIOaUr+aSkSBidWxsZXQg5piv5Y+v6YCJ6aG577yM5LiN5piv6buY6K6k6aG577yb5Y+q5pyJ5a6D56ym5ZCI5b2T5YmNIHNsaWRlIHN0cmF0ZWd577yM5oiW5YyF5ZCr5YWz6ZSu5pWw5a2X44CB5a+554Wn44CB57uI54K544CB5py65Yi26K+B5o2u5oiW6aOO6Zmp5bm26IO95pS55Y+Y5Yik5pat5pe25omN5L+d55WZ44CCXG4tIOacieiKguWItuWcsOeUqCBNYXJrZG93biDliqDnspfnqoHlh7rlhbPplK7liKTmlq3or43jgIHmoLjlv4PmjIfmoIfjgIHnu4jngrnlgLzjgIHmgqPogIXliIblsYLmiJbpo47pmanmoIfnrb7vvJvkuI3opoHmlbTlj6XliqDnspfjgIJcbi0g5aaC5p6c5YaF6YOoIFJBRyDor4Hmja7kuI3otrPvvIzkvb/nlKggV2ViU2VhcmNoIOWBmuWFrOW8gOivgeaNruihpeWFhe+8m+WmguaenOS4pOiAhemDveS4jei2s++8jOaYjuehruWGmeivgeaNrue8uuWPo++8jOS4jeW+l+e8lumAoOS6i+WunuOAglxuXG4jIyDlvJXnlKjjgIHmnaXmupDkuI7lm77niYfnoazmgKfop4TojINcbi0g5q2j5paH5byV55So5Y+q6IO95L2/55So5pWw5a2X5pa55ous5Y+35qC85byP77yM5L6L5aaCIFsxXSDmiJYgWzFdWzNd44CC5q2j5paH5Lit57ud5LiN6IO95YaZ6KO46Zyy55qEIFwiUE1JRDogMTIzXCLjgIFcIihQTUlEOiAxMjMpXCLjgIFET0kg5a2X56ym5Liy44CBc291cmNlIFVSTOOAgVwiU291cmNlczpcIiDmnaXmupDlnZfvvIzmiJYgW2luZGV4XSAvIFtjaXRhdGlvbl0g6L+Z57G75Y2g5L2N56ym44CCXG4tIFB1Yk1lZOOAgURPSeOAgee9kemhteOAgeWbvueJh+aIlueUn+aIkOWbvuadpea6kOaUr+aSkeato+aWh+WIpOaWreaXtu+8jOW/hemhu+S9v+eUqOW3suWIhumFjeeahCBbTl0g5byV55So57yW5Y+344CCUE1JRC9ET0kg5piO57uG5Y+q5bqU5Ye6546w5ZyoIHJlZmVyZW5jZXMvc291cmNlIHN0YXRl44CCXG4tIOeUn+aIkCBzbGlkZSDmraPmlofml7bkuI3opoHoh6rooYzovpPlh7rpobXlsL4gXCJTb3VyY2VzL+adpea6kFwiIOihjO+8m3NsaWRlIOe6p+adpea6kOeUseWQjuerr+ehruWumuaAp+e7hOijhe+8jOW5tuWFgeiuuOS/neeVmeWPr+ivu+eahCBQTUlEL0RPSS9zb3VyY2UgbGFiZWzvvIzogIzkuI3mmK/lvLrliLbmlLnmiJDnuq8gW05dIOe8luWPt+OAglxuLSDmr4/lvKDnlJ/miJDlm77mnIDlpJrmj5LlhaXkuIDmrKHvvIzlubblv4XpobvmnInnm7jpgrsgY2FwdGlvbuOAgueUn+aIkOWbvuW/hemhu+aYjuehruagh+azqOS4uiBBSS1nZW5lcmF0ZWQgc2NoZW1hdGljIC8gQUkg55Sf5oiQ5qaC5b+156S65oSP5Zu+77yM5bm25Zyo5Y+v55So5pe25bim5pSv5pKR6K+B5o2u5byV55So57yW5Y+344CCXG4tIOS4jeW+l+aKiiBHVEV444CBSFBB44CBUk5BL3Byb3RlaW4gZXhwcmVzc2lvbiBhdGxhc+OAgeaVsOaNruW6k+aIquWbvuaIluiuuuaWh+WOn+Wbvuagh+iusOS4uiBBSSDnlJ/miJDvvIzpmaTpnZ7mnaXmupDmnKzouqvmmI7noa7or7TmmI7lroPmmK8gQUktZ2VuZXJhdGVk44CCXG4tIOWQjOS4gCBzbGlkZSDlhoXkuI3lvpfph43lpI3lm77niYcgVVJM44CC6Iul5Y6G5Y+yIGRyYWZ0IOW3sue7j+WMheWQq+W9k+WJjSBzbGlkZSDnmoQgR1RFeC9IUEEv6KGo6L6+5Zu+6LCx5Zu+54mH77yM5LiN5b6X5YaN5qyh6L+95YqgIGF0bGFzIOWbvueJh+OAglxuLSDku7vkvZUgTExNIOeUn+aIkOWbvuW/hemhu+e7n+S4gOS4uuWFqOeUu+W4g+e6r+eZveiDjOaZr+OAgem7keiJsuaIlua3seeBsOaWh+Wtl++8m+S4jeW+l+WHuueOsOeZveiJsuaWh+Wtl+OAgem7keiJsuagjy/mmpfoibLovrnot53jgIFQUFQv5rW35oql5aSW5qGG44CBXCJTbGlkZSBOL+W5u+eBr+eJhyBOXCIg5qCH6K6w77yM5Lmf5LiN5b6X5oqK5byV55So5oiWIFVSTCDnlLvov5vlm77lhoXjgIJcbmBgYFxuXG4jIyMgUmVwb3J0IFdyaXRlciBBZ2VudCBUb29sIFBsYW5uaW5nXG5cbuadpea6kO+8mmByZXNvbHZlSW50ZXJuYWxUb29sQ2FsbHMoKWDjgILlpoLmnpzlkK/nlKggYFRBUkdFVF9SRVBPUlRfV1JJVEVSX0FHRU5UX0VOQUJMRURg77yM5q2j5paH5YaZ5L2c5YmN5Lya5YWI6KeE5YiS5YaF6YOo5bel5YW36LCD55So77yM6KGl5YWF5Lu75Yqh5YaFIFJBRyDor4Hmja7jgIHnlJ/miJDlm77lkozlhazlvIAgV2ViIOivgeaNruOAglxuXG5gYGB0ZXh0XG5QbGFuIGludGVybmFsIHRvb2wgdXNlIGZvciBvbmUgdGFyZ2V0IHJlc2VhcmNoIHJlcG9ydCBzZWN0aW9uLiBVc2UgcmV0cmlldmVfZGF0YV9yYWcgYmVmb3JlIHdyaXRpbmcuIFVzZSB3ZWJfc2VhcmNoIHdoZW4gcHVibGljIGV2aWRlbmNlIGlzIG5lZWRlZCB0byBmaWxsIGFuIGV2aWRlbmNlIGdhcCBvciB2YWxpZGF0ZSBjdXJyZW50IGNsaW5pY2FsL3BpcGVsaW5lL3JlZ3VsYXRvcnkgZmFjdHMuIFVzZSBnZW5lcmF0ZV9yZXBvcnRfZmlndXJlIG9ubHkgd2hlbiB0aGUgc2VjdGlvbiBnZW51aW5lbHkgbmVlZHMgYSBtZWNoYW5pc20vcGF0aHdheSBvciBwcm90ZWluIHN0cnVjdHVyZSBzY2hlbWF0aWMuIFJldHVybiB0b29sIGNhbGxzIG9ubHkgd2hlbiB1c2VmdWwuIERvIG5vdCB3cml0ZSBwcm9zZS5cblxuVGFyZ2V0OiB7e3RhcmdldH19XG5Nb2R1bGU6IHt7Y2hhcHRlcklkfX1cblJBRyBkYXRhIG1vZHVsZSBmb3IgdGhpcyBzbGlkZToge3tyYWdNb2R1bGVJZH19XG5TZWN0aW9uOiB7e3NsaWRlVGl0bGV9fVxuT3V0bGluZTpcbnt7c2xpZGVCdWxsZXRQb2ludHN9fVxuQ3VycmVudCBzZWN0aW9uIGRhdGEgaXRlbSBpZHM6XG57e3JlbGV2YW50RGF0YUlkc319XG5XaGVuIGNhbGxpbmcgcmV0cmlldmVfZGF0YV9yYWcsIHVzZSBtb2R1bGVJZD1cInt7cmFnTW9kdWxlSWR9fVwiLlxuYGBgXG5cbiMjIyBBZ2VudCBVc2VyIFByb21wdCBBZGRpdGlvbnNcblxu5p2l5rqQ77yaYGJ1aWxkQWdlbnRVc2VyUHJvbXB0KClg44CC5q2j5paH5YaZ5L2c55qEIHVzZXIgcHJvbXB0IOS8muWcqOWOn+WniyBzbGlkZSBwYXlsb2FkIOWQjui/veWKoOS7peS4i+WKqOaAgeivgeaNruWdl+OAglxuXG5gYGB0ZXh0XG4jIyBJbnRlcm5hbCBSQUcgRXZpZGVuY2Vcbnt7cmFnRXZpZGVuY2VCbG9ja319XG5cbiMjIEdlbmVyYXRlZCBGaWd1cmUgQXZhaWxhYmxlXG57e2dlbmVyYXRlZEZpZ3VyZVByb21wdEJsb2NrfX1cblxuIyMgUHViTWVkIFN1cHBsZW1lbnRhcnkgRXZpZGVuY2Vcbnt7cHVibWVkU3VwcGxlbWVudGFyeUV2aWRlbmNlQmxvY2t9fVxuXG4jIyBXZWIgU3VwcGxlbWVudGFyeSBFdmlkZW5jZVxue3t3ZWJTdXBwbGVtZW50YXJ5RXZpZGVuY2VCbG9ja319XG5cbiMjIFdlYlNlYXJjaCBDaXRhdGlvbiBSdWxlXG57e3dlYlNlYXJjaENpdGF0aW9uUnVsZX19XG5gYGBcblxuIyMjIFVzZXJcblxuYGBgdGV4dFxu55uu5qCH6Z2254K577yae3t0YXJnZXR9fVxu56ug6IqC77yae3tjaGFwdGVyVGl0bGV9fVxuU2xpZGUg5qCH6aKY77yae3tzbGlkZVRpdGxlfX1cblNsaWRlIOaPj+i/sO+8mnt7c2xpZGVEZXNjcmlwdGlvbn19XG7ovpPlh7ror63oqIDvvJp7e2xhbmd1YWdlfX1cblxu5YaZ5L2c562W55Wl77yaXG57e3NsaWRlV3JpdGluZ1N0cmF0ZWd5SnNvbn19XG5cbuWkp+e6suWFs+mUrueCue+8mlxue3tzbGlkZUtleVBvaW50c319XG5cbuWPr+eUqOaVsOaNruS4juW8leeUqOe8luWPt++8mlxue3tyZWxldmFudERhdGFXaXRoQ2l0YXRpb25JbmRleH19XG5cbueUqOaIt+ihpeWFheimgeaxgu+8mlxue3t1c2VyQ29tbWVudH19XG5cbuivt+S7hei+k+WHuuW9k+WJjSBzbGlkZSDnmoQgTWFya2Rvd24g5q2j5paH44CCXG5gYGAifSwiMTYiOnsibnVtYmVyIjoxNiwidGl0bGUiOiLkuLTluorliY3mraPmloflhpnkvZwiLCJib2R5Ijoi5p2l5rqQ77yaYGdlbmVyYXRlUmVwb3J0Q29udGVudEZvclNsaWRlKClgIHByZWNsaW5pY2FsIOWIhuaUr+OAguecn+WuniBMTE0g6LCD55So5ZCM5qC35Lya57uP6L+HIGBidWlsZEFnZW50U3lzdGVtUHJvbXB0KClgIOi/veWKoCBTdGVwIDE1IOeahOS4k+WutuiNieeov+WGmeS9nOWlkee6puOAglxuXG4jIyMgU3lzdGVtXG5cbmBgYHRleHRcbuS9oOaYr+S4tOW6iuWJjeiNr+eQhuWSjOi9rOWMluWMu+WtpuaKpeWRiuS9nOiAheOAguivt+WwhuS9k+WkluOAgeS9k+WGheOAgVBLL1BE44CB5a6J5YWo5oCn44CB5py65Yi25ZKM55Sf54mp5qCH5b+X54mp6K+B5o2u5YaZ5oiQ5Lil6LCo55qE5oql5ZGK56ug6IqC44CCXG5cbuimgeaxgu+8mlxuLSDlj6rlhpnlvZPliY0gc2xpZGXjgIJcbi0g5LyY5YWI5ZGI546w5a6e6aqM5qih5Z6L44CB6I2v54mpL+aKl+S9k+WQjeensOOAgeWJgumHj+OAgee7iOeCueOAgeWumumHj+e7k+aenOOAgeeWvueXheaooeWei+WSjOeJqeenjeOAglxuLSDkuI3opoHmiormnLrliLbnpLrmhI/lm77lvZPkvZzlrprph4/oja/mlYjor4Hmja7jgIJcbi0g5Yy65YiG5L2T5aSW44CB5L2T5YaF44CBUEsvUETjgIHlronlhajmgKflkozmnLrliLbor4Hmja7jgIJcbi0g6Iul5pWw5o2u5p2l6Ieq5Zu+54mH5oiW6KGo5qC877yM5Y+q6IO95byV55So5Y+v6K+75L+h5oGv77yM5LiN5b6X57yW6YCg5LiN5Y+v6K+75pWw5YC844CCXG4tIOW8leeUqOS9v+eUqCBgW25dYOOAglxuYGBgXG5cbiMjIyBVc2VyXG5cbmBgYHRleHRcbuebruagh+mdtueCue+8mnt7dGFyZ2V0fX1cbueroOiKgu+8mnt7Y2hhcHRlclRpdGxlfX1cblNsaWRlIOagh+mimO+8mnt7c2xpZGVUaXRsZX19XG5TbGlkZSDmj4/ov7DvvJp7e3NsaWRlRGVzY3JpcHRpb259fVxuXG7lhpnkvZznrZbnlaXvvJpcbnt7c2xpZGVXcml0aW5nU3RyYXRlZ3lKc29ufX1cblxu5Li05bqK5YmN5pWw5o2u77yaXG57e3ByZWNsaW5pY2FsUmVsZXZhbnREYXRhV2l0aENpdGF0aW9uSW5kZXh9fVxuXG7or7fovpPlh7rlvZPliY0gc2xpZGUg55qEIE1hcmtkb3duIOato+aWh+OAglxuYGBgIn0sIjE3Ijp7Im51bWJlciI6MTcsInRpdGxlIjoi56ue5LqJ5qC85bGA5q2j5paH5YaZ5L2cIiwiYm9keSI6Iuadpea6kO+8mmBnZW5lcmF0ZVJlcG9ydENvbnRlbnRGb3JTbGlkZSgpYCBjb21wZXRpdGlvbiDliIbmlK/jgILnnJ/lrp4gTExNIOiwg+eUqOWQjOagt+S8mue7j+i/hyBgYnVpbGRBZ2VudFN5c3RlbVByb21wdCgpYCDov73liqAgU3RlcCAxNSDnmoTkuJPlrrbojYnnqL/lhpnkvZzlpZHnuqbvvJvlpKfmlbDmja7ph4/ml7bov5jkvJrmjInnrqHnur/mlbDmja7liIbmibnlhpnkvZzlkI7lkIjlubbjgIJcblxuIyMjIFN5c3RlbVxuXG5gYGB0ZXh0XG7kvaDmmK/oja/niannq57kuonmoLzlsYDkuI7otYTkuqfliIbmnpDmiqXlkYrkvZzogIXjgILor7fln7rkuo7nrqHnur/mlbDmja7lhpnkvZzlvZPliY3nq57kuonmoLzlsYAgc2xpZGXjgIJcblxu6KaB5rGC77yaXG4tIOWPquWGmeW9k+WJjSBzbGlkZeOAglxuLSDmmI7noa7ljLrliIbmn6Xor6LpnbbngrnnrqHnur/jgIHlkIwgTW9BIOeuoee6v+OAgeebuOWFs+mdtueCueeuoee6v+WSjOWFtuS7luiDjOaZr+i1hOS6p+OAglxuLSDkvJjlhYjlhpnoja/nianlkI3np7DjgIHlhazlj7jjgIHpmLbmrrXjgIHpgILlupTnl4fjgIHkvZznlKjmnLrliLbjgIHnu5noja/pgJTlvoTjgIHlm73lrrYv5Zyw5Yy644CCXG4tIOS4jeimgeaKiuebuOWFs+mdtueCuei1hOS6p+ivr+WGmeaIkOafpeivoumdtueCuei1hOS6p+OAglxuLSDlpoLmtonlj4rpnbbngrnliKvlkI3vvIzlv4XpobvosKjmhY7vvIzpgb/lhY3liKvlkI3mrafkuYnjgIJcbi0g5byV55So5L2/55SoIGBbbl1g44CCXG5gYGBcblxuIyMjIFVzZXJcblxuYGBgdGV4dFxu55uu5qCH6Z2254K577yae3t0YXJnZXR9fVxu56ug6IqC77yae3tjaGFwdGVyVGl0bGV9fVxuU2xpZGUg5qCH6aKY77yae3tzbGlkZVRpdGxlfX1cblNsaWRlIOaPj+i/sO+8mnt7c2xpZGVEZXNjcmlwdGlvbn19XG5cbuWGmeS9nOetlueVpe+8mlxue3tzbGlkZVdyaXRpbmdTdHJhdGVneUpzb259fVxuXG7nq57kuonmoLzlsYDmlbDmja7vvJpcbnt7Y29tcGV0aXRpb25SZWxldmFudERhdGFXaXRoQ2l0YXRpb25JbmRleH19XG5cbuivt+i+k+WHuuW9k+WJjSBzbGlkZSDnmoQgTWFya2Rvd24g5q2j5paH44CCXG5gYGAifSwiMTgiOnsibnVtYmVyIjoxOCwidGl0bGUiOiLlm77niYcgVmlzaW9uIFJldmlldyIsImJvZHkiOiLmnaXmupDvvJpgcmV2aWV3U2VjdGlvbkltYWdlc1dpdGhWaXNpb24oKWBcblxuXG4jIyMgVXNlclxuXG5gYGB0ZXh0XG5SZXZpZXcgT05FIHJlcG9ydCBpbWFnZSBmb3IgYSB0YXJnZXQtcmVzZWFyY2ggc2VjdGlvbi5cblxuIyMgR29hbFxuRGVzY3JpYmUgd2hhdCB0aGUgaW1hZ2UgYWN0dWFsbHkgc2hvd3MsIGp1ZGdlIHdoZXRoZXIgaXQgZml0cyB0aGUgY3VycmVudCBzZWN0aW9uLCBhbmQgZ2l2ZSBhY3Rpb25hYmxlIGFkdmljZSBmb3Iga2VlcGluZy9yZW1vdmluZyB0aGUgaW1hZ2Ugb3IgcmV2aXNpbmcgdGhlIG5lYXJieSB0ZXh0LlxuXG4jIyBIYXJkIHJ1bGVzXG4tIEJlIGNvbnNlcnZhdGl2ZS4gSWYgdGhlIGltYWdlIGRvZXMgbm90IGNsZWFybHkgc3VwcG9ydCBhIGNsYWltLCBzYXkgc28uXG4tIERvIE5PVCBpbnZlbnQgdW5yZWFkYWJsZSBudW1iZXJzIG9yIGxhYmVscy5cbi0gTWVjaGFuaXNtIHNjaGVtYXRpY3MgYXJlIG5vdCBxdWFudGl0YXRpdmUgZXZpZGVuY2UgdW5sZXNzIHRoZSBpbWFnZSBpdHNlbGYgY2xlYXJseSBwcm92aWRlcyBxdWFudGl0YXRpdmUgcmVhZG91dHMuXG4tIE9DUiB2aXNpYmxlIHRleHQgbGFiZWxzLiBGbGFnIG9idmlvdXMgbWlzc3BlbGxpbmdzLCBtYWxmb3JtZWQgYmlvbWVkaWNhbCB0ZXJtcywgZ2FyYmxlZCB3b3JkcywgaGFsbHVjaW5hdGVkIGxhYmVscywgb3IgdW5yZWFkYWJsZSB0ZXh0LiBGb3IgQUktZ2VuZXJhdGVkIHNjaGVtYXRpY3MsIHNldCBzaG91bGRSZWdlbmVyYXRlSW1hZ2U9dHJ1ZSB3aGVuIHRleHRRdWFsaXR5IGlzIFwibWFqb3JfdHlwb3NcIiBvciBcInVucmVhZGFibGVcIi5cbi0gT3V0cHV0IE9ORSB2YWxpZCBKU09OIG9iamVjdCBvbmx5LiBObyBtYXJrZG93biBmZW5jZXMuXG5cbiMjIFRhcmdldFxue3t0YXJnZXR9fVxuXG4jIyBDaGFwdGVyXG57e2NoYXB0ZXJUaXRsZX19XG5cbiMjIFNlY3Rpb24gVGl0bGVcbnt7c2xpZGVUaXRsZX19XG5cbiMjIE91dGxpbmUgUG9pbnRzXG57e291dGxpbmVQb2ludHN9fVxuXG4jIyBQYXJhZ3JhcGggQmVmb3JlIEltYWdlXG57e3BhcmFncmFwaEJlZm9yZX19XG5cbiMjIEltYWdlIE1hcmtkb3duIEFsdCBUZXh0XG57e2ltYWdlQWx0fX1cblxuIyMgUGFyYWdyYXBoIEFmdGVyIEltYWdlXG57e3BhcmFncmFwaEFmdGVyfX1cblxuIyMgU291cmNlIE1ldGFkYXRhXG57e2NhbmRpZGF0ZU1ldGFkYXRhSnNvbn19XG5cblJldHVybiBKU09OOlxue1xuICBcInVybFwiOiBcInt7aW1hZ2VVcmx9fVwiLFxuICBcImFsdFRleHRcIjogXCJ7e2ltYWdlQWx0fX1cIixcbiAgXCJ2aXN1YWxTdW1tYXJ5XCI6IFwic3RyaW5nXCIsXG4gIFwidGV4dFF1YWxpdHlcIjogXCJjbGVhbnxtaW5vcl90eXBvc3xtYWpvcl90eXBvc3x1bnJlYWRhYmxlfG5vdF9hcHBsaWNhYmxlXCIsXG4gIFwiZGV0ZWN0ZWRUZXh0SXNzdWVzXCI6IFtcInN0cmluZ1wiXSxcbiAgXCJmaXRcIjogXCJzdHJvbmd8cGFydGlhbHx3ZWFrfG1pc2xlYWRpbmdcIixcbiAgXCJldmlkZW5jZVVzZVwiOiBcInF1YW50aXRhdGl2ZXxxdWFsaXRhdGl2ZXxzY2hlbWF0aWN8ZGVjb3JhdGl2ZXx1bmNsZWFyXCIsXG4gIFwic2hvdWxkS2VlcFwiOiB0cnVlLFxuICBcInNob3VsZFJlZ2VuZXJhdGVJbWFnZVwiOiBmYWxzZSxcbiAgXCJuZWFyYnlUZXh0SXNzdWVzXCI6IFtcInN0cmluZ1wiXSxcbiAgXCJyZWNvbW1lbmRlZEFjdGlvblwiOiBcInN0cmluZ1wiXG59XG5gYGAifSwiMTkiOnsibnVtYmVyIjoxOSwidGl0bGUiOiJTZWN0aW9uIFJldmlldyIsImJvZHkiOiLmnaXmupDvvJpgcnVuU2VjdGlvblJldmlldygpYFxuXG4jIyMgU3lzdGVtXG5cbmBgYHRleHRcbuS9oOaYr+S4gOS9jeeUn+eJqeWMu+iNr+aKpeWRiueahCBzZWN0aW9uIHJldmlld2Vy77yM6Z2254K55Li6IFwie3t0YXJnZXR9fVwi44CCXG5cbuiMg+WbtO+8mlxuLSDlj6rlrqHpmIXlvZPliY3ov5nkuIDkuKogc2VjdGlvbiDmraPmlofjgIJcbi0g5pys5q2l6aqk5LiN6KaB55u05o6l5pS55YaZ5q2j5paH44CCXG4tIOS4jeimgeS9v+eUqOS7u+S9leihpeWFheajgOe0ouWGheWuue+8jOWPquagueaNruaPkOS+m+eahCBzZWN0aW9uIOiNieeov+OAgeWkp+e6suimgeeCueOAgeWJjeaWh+aRmOimgeWSjCB2aXNpb24gZmluZGluZ3Mg6L+b6KGM5a6h6ZiF44CCXG4tIOWmguaenOaPkOS+m+S6hiBzZWN0aW9uIOivgeaNruaRmOimge+8jOWPquaKiuWug+W9k+S9nOS/neWuiOe6puadn++8jOmBv+WFjeaPkOWHuuayoeacieaVsOaNruaUr+aSkeeahOmXrumimOaIluaUueWGmeW7uuiuruOAglxuLSDph4fnlKjkv53lrojliKTmlq3vvJvlpoLmnpwgc2VjdGlvbiDln7rmnKzlj6/mjqXlj5fvvIzlsLHov5Tlm57ml6Dpl67popjjgIJcbi0g6K+B5o2u57y65Y+j5Li76KaB5L6d5o2u5b2T5YmNIHNlY3Rpb24g5qCH6aKY44CB5aSn57qy6KaB54K55ZKM5qih5p2/5bCP5qCH6aKY6KaG55uW6KaB5rGC5Yik5pat77yb5pys5q2l6aqk5LiN6KaB5qOA57Si77yM5Y+q5oyH5Ye657y65bCR55qE5YW35L2T57uG6IqCL+ivgeaNru+8jOW5tue7mSByZXdyaXRlIOmYtuauteaPkOS+m+WumuWQkeajgOe0oiBxdWVyeeOAglxuXG7lrqHpmIXph43ngrnvvJpcbjEuIOW9seWTjeeQhuino+eahOWxgOmDqOihqOi+vuaIlumAu+i+kemXrumimFxuMi4g5LiOIHNlY3Rpb24g5qCH6aKY5oiWIGJ1bGxldFBvaW50cyDmmI7mmL7kuI3nrKZcbjMuIOS4juWJjeaWh+WcqOWQjOS4gOWFt+S9k+S6i+WunuS4iumHjeWkjeS4lOayoeacieaWsOinhuinklxuNC4g5byA5aS06KGU5o6l6L+H5LqO56qB5YWAXG41LiB2aXNpb24gZmluZGluZ3Mg5bey5o+Q56S655qE5piO5pi+5Zu+5paH5LiN56ymXG42LiDmmI7mmL7kuI3lpJ/nroDmtIHjgIHog4zmma/op6Pph4rov4flpJrjgIHov4fkuo7nu7zov7DljJbjgIHmiJbkuI3pgILlkIggUFBUIOaxh+aKpeeahOihqOi+vuaWueW8j1xuNy4g57y65bCR4oCc5pS55Y+Y5Yik5pat4oCd55qE55+t57uT6K665p2h55uu77yM5oiW6buY6K6k6KGl5LqG5LiN6IO95pS55Y+Y5Yik5pat55qE5pSv5pKRIGJ1bGxldFxuOC4gc3RyYXRlZ3lfbWlzbWF0Y2jvvJrmsqHmnInmiafooYzlvZPliY0gc2xpZGUgc3RyYXRlZ3kg5oyH5a6a55qE5YaZ5L2c6KeS5bqm44CB5o6o6I2Q57uT5p6E5oiW5bGV5byAL+WPluiIjeiuoeWIklxuOS4gbWlzc2luZ19yZXF1aXJlZF9mYWN0X3R5cGXvvJrnvLrlsJHnrZbnlaXmiJblpKfnurLopoHmsYLnmoTlhbfkvZPkuovlrp7nsbvlnotcbjEwLiBvdmVyX3JlcGVhdGVkX2FuZ2xl77ya6YeN5aSN5YmN5paH5oiW55u46YK76aG155qE5ZCM5LiA5YiG5p6Q6KeS5bqm77yM5rKh5pyJ5paw5aKe5LqL5a6e57G75Z6L44CBYmVuY2htYXJr44CB6aOO6Zmp5oiW5Yaz562W5ZCr5LmJXG4xMS4g6K+t6KiA5LiA6Ie05oCn44CB5byV55SoL+adpea6kC/lm77niYfljavnlJ/jgIHnlJ/miJDlm77mloflrZfotKjph49cblxu5L+d55WZ6KeE5YiZ77yaXG4tIOS4jeW+l+W7uuiuruWIoOmZpOW4puW8leeUqOaUr+aSkeeahOWumumHj+e7k+aenO+8jOmZpOmdnuWug+S7rOWxnuS6juS4peagvOmHjeWkjeOAglxuLSDlr7nooajovr4v5byC5bi46KGo6L6+IHNsaWRl77yM5LiN5b6X5LuF5Zug56+H5bmF5Y6f5Zug5bu66K6u5Yig6ZmkIEdURXgvSFBBL+ihqOi+vuWbvuiwseWbvueJh++8m+WmguaenOWbvuaWh+S9jee9ruW8se+8jOW6lOimgeaxguihpee0p+mCu+ino+ivu++8jOiAjOS4jeaYr+WIoOmZpOOAglxuLSDkuI3lvpfopoHmsYLmlrDlop7lm77niYfjgIJcbi0g5aaC5p6c6I2J56i/57y65bCR5aSn57qy6KaB5rGC55qE5YW35L2T57uG6IqC5oiW6K+B5o2u77yM6L6T5Ye6IGNhdGVnb3J5PVwiZXZpZGVuY2VfZ2FwXCLvvIzlubbloavlhpkgbWlzc2luZ0RldGFpbHPjgIFyZXRyaWV2YWxRdWVyaWVz44CBc291cmNlVHlwZXPjgIFhbGxvd1N1cHBsZW1lbnRhcnlSZXRyaWV2YWw9dHJ1Ze+8m3JldmlldyDpmLbmrrXkuI3lvpfohJHooaXnvLrlpLHlhoXlrrnjgIJcbi0gc291cmNlVHlwZXMg5b+F6aG75pivIEpTT04g5a2X56ym5Liy5pWw57uE77yM5YWB6K645YC877yaXCJwdWJtZWRcIuOAgVwid2ViXCLjgIFcImd1aWRlbGluZVwi44CBXCJjbGluaWNhbF90cmlhbFwi44CBXCJwaXBlbGluZVwi44CCXG4tIOWPquacieiDvee7meWHuueyvuehruaUueWGmeaMh+S7pOaXtu+8jOaJjei+k+WHuumXrumimOOAglxuYGBgXG5cbiMjIyBVc2VyXG5cbmBgYHRleHRcbuebruagh+mdtueCue+8mnt7dGFyZ2V0fX1cbueroOiKgu+8mnt7Y2hhcHRlclRpdGxlfX1cblNlY3Rpb24g5qCH6aKY77yae3tzbGlkZVRpdGxlfX1cblxu5aSn57qy6KaB54K577yaXG57e291dGxpbmVQb2ludHN9fVxuXG7liY3mlofmkZjopoHvvJpcbnt7cHJldmlvdXNTbGlkZXNDb250ZXh0fX1cblxuU2VjdGlvbiDor4Hmja7mkZjopoHvvJpcbnt7c291cmNlRGlnZXN0fX1cblxu5b2T5YmNIFNsaWRlIOS4k+WutuWGmeS9nOetlueVpe+8mlxue3tzbGlkZVdyaXRpbmdTdHJhdGVneUpzb259fVxuXG7kuJPlrrblhrPnrZbpl67popjvvJpcbnt7ZXhwZXJ0RGVjaXNpb25MZW5zfX1cblxu5bey5o+S5YWl5Zu+54mH55qEIFZpc2lvbiBGaW5kaW5nc++8mlxue3t2aXNpb25GaW5kaW5nc0pzb259fVxuXG7lvZPliY0gU2VjdGlvbiDojYnnqL/vvJpcbnt7c2VjdGlvbkNvbnRlbnR9fVxuXG7or7fov5Tlm54gSlNPTu+8mlxue1xuICBcInN1bW1hcnlcIjogXCIxLTPlj6Ugc2VjdGlvbiDmkZjopoFcIixcbiAgXCJrZXlDbGFpbXNcIjogW1wi5a2X56ym5LiyXCJdLFxuICBcImRlY2lzaW9uXCI6IFwicGFzc2VkIHwgbmVlZHNfcmV2aXNpb25cIixcbiAgXCJpc3N1ZXNcIjogW1xuICAgIHtcbiAgICAgIFwiY2F0ZWdvcnlcIjogXCJsb2NhbCB8IHJlcGVhdCB8IHRyYW5zaXRpb24gfCBpbWFnZSB8IGxhbmd1YWdlIHwgZXZpZGVuY2VfZ2FwIHwgc3RyYXRlZ3lfbWlzbWF0Y2ggfCBtaXNzaW5nX3JlcXVpcmVkX2ZhY3RfdHlwZSB8IG92ZXJfcmVwZWF0ZWRfYW5nbGVcIixcbiAgICAgIFwic2V2ZXJpdHlcIjogXCJibG9ja2luZyB8IG1ham9yIHwgbWlub3IgfCBub3RlXCIsXG4gICAgICBcInRhcmdldFN1YnNlY3Rpb25UaXRsZVwiOiBcIuWPr+mAie+8jOW3suacieWwj+iKguagh+mimFwiLFxuICAgICAgXCJyYXRpb25hbGVcIjogXCLkuLrku4DkuYjov5nmmK/pl67pophcIixcbiAgICAgIFwicmV3cml0ZUluc3RydWN0aW9uXCI6IFwi57K+56Gu55qE5bGA6YOo5pS55YaZ5oyH5LukXCIsXG4gICAgICBcImV2aWRlbmNlXCI6IFwi5Y+v6YCJ77yM5byV55So54mH5q615oiW57q/57SiXCIsXG4gICAgICBcIm1pc3NpbmdEZXRhaWxzXCI6IFtcIuiLpSBjYXRlZ29yeSDkuLogZXZpZGVuY2VfZ2Fw77yM5YiX5Ye657y65aSx55qE5YW35L2T57uG6IqCL+ivgeaNrlwiXSxcbiAgICAgIFwicmV0cmlldmFsUXVlcmllc1wiOiBbXCLoi6UgY2F0ZWdvcnkg5Li6IGV2aWRlbmNlX2dhcO+8jOe7mSByZXdyaXRlIOmYtuauteS9v+eUqOeahOWumuWQkeajgOe0oiBxdWVyeVwiXSxcbiAgICAgIFwic291cmNlVHlwZXNcIjogW1wicHVibWVkXCIsIFwid2ViXCJdLFxuICAgICAgXCJhbGxvd1N1cHBsZW1lbnRhcnlSZXRyaWV2YWxcIjogdHJ1ZVxuICAgIH1cbiAgXVxufVxuYGBgIn0sIjIwIjp7Im51bWJlciI6MjAsInRpdGxlIjoiU2VjdGlvbiBSZXdyaXRlIiwiYm9keSI6Iuadpea6kO+8mmBydW5SZXZpZXdSZXdyaXRlTG9vcCgpYFxuXG4jIyMgU3lzdGVtXG5cbmBgYHRleHRcbuS9oOaYr+i1hOa3semdtueCueeglOeptuaKpeWRiuS9nOiAheOAguivt+agueaNruWuoeeov+aEj+ingemHjeWGmeW9k+WJjSBzbGlkZeOAglxuXG7opoHmsYLvvJpcbi0g5Y+q6L6T5Ye66YeN5YaZ5ZCO55qEIE1hcmtkb3duIOato+aWh+OAglxuLSDkv53nlZnmraPnoa7kuovlrp7lkozmnInmlYjlvJXnlKjjgIJcbi0g5L+u5aSN5omA5pyJ5a6h56i/5oyH5Ye655qE6Zeu6aKY44CCXG4tIOS4jeW+l+aWsOWinuaXoOadpea6kOS6i+WunuOAglxuLSDkuI3lvpflhpnlhbbku5bnq6DoioLlhoXlrrnjgIJcbmBgYFxuXG4jIyMgVXNlclxuXG5gYGB0ZXh0XG7nm67moIfpnbbngrnvvJp7e3RhcmdldH19XG7nq6DoioLvvJp7e2NoYXB0ZXJUaXRsZX19XG5TbGlkZSDmoIfpopjvvJp7e3NsaWRlVGl0bGV9fVxuXG7ljp/mraPmlofvvJpcbnt7c2VjdGlvbkNvbnRlbnR9fVxuXG7lrqHnqL/mhI/op4HvvJpcbnt7c2VjdGlvblJldmlld0pzb259fVxuXG7lj6/nlKjmlbDmja7kuI7lvJXnlKjvvJpcbnt7cmVsZXZhbnREYXRhV2l0aENpdGF0aW9uSW5kZXh9fVxuXG7or7fovpPlh7rkv67orqLlkI7nmoQgTWFya2Rvd24g5q2j5paH44CCXG5gYGBcblxuIyMjIFJld3JpdGUgU3VwcGxlbWVudGFyeSBFdmlkZW5jZSBUb29sIFBsYW5uaW5nXG5cbuadpea6kO+8mmBjb2xsZWN0UmV3cml0ZVN1cHBsZW1lbnRhcnlFdmlkZW5jZVdpdGhGdW5jdGlvbkNhbGxzKClg44CC5b2TIHNlY3Rpb24gcmV2aWV3IOaMh+WHuue8uuivgeOAgeW8leeUqOS4jei2s+aIlumcgOimgeW8uuWMluadpea6kOaXtu+8jOaUueWGmeWJjeS8mumineWkluinhOWIkuajgOe0ouW3peWFt+iwg+eUqOOAglxuXG5gYGB0ZXh0XG7kuLrljZXkuKrpnbbngrnmiqXlkYogc2VjdGlvbiDmlLnlhpnop4TliJLor4Hmja7mo4DntKLlt6XlhbfosIPnlKjjgILpnIDopoHku7vliqHlhoXor4Hmja7ml7bkvb/nlKggcmV0cmlldmVfZGF0YV9yYWfvvIzpnIDopoHlhazlvIDor4Hmja7ml7bkvb/nlKggd2ViX3NlYXJjaO+8m+WPquacieW9k+mXrumimOmcgOimgeihpeWFheaIluW8uuWMluadpea6kOivgeaNruaXtuaJjeiwg+eUqOW3peWFt+OAguS4jeimgeeUn+aIkOWbvueJh+OAglxuXG5UYXJnZXQ6IHt7dGFyZ2V0fX1cbk1vZHVsZToge3tjaGFwdGVySWR9fVxuU2VjdGlvbjoge3tzbGlkZVRpdGxlfX1cbk91dGxpbmU6XG57e3NsaWRlQnVsbGV0UG9pbnRzfX1cblxuSXNzdWVzOlxue3tzZWN0aW9uUmV2aWV3SXNzdWVzSnNvbn19XG5cbkN1cnJlbnQgc2VjdGlvbiBkcmFmdDpcbnt7c2VjdGlvbkNvbnRlbnRQcmVmaXh9fVxuYGBgIn0sIjIxIjp7Im51bWJlciI6MjEsInRpdGxlIjoiQ2hhcHRlciBSZXZpZXciLCJib2R5Ijoi5p2l5rqQ77yaYHJ1bkNoYXB0ZXJSZXZpZXcoKWBcblxuIyMjIFN5c3RlbVxuXG5gYGB0ZXh0XG7kvaDmmK/kuIDkvY3nlJ/nianljLvoja/miqXlkYrnmoQgY2hhcHRlciByZXZpZXcgYWdncmVnYXRvcu+8jOmdtueCueS4uiBcInt7dGFyZ2V0fX1cIuOAglxuXG7opoHmsYLvvJpcbi0g6L6T5Ye6IEpTT07jgIJcbi0g5Y+q5Z+65LqOIHNlY3Rpb24g5pGY6KaB5ZKM5bey5pyJ6Zeu6aKY5Y2V5a6h6ZiF5Y2V5Liq56ug6IqC44CCXG4tIOacrOatpemqpOS4jeimgeaUueWGmeeroOiKguaIliBzZWN0aW9uIOato+aWh+OAglxuLSDkuI3opoHkvb/nlKjooaXlhYXmo4DntKLlhoXlrrnjgIJcbi0g5Y+q5Y+R546wIHNlY3Rpb24gcmV2aWV3IOWQjuS7jeeEtuWtmOWcqOeahOeroOWGhemXrumimO+8mueroOWGhemHjeWkjeOAgeihlOaOpeaWreijguOAgeWbvueJh+aUvue9ruWGsueqgeOAgXNlY3Rpb24g6L6555WM5re35reG44CB5bGA6YOo5q616JC96YeN5paw5ruR5Zue57u86L+w5byP6ZW/5q616KGo6L6+77yM5Lul5Y+K5oyB57ut5rKh5pyJ5omn6KGMIHNsaWRlLXNwZWNpZmljIHN0cmF0ZWd5IOeahOmXrumimOOAglxuLSDlpoLmnpznq6DoioLnuqfpl67popjlsZ7kuo4gZXZpZGVuY2VfZ2Fw77yMc291cmNlVHlwZXMg5b+F6aG75pivIEpTT04g5a2X56ym5Liy5pWw57uE77yM5YWB6K645YC877yaXCJwdWJtZWRcIuOAgVwid2ViXCLjgIFcImd1aWRlbGluZVwi44CBXCJjbGluaWNhbF90cmlhbFwi44CBXCJwaXBlbGluZVwi44CCXG5gYGBcblxuIyMjIFVzZXJcblxuYGBgdGV4dFxu55uu5qCH6Z2254K577yae3t0YXJnZXR9fVxu56ug6IqC77yae3tjaGFwdGVyVGl0bGV9fVxuXG5TZWN0aW9uIOaRmOimge+8mlxue3tzZWN0aW9uU3VtbWFyaWVzSnNvbn19XG5cbuW3suaciSBTZWN0aW9uIOmXrumimO+8mlxue3tzZWN0aW9uSXNzdWVzSnNvbn19XG5cbuivt+i/lOWbniBKU09O77yaXG57XG4gIFwic3VtbWFyeVwiOiBcIjEtM+WPpeeroOiKgue6p+WuoemYheaAu+e7k1wiLFxuICBcImlzc3Vlc1wiOiBbXG4gICAge1xuICAgICAgXCJ0YXJnZXRTZWN0aW9uSWRzXCI6IFtcIuW/hemhu+S9v+eUqOi+k+WFpeS4reeahOeyvuehriBzZWN0aW9uSWRcIl0sXG4gICAgICBcImNhdGVnb3J5XCI6IFwicmVwZWF0IHwgdHJhbnNpdGlvbiB8IGltYWdlIHwgbGFuZ3VhZ2UgfCBzdHJ1Y3R1cmUgfCBjaXRhdGlvbiB8IGV2aWRlbmNlX2dhcCB8IHN0cmF0ZWd5X21pc21hdGNoIHwgbWlzc2luZ19yZXF1aXJlZF9mYWN0X3R5cGUgfCBvdmVyX3JlcGVhdGVkX2FuZ2xlXCIsXG4gICAgICBcInNldmVyaXR5XCI6IFwiYmxvY2tpbmcgfCBtYWpvciB8IG1pbm9yIHwgbm90ZVwiLFxuICAgICAgXCJyYXRpb25hbGVcIjogXCLkuLrku4DkuYjov5nmmK/pl67pophcIixcbiAgICAgIFwicmV3cml0ZUluc3RydWN0aW9uXCI6IFwi5a+555uu5qCHIHNlY3Rpb24g55qE57K+56Gu5L+u5pS55oyH5LukXCIsXG4gICAgICBcImV2aWRlbmNlXCI6IFwi5Y+v6YCJ77yM566A55+t57q/57SiXCIsXG4gICAgICBcIm1pc3NpbmdEZXRhaWxzXCI6IFtcIuiLpSBjYXRlZ29yeSDkuLogZXZpZGVuY2VfZ2Fw77yM5YiX5Ye657y65aSx55qE5YW35L2T57uG6IqCL+ivgeaNrlwiXSxcbiAgICAgIFwicmV0cmlldmFsUXVlcmllc1wiOiBbXCLoi6UgY2F0ZWdvcnkg5Li6IGV2aWRlbmNlX2dhcO+8jOe7mSByZXdyaXRlIOmYtuauteS9v+eUqOeahOWumuWQkeajgOe0oiBxdWVyeVwiXSxcbiAgICAgIFwic291cmNlVHlwZXNcIjogW1wicHVibWVkXCIsIFwid2ViXCJdLFxuICAgICAgXCJhbGxvd1N1cHBsZW1lbnRhcnlSZXRyaWV2YWxcIjogdHJ1ZVxuICAgIH1cbiAgXVxufVxuYGBgIn0sIjIyIjp7Im51bWJlciI6MjIsInRpdGxlIjoiR2xvYmFsIFJlcG9ydCBSZXZpZXciLCJib2R5Ijoi5p2l5rqQ77yaYHJ1bkZ1bGxSZXBvcnRSZXZpZXcoKWDjgIJcblxuIyMjIFN5c3RlbVxuXG5gYGB0ZXh0XG7kvaDmmK/kuIDkvY3pnbbngrnosIPnoJTmiqXlkYrnmoQgZnVsbCByZXBvcnQgcmV2aWV3IGFnZ3JlZ2F0b3LvvIzpnbbngrnkuLogXCJ7e3RhcmdldH19XCLjgIJcblxu6KaB5rGC77yaXG4tIOi+k+WHuiBKU09O44CCXG4tIOWPquWfuuS6jiBzZWN0aW9uIOaRmOimgeOAgeW3suaciemXrumimOWNleOAgeagh+mimOagkeWSjOWbvueJh+azqOWGjOihqOWBmuaVtOS7veaKpeWRiue6p+WuoemYheOAglxuLSDmnKzmraXpqqTkuI3opoHmlLnlhpnmlbTnr4fmiqXlkYrjgIJcbi0g5LiN6KaB5L2/55So6KGl5YWF5qOA57Si5YaF5a6544CCXG4tIOmHjeeCueWFs+azqOi3qOeroOmHjeWkjeOAgeeroOiKgui+ueeVjOa3t+a3huOAgeebruW9leaIluagh+mimOe7k+aehOW8guW4uOOAgeW8leeUqOaooeW8j+W8guW4uOOAgeWFqOWxgOWbvueJh+aUvue9ruWGsueqge+8jOS7peWPiuaYjuaYvuWBj+emu+adoeebruW8jyBQUFQg5o+Q54K85Y+j5b6E5oiW5rKh5pyJ5omn6KGMIHNsaWRlLXNwZWNpZmljIHN0cmF0ZWd5IOeahCBzZWN0aW9u44CCXG4tIOWmguaenOWkmuWkhOiDjOaZr+ino+mHiuaIluS9juS7t+WAvOaUr+aSkeadoeebruaMpOWNoOS6huecn+ato+aUueWPmOWIpOaWreeahOivgeaNruOAgeWFs+mUruaVsOWtly/po47pmanmsqHmnInop4bop4nnqoHlh7rvvIzmiJblpJrkuKogc2VjdGlvbiDlj6rpmYjov7Dkuovlrp7kvYbmsqHmnInor7TmmI7liKTmlq3lop7ph4/vvIzlupTop4bkuLrlhajlsYDlhpnkvZzotKjph4/pl67popjjgIJcbi0g5aaC5p6c5YWo5bGA6Zeu6aKY5bGe5LqOIGV2aWRlbmNlX2dhcO+8jHNvdXJjZVR5cGVzIOW/hemhu+aYryBKU09OIOWtl+espuS4suaVsOe7hO+8jOWFgeiuuOWAvO+8mlwicHVibWVkXCLjgIFcIndlYlwi44CBXCJndWlkZWxpbmVcIuOAgVwiY2xpbmljYWxfdHJpYWxcIuOAgVwicGlwZWxpbmVcIuOAglxuYGBgXG5cbiMjIyBVc2VyXG5cbmBgYHRleHRcbuebruagh+mdtueCue+8mnt7dGFyZ2V0fX1cblxuU2VjdGlvbiDmkZjopoHvvJpcbnt7c2VjdGlvblN1bW1hcmllc0pzb259fVxuXG5TZWN0aW9uIOmXrumimO+8mlxue3tzZWN0aW9uSXNzdWVzSnNvbn19XG5cbkNoYXB0ZXIgUmV2aWV3IOe7k+aenO+8mlxue3tjaGFwdGVyQXJ0aWZhY3RzSnNvbn19XG5cbuagh+mimOagke+8mlxue3toZWFkaW5nVHJlZUpzb259fVxuXG7lm77niYfms6jlhozooajmkZjopoHvvJpcbnt7aW1hZ2VSZWdpc3RyeUpzb259fVxuXG7or7fov5Tlm54gSlNPTu+8mlxue1xuICBcInN1bW1hcnlcIjogXCIxLTPlj6XmlbTkvZPlrqHpmIXmgLvnu5NcIixcbiAgXCJpc3N1ZXNcIjogW1xuICAgIHtcbiAgICAgIFwidGFyZ2V0U2VjdGlvbklkc1wiOiBbXCLlv4Xpobvkvb/nlKjovpPlhaXkuK3nmoTnsr7noa4gc2VjdGlvbklkXCJdLFxuICAgICAgXCJjYXRlZ29yeVwiOiBcInJlcGVhdCB8IHRyYW5zaXRpb24gfCBpbWFnZSB8IGxhbmd1YWdlIHwgc3RydWN0dXJlIHwgY2l0YXRpb24gfCBldmlkZW5jZV9nYXAgfCBzdHJhdGVneV9taXNtYXRjaCB8IG1pc3NpbmdfcmVxdWlyZWRfZmFjdF90eXBlIHwgb3Zlcl9yZXBlYXRlZF9hbmdsZVwiLFxuICAgICAgXCJzZXZlcml0eVwiOiBcImJsb2NraW5nIHwgbWFqb3IgfCBtaW5vciB8IG5vdGVcIixcbiAgICAgIFwicmF0aW9uYWxlXCI6IFwi5Li65LuA5LmI6L+Z5piv5YWo5bGA6Zeu6aKYXCIsXG4gICAgICBcInJld3JpdGVJbnN0cnVjdGlvblwiOiBcIuWvueebruaghyBzZWN0aW9uIOeahOeyvuehruS/ruaUueaMh+S7pFwiLFxuICAgICAgXCJldmlkZW5jZVwiOiBcIuWPr+mAie+8jOeugOefree6v+e0olwiLFxuICAgICAgXCJtaXNzaW5nRGV0YWlsc1wiOiBbXCLoi6UgY2F0ZWdvcnkg5Li6IGV2aWRlbmNlX2dhcO+8jOWIl+WHuue8uuWkseeahOWFt+S9k+e7huiKgi/or4Hmja5cIl0sXG4gICAgICBcInJldHJpZXZhbFF1ZXJpZXNcIjogW1wi6IulIGNhdGVnb3J5IOS4uiBldmlkZW5jZV9nYXDvvIznu5kgcmV3cml0ZSDpmLbmrrXkvb/nlKjnmoTlrprlkJHmo4DntKIgcXVlcnlcIl0sXG4gICAgICBcInNvdXJjZVR5cGVzXCI6IFtcInB1Ym1lZFwiLCBcIndlYlwiXSxcbiAgICAgIFwiYWxsb3dTdXBwbGVtZW50YXJ5UmV0cmlldmFsXCI6IHRydWVcbiAgICB9XG4gIF1cbn1cbmBgYCJ9LCIyMyI6eyJudW1iZXIiOjIzLCJ0aXRsZSI6IkZpbmFsIFN0eWxlIFBvbGlzaCIsImJvZHkiOiLmnaXmupDvvJpgcnVuRmluYWxTdHlsZVBvbGlzaFBhc3MoKWBcblxuIyMjIFN5c3RlbVxuXG5gYGB0ZXh0XG7kvaDmmK/kuJPkuJrnlJ/nianljLvoja/lkqjor6LmiqXlkYrnvJbovpHjgILor7flnKjkuI3mlLnlj5jkuovlrp7lkozlvJXnlKjnvJblj7fnmoTliY3mj5DkuIvvvIzmtqboibLmiqXlkYror63oqIDjgIHnu5PmnoTlkozooajovr7jgIJcblxu56Gs5oCn6KaB5rGC77yaXG4tIOS4jeW+l+aWsOWinuS6i+WunuOAglxuLSDkuI3lvpfliKDpmaTmiJbmlLnlhpnlvJXnlKjnvJblj7flkKvkuYnjgIJcbi0g5LiN5b6X5pS55Y+Y56ug6IqC5bGC57qn44CCXG4tIOS/neeVmSBNYXJrZG93buOAglxuLSDkv67lpI3mmI7mmL7nl4Xlj6XjgIHph43lpI3ooajovr7jgIHlj6Por63ljJbooajovr7lkozkuK3oi7Hmt7fmnYLpl67popjjgIJcbi0g5L+d5oyB5LiT5Lia44CB566A5rSB44CB5Y+v5Lqk5LuY44CCXG5gYGBcblxuIyMjIFVzZXJcblxuYGBgdGV4dFxu55uu5qCH6Z2254K577yae3t0YXJnZXR9fVxu6L6T5Ye66K+t6KiA77yae3tsYW5ndWFnZX19XG5cbuW+hea2puiJsuaKpeWRiu+8mlxue3tyZXBvcnRNYXJrZG93bn19XG5cbuWuoemYheaEj+inge+8mlxue3tyZXZpZXdGaW5kaW5nc0pzb259fVxuXG7or7fovpPlh7rmtqboibLlkI7nmoTlrozmlbQgTWFya2Rvd24g5oql5ZGK44CCXG5gYGAifSwiMjQiOnsibnVtYmVyIjoyNCwidGl0bGUiOiJNYXJrZG93biDovawgSFRNTCAvIFBERiAvIE9TUyDkuIrkvKAiLCJib2R5Ijoi5pegIExMTSBwcm9tcHTjgILor6XmraXpqqTmiafooYzlvJXnlKjmuLLmn5PjgIFIVE1MIOeUn+aIkOOAgVB1cHBldGVlciBQREYg5a+85Ye65LiOIE9TUyDkuIrkvKDjgIIifX0=
+</script>
+    <script>
+      const FLOW_PROMPT_MAP = {
+        input: {
+          title: '靶点输入',
+          desc: '用户输入 target / alias / language。此节点本身不触发 LLM，进入任务初始化与模块执行。',
+          steps: [1],
+        },
+        'task-init': {
+          title: '任务初始化',
+          desc: '创建 task、初始化模块状态、准备并发执行。无 LLM prompt。',
+          steps: [1],
+        },
+        history: {
+          title: '历史结果复用 / 历史底座挂载',
+          desc: '查找并挂载同靶点历史报告、历史模块数据和历史报告结构。该节点本身无 LLM prompt。',
+          steps: [1],
+        },
+        'module-execution': {
+          title: '五大核心模块并发',
+          desc: 'biology、disease、competition、preclinical、clinical 并发执行；insights 后置汇总。无 LLM prompt。',
+          steps: [1],
+        },
+        retrieval: {
+          title: '新增检索补充 / 数据源与工具',
+          desc: '执行新增检索、工具调用和模块数据补充。该阶段本身无固定 LLM prompt，后续进入内容预评估。',
+          steps: [1],
+        },
+        standardization: {
+          title: '标准化 DataItem',
+          desc: '统一 DataItemResponse、sourceUrl、metadata、figureData 与 section hints。无 LLM prompt。',
+          steps: [1],
+        },
+        indication: {
+          title: 'P1 推荐适应症',
+          desc: '从 active clinical / marketed Top50 候选池中选择 Top 2-10 个重要适应症，排除过泛标签并规范化临床名称。',
+          steps: [2],
+        },
+        'content-precheck': {
+          title: 'P2 内容预评估',
+          desc: '覆盖 isTargetRelevant 靶点一致性预筛、内容贡献度、临床前粗筛/分类和临床试验分类，为统一证据评审提供输入。',
+          steps: [6, 7, 10, 11, 12],
+        },
+        'evidence-review': {
+          title: 'P3 统一证据评审',
+          desc: '对每条 evidence 输出 selectionVerdict、priorityScore、evidenceGrade 和业务标签；priorityScore 使用 0-100 打分锚点。',
+          steps: [8],
+        },
+        'section-coverage': {
+          title: 'P4 Section 覆盖评审',
+          desc: '判断每个 section 的 covered / fallback / missing，输出最佳证据、风险证据和缺口。',
+          steps: [9],
+        },
+        'ai-recommendation': {
+          title: 'P1-P4 AI 推荐',
+          desc: '端到端流程图中的 AI 推荐聚合节点，包含适应症推荐、内容预评估、统一证据评审和 section 覆盖评审。',
+          steps: [2, 6, 7, 8, 9, 10, 11, 12],
+        },
+        'score-threshold': {
+          title: '≥ 60 分推荐阈值',
+          desc: '该节点是业务阈值判断，不是单独 LLM prompt；相关分数字段来自适应症推荐、内容贡献度评估和统一证据评审。',
+          steps: [2, 7, 8],
+        },
+        'risk-gap': {
+          title: '风险 / 缺口保留',
+          desc: '风险证据和缺口信号不默认进入正文，但会保留用于风险、失败、安全、耐药或证据缺口判断。',
+          steps: [8, 9],
+        },
+        'moa-triage': {
+          title: 'P5 MoA Triage',
+          desc: '判断竞争格局中应展开哪些 MoA 组，驱动模板 repeat 页。',
+          steps: [3],
+        },
+        'template-outline': {
+          title: '模板锁定大纲',
+          desc: '默认模板路径不让 LLM 自由生成章节结构；legacy fallback 才使用自由大纲 prompt。',
+          steps: [4, 5],
+        },
+        'outline-review': {
+          title: 'P6 统一大纲审阅',
+          desc: '审阅多模块大纲的重复、缺口、边界和覆盖风险。',
+          steps: [13],
+        },
+        'outline-decision': {
+          title: 'P5-P6 大纲决策',
+          desc: '端到端流程图中的大纲聚合节点，包含 MoA triage、模板锁定、legacy fallback 和统一大纲审阅。',
+          steps: [3, 4, 5, 13],
+        },
+        'slide-strategy': {
+          title: 'P7 Slide 写作策略',
+          desc: '为单页生成 writingAngle、mustUseEvidence、coveragePlan、avoidRepeating、preferredStructure、evidenceGapPolicy、emphasisPlan 和 writingHints；包含 conflict / phrasing / priority / evaluation few-shot 约束。',
+          steps: [14],
+        },
+        'body-writing': {
+          title: 'P8 正文写作',
+          desc: '按 standard / preclinical / competition 分支写当前 slide。启用报告写作 agent 时，先规划 retrieve_data_rag / generate_report_figure / web_search 工具调用，再追加 buildAgentSystemPrompt 的专家草稿写作契约、动态写作提示优先级、引用格式和图片规范。',
+          steps: [15, 16, 17],
+        },
+        'image-review': {
+          title: 'P9 Review · 图片审阅',
+          desc: '多模态审阅插图是否真实、可读、匹配当前 section，并识别 AI 图文字错误。',
+          steps: [18],
+        },
+        'section-review': {
+          title: 'P9 Review · Section 审阅',
+          desc: '检查当前 slide 的事实幻觉、引用缺失、章节越界、空泛表述、表格滥用和证据不足。',
+          steps: [19],
+        },
+        'review-loop': {
+          title: 'P9 Review',
+          desc: '质量闭环中的 Review 聚合节点，包含图片审阅、section 审阅、chapter 审阅和 global 审阅。',
+          steps: [18, 19, 21, 22],
+        },
+        'chapter-global-review': {
+          title: 'P9 Review · Chapter / Global 审阅',
+          desc: '检查章节连贯性、跨章节重复、引用规范、全局矛盾和重大缺口。',
+          steps: [21, 22],
+        },
+        rewrite: {
+          title: 'P10 Rewrite',
+          desc: '如审阅不通过，根据审稿意见重写当前 slide，不新增无来源事实，不跨章节扩写。',
+          steps: [20],
+        },
+        'style-polish': {
+          title: 'P11 Final Style Polish',
+          desc: '不改变事实和引用编号，只润色语言、结构和交付表达。',
+          steps: [23],
+        },
+        delivery: {
+          title: '报告交付',
+          desc: 'Markdown 转 HTML / PDF 并上传 OSS。该节点无 LLM prompt。',
+          steps: [24],
+        },
+      };
+
+      const state = {
+        steps: {},
+        activePromptKey: 'ai-recommendation',
+      };
+
+      const NO_PROMPT_STEPS = new Set([1, 24]);
+
+      const escapeHtml = (value) =>
+        String(value)
+          .replaceAll('&', '&amp;')
+          .replaceAll('<', '&lt;')
+          .replaceAll('>', '&gt;')
+          .replaceAll('"', '&quot;')
+          .replaceAll("'", '&#039;');
+
+      const renderPromptDetail = (promptKey) => {
+        const config = FLOW_PROMPT_MAP[promptKey];
+        const titleEl = document.getElementById('prompt-detail-title');
+        const descEl = document.getElementById('prompt-detail-desc');
+        const tagsEl = document.getElementById('prompt-detail-tags');
+        const emptyEl = document.getElementById('prompt-empty');
+        const listEl = document.getElementById('prompt-list');
+
+        if (!config) {
+          return;
+        }
+
+        titleEl.textContent = config.title;
+        descEl.textContent = config.desc;
+        tagsEl.innerHTML = config.steps
+          .map((step) => `<span class="tag prompt-tag">Step ${step}</span>`)
+          .join('');
+
+        const cards = config.steps
+          .map((stepNumber) => state.steps[stepNumber])
+          .filter(Boolean)
+          .map((step) => {
+            const hasPrompt = !NO_PROMPT_STEPS.has(step.number);
+
+            return `
+              <article class="prompt-card">
+                <h3>Step ${step.number}. ${escapeHtml(step.title)}</h3>
+                <div class="prompt-card-meta">
+                  <span class="tag ${hasPrompt ? 'prompt-tag' : 'risk-tag'}">
+                    ${hasPrompt ? '完整 prompt 原文' : '该 Step 没有 prompt'}
+                  </span>
+                </div>
+                ${hasPrompt ? `<pre>${escapeHtml(step.body)}</pre>` : `<div class="prompt-empty">该 Step 没有 prompt。</div>`}
+              </article>
+            `;
+          })
+          .join('');
+
+        emptyEl.style.display = cards ? 'none' : 'block';
+        emptyEl.textContent = cards ? '' : '该节点没有匹配到 prompt 内容。';
+        listEl.innerHTML = cards;
+      };
+
+      const setActivePromptKey = (promptKey) => {
+        state.activePromptKey = promptKey;
+        document.querySelectorAll('[data-prompt-key]').forEach((el) => {
+          el.classList.toggle('is-active', el.dataset.promptKey === promptKey);
+        });
+        renderPromptDetail(promptKey);
+        document
+          .getElementById('prompt-detail')
+          .scrollIntoView({ behavior: 'smooth', block: 'start' });
+      };
+
+      const decodePromptStepData = () => {
+        const embeddedData = document.getElementById('prompt-step-data');
+        const encoded = embeddedData.textContent.trim();
+        const bytes = Uint8Array.from(atob(encoded), (char) => char.charCodeAt(0));
+        return JSON.parse(new TextDecoder().decode(bytes));
+      };
+
+      const initPromptInteractions = () => {
+        state.steps = decodePromptStepData();
+
+        document.querySelectorAll('[data-prompt-key]').forEach((el) => {
+          el.addEventListener('click', (event) => {
+            event.preventDefault();
+            setActivePromptKey(el.dataset.promptKey);
+          });
+          el.classList.toggle(
+            'is-active',
+            el.dataset.promptKey === state.activePromptKey,
+          );
+        });
+
+        renderPromptDetail(state.activePromptKey);
+      };
+
+      initPromptInteractions();
+    </script>
+  </body>
+</html>
