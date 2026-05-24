@@ -28,7 +28,22 @@ function wait(ms: number, signal?: AbortSignal): Promise<void> {
   });
 }
 
-export async function pollAsyncTask<TTask extends { taskId: string; status: string; error?: string }>(
+function formatTaskError(error: unknown, taskId: string): string {
+  if (typeof error === "string" && error.length > 0) {
+    return error;
+  }
+
+  if (typeof error === "object" && error !== null && "message" in error) {
+    const message = (error as { message?: unknown }).message;
+    if (typeof message === "string" && message.length > 0) {
+      return message;
+    }
+  }
+
+  return `Task ${taskId} failed.`;
+}
+
+export async function pollAsyncTask<TTask extends { taskId: string; status: string; error?: unknown }>(
   getTask: () => Promise<TTask>,
   options: AsyncPollOptions = {},
 ): Promise<TTask> {
@@ -48,7 +63,7 @@ export async function pollAsyncTask<TTask extends { taskId: string; status: stri
     if (failedStatuses.includes(task.status)) {
       throw new OpenApiRequestError({
         code: "TASK_FAILED",
-        message: task.error ?? `Task ${task.taskId} failed.`,
+        message: formatTaskError(task.error, task.taskId),
         data: task,
       });
     }

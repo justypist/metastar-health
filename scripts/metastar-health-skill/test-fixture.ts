@@ -22,9 +22,11 @@ export function withFixture<T>(options: FixtureOptions, run: (cwd: string) => T)
     "ocr.ts",
     "papers.ts",
     "polling.ts",
+    "preclinical-literature.ts",
     "target-assistant.ts",
     "target-quick-assessment.ts",
     "text-extraction.ts",
+    "tools.ts",
     "types.ts",
     "upload.ts",
   ];

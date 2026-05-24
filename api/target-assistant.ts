@@ -38,6 +38,8 @@ export interface TargetAssistantTaskResult {
   target?: string;
   pdfUrl?: string;
   reportUrl?: string;
+  bulletJsonUrl?: string;
+  referencesCsvUrl?: string;
   error?: string;
   createdAt?: string;
   updatedAt?: string;
@@ -45,6 +47,83 @@ export interface TargetAssistantTaskResult {
 }
 
 export interface TargetAssistantPollOptions extends OpenApiRequestOptions, PollOptions {}
+
+export interface TargetAssistantQaMessage {
+  role: "user" | "assistant";
+  content: string;
+}
+
+export interface TargetAssistantReportQaParams {
+  taskId: string;
+  question: string;
+  sessionId?: string;
+  language?: TargetAssistantLanguage;
+  history?: TargetAssistantQaMessage[];
+}
+
+export interface TargetAssistantCitation {
+  id?: string;
+  title?: string;
+  sourceUrl?: string;
+  sourceLabel?: string;
+  [key: string]: unknown;
+}
+
+export interface TargetAssistantReportQaResult {
+  success: boolean;
+  taskId: string;
+  target?: string;
+  scope: "full_task" | string;
+  sessionId?: string;
+  answer: string;
+  citations?: TargetAssistantCitation[];
+  [key: string]: unknown;
+}
+
+export type TargetAssistantRagModuleId =
+  | "biology"
+  | "disease"
+  | "competition"
+  | "preclinical"
+  | "clinical"
+  | "insights"
+  | "supplementary"
+  | string;
+
+export interface TargetAssistantRagSearchParams {
+  taskId: string;
+  question: string;
+  moduleId?: TargetAssistantRagModuleId;
+  dataLimit?: number;
+  reportLimit?: number;
+}
+
+export interface TargetAssistantRagItem {
+  id: string;
+  type: string;
+  moduleId?: string;
+  title?: string;
+  content?: string;
+  sourceUrl?: string;
+  sourceLabel?: string;
+  evidenceGrade?: string;
+  dataItemId?: string;
+  isAIRecommended?: boolean;
+  isSelected?: boolean;
+  reportSectionId?: string;
+  reportSlideId?: string;
+  [key: string]: unknown;
+}
+
+export interface TargetAssistantRagSearchResult {
+  success: boolean;
+  taskId: string;
+  target?: string;
+  question: string;
+  relatedData: TargetAssistantRagItem[];
+  reportChunks: TargetAssistantRagItem[];
+  [key: string]: unknown;
+}
 
 function assertTargetAssistantSubmitted(data: TargetAssistantSubmission): TargetAssistantSubmissionSuccess {
   if (!data.success) {
@@ -83,4 +162,26 @@ export function pollTargetAssistantResult(
   options: TargetAssistantPollOptions = {},
 ): Promise<TargetAssistantTaskResult> {
   return pollAsyncTask(() => getTargetAssistantResult(taskId, options), options);
+}
+
+export function askTargetAssistantReport(
+  params: TargetAssistantReportQaParams,
+  options: OpenApiRequestOptions = {},
+): Promise<TargetAssistantReportQaResult> {
+  return requestOpenApiData<TargetAssistantReportQaResult>("/api/target-assistant/report/qa", {
+    ...options,
+    method: "POST",
+    body: params,
+  });
+}
+
+export function searchTargetAssistantRag(
+  params: TargetAssistantRagSearchParams,
+  options: OpenApiRequestOptions = {},
+): Promise<TargetAssistantRagSearchResult> {
+  return requestOpenApiData<TargetAssistantRagSearchResult>("/api/target-assistant/rag/search", {
+    ...options,
+    method: "POST",
+    body: params,
+  });
 }

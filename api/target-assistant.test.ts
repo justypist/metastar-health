@@ -2,8 +2,10 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 
 import {
+  askTargetAssistantReport,
   getTargetAssistantResult,
   pollTargetAssistantResult,
+  searchTargetAssistantRag,
   submitTargetAssistantTask,
 } from "./target-assistant.ts";
 import { OpenApiRequestError } from "./types.ts";
@@ -75,4 +77,65 @@ test("target assistant result APIs encode paths and poll results", async () => {
   assert.deepEqual(await pollTargetAssistantResult("task id/2", { ...options, intervalMs: 1, timeoutMs: 10 }), polled);
   assert.equal(String(calls[0]?.input), "https://api.example.test/api/target-assistant/result/task%20id%2F1");
   assert.equal(String(calls[1]?.input), "https://api.example.test/api/target-assistant/result/task%20id%2F2");
+});
+
+test("askTargetAssistantReport posts QA params and returns data", async () => {
+  const calls: FetchCall[] = [];
+  const params = { taskId: "task-1", question: "EGFR 的临床证据是什么？", language: "zh-CN" as const };
+  const data = {
+    success: true,
+    taskId: "task-1",
+    target: "EGFR",
+    scope: "full_task",
+    sessionId: "session-1",
+    answer: "answer",
+    citations: [{ id: "1", sourceLabel: "PMID:1" }],
+  };
+  const fetchImpl: OpenApiFetch = async (input, init) => {
+    calls.push({ input, init });
+    return successPayload(data);
+  };
+
+  assert.deepEqual(
+    await askTargetAssistantReport(params, {
+      appKey: "key",
+      appSecret: "secret",
+      baseUrl: "https://api.example.test",
+      fetch: fetchImpl,
+    }),
+    data,
+  );
+  assert.equal(String(calls[0]?.input), "https://api.example.test/api/target-assistant/report/qa");
+  assert.equal(calls[0]?.init?.method, "POST");
+  assert.equal(calls[0]?.init?.body, JSON.stringify(params));
+});
+
+test("searchTargetAssistantRag posts retrieval params and returns data", async () => {
+  const calls: FetchCall[] = [];
+  const params = { taskId: "task-1", question: "耐药风险", dataLimit: 8, reportLimit: 6 };
+  const data = {
+    success: true,
+    taskId: "task-1",
+    target: "EGFR",
+    question: "耐药风险",
+    relatedData: [{ id: "clinical:1", type: "data", moduleId: "clinical" }],
+    reportChunks: [{ id: "report:1", type: "report_chunk", moduleId: "report" }],
+  };
+  const fetchImpl: OpenApiFetch = async (input, init) => {
+    calls.push({ input, init });
+    return successPayload(data);
+  };
+
+  assert.deepEqual(
+    await searchTargetAssistantRag(params, {
+      appKey: "key",
+      appSecret: "secret",
+      baseUrl: "https://api.example.test",
+      fetch: fetchImpl,
+    }),
+    data,
+  );
+  assert.equal(String(calls[0]?.input), "https://api.example.test/api/target-assistant/rag/search");
+  assert.equal(calls[0]?.init?.method, "POST");
+  assert.equal(calls[0]?.init?.body, JSON.stringify(params));
 });

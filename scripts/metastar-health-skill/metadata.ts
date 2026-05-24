@@ -51,6 +51,13 @@ export const capabilityMetadata = [
     descriptionTopic: "论文搜索",
   },
   {
+    moduleName: "preclinical-literature",
+    title: "文献临床前数据检索",
+    category: "sync-search",
+    referenceFile: "references/sync-search.md",
+    descriptionTopic: "文献临床前数据检索",
+  },
+  {
     moduleName: "target-assistant",
     title: "靶点助手",
     category: "target-workflows",
@@ -70,6 +77,13 @@ export const capabilityMetadata = [
     category: "async-doc-processing",
     referenceFile: "references/async-doc-processing.md",
     descriptionTopic: "临床前文本提取",
+  },
+  {
+    moduleName: "tools",
+    title: "通用检索工具",
+    category: "sync-search",
+    referenceFile: "references/sync-search.md",
+    descriptionTopic: "专利、临床试验、药物交易、资讯、PubMed、网页、会议和公司演示文稿检索",
   },
 ] as const satisfies readonly CapabilityMetadata[];
 

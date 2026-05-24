@@ -20,7 +20,7 @@ export function parseApiIndexExports(source: string): Array<{ moduleName: string
 
 export function parseExportedFunctions(source: string): string[] {
   const functions: string[] = [];
-  const functionPattern = /^export\s+(?:async\s+)?function\s+(?<functionName>[A-Za-z_$][\w$]*)\s*\(/gmu;
+  const functionPattern = /^export\s+(?:async\s+)?function\s+(?<functionName>[A-Za-z_$][\w$]*)(?:\s*<[^(\n]+>)?\s*\(/gmu;
 
   for (const match of source.matchAll(functionPattern)) {
     const functionName = match.groups?.functionName;

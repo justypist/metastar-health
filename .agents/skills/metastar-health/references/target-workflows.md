@@ -6,7 +6,7 @@
 
 ## 函数清单
 
-- 靶点助手：`submitTargetAssistantTask(params, options?)`、`getTargetAssistantResult(taskId, options?)`、`pollTargetAssistantResult(taskId, options?)`。
+- 靶点助手：`submitTargetAssistantTask(params, options?)`、`getTargetAssistantResult(taskId, options?)`、`pollTargetAssistantResult(taskId, options?)`、`askTargetAssistantReport(params, options?)`、`searchTargetAssistantRag(params, options?)`。
 - 靶点快速评估：`submitTargetQuickAssessmentTask(params, options?)`、`getTargetQuickAssessmentResult(taskId, options?)`、`pollTargetQuickAssessmentResult(taskId, options?)`。
 
 ## 通用状态流转
@@ -42,8 +42,14 @@ const task = await pollTargetAssistantResult(submission.taskId, { intervalMs: 50
 
 - `status` 可能为 `researching`、`generating_report`、`generating_pdf`、`completed` 或 `failed`。
 - `progress` 表示任务进度。
-- 完成后可读取 `target`、`pdfUrl` 和 `reportUrl`。
+- 完成后可读取 `target`、`pdfUrl`、`reportUrl`、`bulletJsonUrl` 和 `referencesCsvUrl`。
 - 失败时读取 `error` 字段，并向用户说明可修改靶点名称或稍后重试。
+
+报告扩展能力：
+
+- `askTargetAssistantReport` 对已完成报告做 QA，参数包含 `taskId`、`question`、可选 `sessionId`、`language` 和短 `history`。返回 Markdown `answer`、`sessionId` 和 `citations`。
+- `searchTargetAssistantRag` 只召回上下文，不生成回答。参数包含 `taskId`、`question`、可选 `moduleId`、`dataLimit`、`reportLimit`，返回 `relatedData` 和 `reportChunks`。
+- 这两个接口要求靶点助手任务已完成；如果任务仍在 `researching`、`generating_report` 或 `generating_pdf`，先继续轮询。
 
 ## 靶点快速评估
 
