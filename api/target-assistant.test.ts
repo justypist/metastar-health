@@ -9,6 +9,7 @@ import {
   submitTargetAssistantTask,
 } from "./target-assistant.ts";
 import { OpenApiRequestError } from "./types.ts";
+import type { TargetAssistantRagSearchResult, TargetAssistantTaskResult } from "./target-assistant.ts";
 import type { OpenApiFetch } from "./types.ts";
 
 interface FetchCall {
@@ -22,8 +23,14 @@ function successPayload(data: unknown): Response {
 
 test("submitTargetAssistantTask posts params and returns successful submission", async () => {
   const calls: FetchCall[] = [];
-  const params = { target: "BRCA1", language: "en-US" as const };
-  const data = { success: true, taskId: "task-1", message: "submitted", validatedTarget: { name: "BRCA1" } };
+  const params = { target: "BRCA1", language: "en-US" as const, generateReport: true };
+  const data = {
+    success: true,
+    taskId: "task-1",
+    message: "submitted",
+    generateReport: true,
+    validatedTarget: { name: "BRCA1" },
+  };
   const fetchImpl: OpenApiFetch = async (input, init) => {
     calls.push({ input, init });
     return successPayload(data);
@@ -62,8 +69,21 @@ test("submitTargetAssistantTask throws when validation fails", async () => {
 
 test("target assistant result APIs encode paths and poll results", async () => {
   const calls: FetchCall[] = [];
-  const completed = { taskId: "task id/1", status: "completed", progress: 100, target: "BRCA1" };
-  const polled = { taskId: "task id/2", status: "completed", progress: 100, target: "EGFR" };
+  const completed: TargetAssistantTaskResult = {
+    taskId: "task id/1",
+    status: "completed",
+    progress: 100,
+    target: "BRCA1",
+    generateReport: false,
+  };
+  const polled: TargetAssistantTaskResult = {
+    taskId: "task id/2",
+    status: "completed",
+    progress: 100,
+    target: "EGFR",
+    generateReport: true,
+    reportUrl: "https://oss.example.test/reports/EGFR_report.html",
+  };
   const responses = [successPayload(completed), successPayload(polled)];
   const fetchImpl: OpenApiFetch = async (input, init) => {
     calls.push({ input, init });
@@ -112,14 +132,42 @@ test("askTargetAssistantReport posts QA params and returns data", async () => {
 
 test("searchTargetAssistantRag posts retrieval params and returns data", async () => {
   const calls: FetchCall[] = [];
-  const params = { taskId: "task-1", question: "耐药风险", dataLimit: 8, reportLimit: 6 };
-  const data = {
+  const params = { taskId: "task-1", question: "耐药风险", dataLimit: 8, reportLimit: 6, includeAllFulltextChunks: true };
+  const data: TargetAssistantRagSearchResult = {
     success: true,
     taskId: "task-1",
     target: "EGFR",
     question: "耐药风险",
-    relatedData: [{ id: "clinical:1", type: "data", moduleId: "clinical" }],
+    relatedData: [
+      {
+        id: "clinical:1",
+        type: "data",
+        moduleId: "clinical",
+        fulltextAttachment: {
+          status: "matched",
+          pmid: "29151359",
+          sourceIndexes: ["pubmed_total_fulltext"],
+          chunkCount: 42,
+          attachedChunkCount: 1,
+          hasFigures: true,
+          hasTables: false,
+        },
+        attachedFulltextChunks: [
+          {
+            chunkId: "pubmed_total_fulltext:29151359:8",
+            sourceIndex: "pubmed_total_fulltext",
+            parentPmid: "29151359",
+            sectionKey: "Results",
+            sectionType: "results",
+            chunkType: "fulltext",
+            order: 8,
+            content: "Evidence text",
+          },
+        ],
+      },
+    ],
     reportChunks: [{ id: "report:1", type: "report_chunk", moduleId: "report" }],
+    total: { relatedData: 1, reportChunks: 1 },
   };
   const fetchImpl: OpenApiFetch = async (input, init) => {
     calls.push({ input, init });
@@ -138,4 +186,6 @@ test("searchTargetAssistantRag posts retrieval params and returns data", async (
   assert.equal(String(calls[0]?.input), "https://api.example.test/api/target-assistant/rag/search");
   assert.equal(calls[0]?.init?.method, "POST");
   assert.equal(calls[0]?.init?.body, JSON.stringify(params));
+  assert.equal(data.relatedData[0]?.fulltextAttachment?.status, "matched");
+  assert.equal(data.relatedData[0]?.attachedFulltextChunks?.[0]?.sectionType, "results");
 });

@@ -24,32 +24,34 @@ const task = await pollTargetAssistantResult(submission.taskId, { intervalMs: 50
 
 ## 靶点助手
 
-适用于围绕单个靶点生成研究过程和报告。
+适用于围绕单个靶点完成数据采集/筛选，并可选生成平台报告。
 
 输入约束：
 
 - `target?: string`：靶点名。
 - `targetEntity?: { name: string; aliases?: string[] }`：已补全或验证的靶点实体。
 - `language?: "zh-CN" | "en-US"`：报告语言。
+- `generateReport?: boolean`：是否由平台生成 HTML/PDF/JSON/CSV 报告产物，默认 `false`。默认模式只完成数据采集/筛选，完成后优先调用 RAG 接口拿上下文。
 - `target` 与 `targetEntity` 至少提供一个；如果用户给的是模糊名称，建议先使用实体补全资源确认名称和别名。
 
 提交结果：
 
-- 成功时返回 `TargetAssistantSubmissionSuccess`，包含 `success: true`、`taskId`、`message` 和可选 `validatedTarget`。
+- 成功时返回 `TargetAssistantSubmissionSuccess`，包含 `success: true`、`taskId`、`message`、可选 `generateReport` 和可选 `validatedTarget`。
 - 如果远端返回 `success: false`，封装函数会抛出 `OpenApiRequestError`，错误码为 `TARGET_VALIDATION_FAILED`。
 
 任务结果：
 
-- `status` 可能为 `researching`、`generating_report`、`generating_pdf`、`completed` 或 `failed`。
+- `status` 可能为 `researching`、`generating_report`、`generating_pdf`、`completed` 或 `failed`。默认 `generateReport=false` 时通常从 `researching` 直接到 `completed`。
 - `progress` 表示任务进度。
-- 完成后可读取 `target`、`pdfUrl`、`reportUrl`、`bulletJsonUrl` 和 `referencesCsvUrl`。
+- 完成后可读取 `target` 和 `generateReport`。只有提交时 `generateReport=true`，完成态才可能返回 `pdfUrl`、`reportUrl`、`bulletJsonUrl` 和 `referencesCsvUrl`。
 - 失败时读取 `error` 字段，并向用户说明可修改靶点名称或稍后重试。
 
 报告扩展能力：
 
-- `askTargetAssistantReport` 对已完成报告做 QA，参数包含 `taskId`、`question`、可选 `sessionId`、`language` 和短 `history`。返回 Markdown `answer`、`sessionId` 和 `citations`。
-- `searchTargetAssistantRag` 只召回上下文，不生成回答。参数包含 `taskId`、`question`、可选 `moduleId`、`dataLimit`、`reportLimit`，返回 `relatedData` 和 `reportChunks`。
-- 这两个接口要求靶点助手任务已完成；如果任务仍在 `researching`、`generating_report` 或 `generating_pdf`，先继续轮询。
+- `askTargetAssistantReport` 对已完成且已生成平台报告的任务做 QA，参数包含 `taskId`、`question`、可选 `sessionId`、`language` 和短 `history`。返回 Markdown `answer`、`sessionId` 和 `citations`。如果任务使用默认 `generateReport=false`，改用 RAG 接口拿上下文后在调用方生成回答。
+- `searchTargetAssistantRag` 只召回上下文，不生成回答。参数包含 `taskId`、`question`、可选 `moduleId`、`dataLimit`、`reportLimit` 和 `includeAllFulltextChunks`，返回 `relatedData`、`reportChunks` 和可选 `total`。
+- RAG 的 `relatedData[]` 在文献型模块中可能包含 `fulltextAttachment` 和 `attachedFulltextChunks`。`includeAllFulltextChunks=false` 时服务端返回排序/筛选后的相关全文片段；设为 `true` 时返回对应 PMID 的全部可用全文 chunks，由调用方自行排序。
+- RAG 接口要求靶点助手任务已完成；如果任务仍在 `researching`、`generating_report` 或 `generating_pdf`，先继续轮询。默认 `generateReport=false` 的完成任务也可以调用 RAG，此时 `reportChunks` 通常为空，但 `relatedData` 和全文证据片段仍可用于外部 RAG 编排。
 
 ## 靶点快速评估
 

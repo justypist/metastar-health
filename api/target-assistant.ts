@@ -15,12 +15,14 @@ export interface TargetAssistantSubmitParams {
   target?: string;
   targetEntity?: TargetEntity;
   language?: TargetAssistantLanguage;
+  generateReport?: boolean;
 }
 
 export interface TargetAssistantSubmissionSuccess {
   success: true;
   taskId: string;
   message: string;
+  generateReport?: boolean;
   validatedTarget?: TargetEntity;
 }
 
@@ -36,6 +38,7 @@ export interface TargetAssistantTaskResult {
   status: TargetAssistantTaskStatus;
   progress: number;
   target?: string;
+  generateReport?: boolean;
   pdfUrl?: string;
   reportUrl?: string;
   bulletJsonUrl?: string;
@@ -96,6 +99,52 @@ export interface TargetAssistantRagSearchParams {
   moduleId?: TargetAssistantRagModuleId;
   dataLimit?: number;
   reportLimit?: number;
+  includeAllFulltextChunks?: boolean;
+}
+
+export type TargetAssistantFulltextAttachmentStatus =
+  | "matched"
+  | "unmatched"
+  | "no_identifier"
+  | "not_applicable"
+  | "skipped"
+  | "error";
+
+export type TargetAssistantFulltextSectionType =
+  | "results"
+  | "figure"
+  | "table"
+  | "evidence_body"
+  | "abstract"
+  | "methods"
+  | "discussion"
+  | "intro"
+  | "other";
+
+export type TargetAssistantFulltextChunkType = "fulltext" | "figure" | "table" | "other";
+
+export interface TargetAssistantFulltextAttachment {
+  status: TargetAssistantFulltextAttachmentStatus | string;
+  pmid?: string;
+  sourceIndexes?: string[];
+  chunkCount?: number;
+  attachedChunkCount?: number;
+  hasFigures?: boolean;
+  hasTables?: boolean;
+  error?: string;
+  [key: string]: unknown;
+}
+
+export interface TargetAssistantFulltextChunk {
+  chunkId: string;
+  sourceIndex?: string;
+  parentPmid?: string;
+  sectionKey?: string;
+  sectionType?: TargetAssistantFulltextSectionType | string;
+  chunkType?: TargetAssistantFulltextChunkType | string;
+  order?: number;
+  content: string;
+  [key: string]: unknown;
 }
 
 export interface TargetAssistantRagItem {
@@ -112,6 +161,14 @@ export interface TargetAssistantRagItem {
   isSelected?: boolean;
   reportSectionId?: string;
   reportSlideId?: string;
+  fulltextAttachment?: TargetAssistantFulltextAttachment;
+  attachedFulltextChunks?: TargetAssistantFulltextChunk[];
+  [key: string]: unknown;
+}
+
+export interface TargetAssistantRagSearchTotal {
+  relatedData?: number;
+  reportChunks?: number;
   [key: string]: unknown;
 }
 
@@ -122,6 +179,7 @@ export interface TargetAssistantRagSearchResult {
   question: string;
   relatedData: TargetAssistantRagItem[];
   reportChunks: TargetAssistantRagItem[];
+  total?: TargetAssistantRagSearchTotal;
   [key: string]: unknown;
 }
 
