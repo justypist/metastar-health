@@ -11,6 +11,7 @@ export const requiredSkillFiles = [
   "scripts/drugs.ts",
   "scripts/gbd.ts",
   "scripts/hpa.ts",
+  "scripts/literature-fulltext.ts",
   "scripts/literature-process.ts",
   "scripts/ocr.ts",
   "scripts/papers.ts",

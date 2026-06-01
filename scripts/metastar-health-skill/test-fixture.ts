@@ -18,6 +18,7 @@ export function withFixture<T>(options: FixtureOptions, run: (cwd: string) => T)
     "drugs.ts",
     "gbd.ts",
     "hpa.ts",
+    "literature-fulltext.ts",
     "literature-process.ts",
     "ocr.ts",
     "papers.ts",

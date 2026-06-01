@@ -15,19 +15,33 @@ test("searchPreclinicalLiterature posts entity params and returns parsed respons
     targets: [{ name: "GLP1R", aliases: "GLP-1R;Glucagon-like peptide-1 receptor" }],
     diseases: [{ name: "Type 2 Diabetes", aliases: ["T2D"] }],
     companies: [{ name: "Novo Nordisk" }],
-    limit: 20,
+    page: 2,
+    pageSize: 50,
   };
   const response = {
     error: 0,
     data: {
       status: "completed",
       progress: 100,
-      result: [{ ID: "preclinical_doc_001", PMID: "12345678", Target: "GLP1R" }],
-      total: 1,
-      limit: 20,
+      result: [
+        {
+          PMID: "12345678",
+          title: "Preclinical evaluation of GLP1R agonism",
+          Target: "GLP1R",
+          Antibody_Name: "Semaglutide",
+          Clinical_Phase: "Approved",
+          source_type: "literature",
+          pubdate: "2024-01-02",
+          indication: "Type 2 Diabetes",
+          model_info: [{ model_name: "db/db mouse" }],
+        },
+      ],
+      count: 1,
+      page: 2,
+      pageSize: 50,
+      hasMore: true,
+      nextPage: 3,
     },
-    query: params,
-    message: "ok",
   };
   const fetchImpl: OpenApiFetch = async (input, init) => {
     calls.push({ input, init });

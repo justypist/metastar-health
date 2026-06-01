@@ -6,19 +6,22 @@ export interface PreclinicalLiteratureSearchParams {
   targets?: EntityInput[];
   diseases?: EntityInput[];
   companies?: EntityInput[];
-  limit?: number;
+  page?: number;
+  pageSize?: number;
 }
 
+export type PreclinicalLiteratureSourceType = "literature" | "poster" | "presentation" | (string & {});
+
 export interface PreclinicalLiteratureRecord {
-  ID?: string;
   PMID?: string;
   title?: string;
-  abstract?: string;
   Target?: string;
-  Disease?: string;
-  Company?: string;
-  model_info?: unknown[];
-  image_info?: unknown[];
+  Antibody_Name?: string;
+  Clinical_Phase?: string;
+  source_type?: PreclinicalLiteratureSourceType;
+  pubdate?: string;
+  indication?: string;
+  model_info?: Record<string, unknown>[];
   [key: string]: unknown;
 }
 
@@ -26,22 +29,26 @@ export interface PreclinicalLiteratureSearchData {
   status: "completed" | string;
   progress: number;
   result: PreclinicalLiteratureRecord[];
-  total: number;
-  limit: number;
+  count: number;
+  page: number;
+  pageSize: number;
+  hasMore: boolean;
+  nextPage?: number;
 }
 
 export interface NormalizedPreclinicalLiteratureSearchQuery {
   targets: EntityInput[];
   diseases: EntityInput[];
   companies: EntityInput[];
-  limit: number;
+  page: number;
+  pageSize: number;
 }
 
 export interface PreclinicalLiteratureSearchResponse {
   error: 0;
   data: PreclinicalLiteratureSearchData;
-  query: NormalizedPreclinicalLiteratureSearchQuery;
-  message: string;
+  query?: NormalizedPreclinicalLiteratureSearchQuery;
+  message?: string;
   [key: string]: unknown;
 }
 

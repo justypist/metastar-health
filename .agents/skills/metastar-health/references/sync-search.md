@@ -1,6 +1,6 @@
 # 同步查询 API
 
-覆盖论文搜索、实体补全、药物搜索、文献临床前数据检索、HPA 靶点画像、GBD 查询和 v1.8.0 通用检索工具。
+覆盖论文搜索、实体补全、药物搜索、文献临床前数据检索、文献全文存在性查询、HPA 靶点画像、GBD 查询和 v1.8.0 通用检索工具。
 
 以下示例只展示调用形状，不应在未准备认证和用户输入时自动执行。
 
@@ -11,6 +11,7 @@
 - `autocompleteEntities(params, options?)`：补全疾病、药物、靶点或公司实体。
 - `searchDrugs(params, options?)`：按实体、阶段和治疗方式检索药物管线表。
 - `searchPreclinicalLiterature(params, options?)`：按靶点、疾病或公司检索文献来源临床前数据。
+- `lookupLiteratureFulltext(params, options?)`：通过 PMID 或 DOI 查询平台本地 PubMed 全文 chunks 是否存在。
 - `getHpaProfile(params, options?)`：查询 HPA 靶点表达和疾病 panel 画像。
 - `searchGbdData(params, options?)`：查询 GBD 疾病负担数据。
 - `executeTool(toolName, params, options?)`：调用 v1.8.0 通用工具同步 execute 接口。
@@ -22,7 +23,7 @@
 - `options` 使用 `OpenApiRequestOptions`，可传入认证、base URL、fetch 覆盖或请求配置。
 - 同步查询函数返回 Promise，但远端请求完成后直接返回业务数据，不需要 submit/result 轮询。
 - v1.8.0 工具既可同步 `execute`，也可异步 `submit` 后用 `pollToolTaskResult` 轮询；除非用户要求后台任务或请求可能很慢，优先使用同步便捷函数。
-- 建议显式设置 `limit`，避免一次请求返回过多数据。
+- 建议显式设置分页或数量上限，例如 `limit`、`page` / `pageSize`，避免一次请求返回过多数据。
 
 ```ts
 // 仅在用户提供查询条件并授权访问开放 API 后手动调用。
@@ -84,18 +85,38 @@ const result = await searchPapers({ disease: "lung cancer", target: "EGFR", limi
 
 ## 文献临床前数据检索
 
-`searchPreclinicalLiterature` 适用于按靶点、疾病、公司组合检索文献来源临床前 tool 数据。只在用户提供实体条件并授权访问开放 API 后调用。
+`searchPreclinicalLiterature` 适用于按靶点、疾病、公司组合检索文献来源临床前 tool 数据。只在用户提供实体条件并授权访问开放 API 后调用。v1.9 起返回结果按文档对象分页，不展开 `model_info` / `study`。
 
 关键参数：
 
 - `targets?: EntityInput[]`、`diseases?: EntityInput[]`、`companies?: EntityInput[]`：至少提供一类实体。
-- `limit?: number`：返回展开后结果数量，单次最多 1000。
+- `page?: number`：页码，从 1 开始，默认 1。
+- `pageSize?: number`：每页返回文档对象数量，默认 50，单页最多 100。
 
 返回结构要点：
 
 - `data.status`：同步成功时为 `completed`。
-- `data.result`：文献临床前记录数组，常见字段包括 `PMID`、`title`、`Target`、`Disease`、`Company`、`model_info`、`image_info`。
-- `query`：服务端回显的规范化实体参数。
+- `data.result`：文献级记录数组，常见字段包括 `PMID`、`title`、`Target`、`Antibody_Name`、`Clinical_Phase`、`source_type`、`pubdate`、`indication`、`model_info`。
+- `data.count`、`data.page`、`data.pageSize`、`data.hasMore`、`data.nextPage`：分页信息。
+- `model_info` 保留原始模型详情；该同步接口暂不返回 `image_info` / `full_text`。
+
+## 文献全文存在性查询
+
+`lookupLiteratureFulltext` 适用于在做 RAG、证据追溯或全文阅读前，通过 PMID 或 DOI 判断平台本地全文库是否已有 PubMed 全文 chunks。只有用户明确提供 PMID/DOI 并授权访问开放 API 后才调用。
+
+关键参数：
+
+- `pmid?: string`：PubMed ID；已知 PMID 时优先传该字段。
+- `doi?: string`：DOI；当 DOI 未被平台摘要库收录时可能无法命中。
+- `limit?: number`：返回 chunk 数量上限，默认 100，范围 1-1000。
+
+返回结构要点：
+
+- `data.fulltextExists`：平台全文库是否返回至少一个 chunk。
+- `data.article`：摘要库命中后的文献基础信息，包含 `pmid`、`doi`、`title`、`journalName`、`pubdate`。
+- `data.chunks`：全文 chunk 数组，常见字段包括 `chunkId`、`parentPmid`、`chunkType`、`sectionKey`、`order`、`content`。
+- `data.total`、`data.limit`：本次返回 chunk 数量和实际生效上限。
+- 未命中或无本地全文时仍是成功响应，但 `fulltextExists=false`、`chunks=[]`；不要把未命中直接理解为文献不存在。
 
 ## HPA 靶点画像
 

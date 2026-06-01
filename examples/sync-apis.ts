@@ -2,9 +2,11 @@ import {
   autocompleteEntities,
   getHpaProfile,
   getPapersHealth,
+  lookupLiteratureFulltext,
   searchDrugs,
   searchGbdData,
   searchPapers,
+  searchPreclinicalLiterature,
 } from "../api/index.ts";
 import { handleExampleError, logExampleResult, readExampleContext, toOpenApiClientOptions } from "./context.ts";
 import type { ExampleScenario } from "./scenarios.ts";
@@ -96,6 +98,42 @@ export async function exampleSearchGbdData(): Promise<void> {
   }
 }
 
+export async function exampleSearchPreclinicalLiterature(): Promise<void> {
+  try {
+    const context = readExampleContext();
+    const result = await searchPreclinicalLiterature(
+      {
+        targets: [{ name: "EGFR", aliases: ["ERBB1"] }],
+        diseases: [{ name: "non-small cell lung cancer" }],
+        page: 1,
+        pageSize: 10,
+      },
+      toOpenApiClientOptions(context),
+    );
+
+    logExampleResult("searchPreclinicalLiterature", result);
+  } catch (error) {
+    handleExampleError(error);
+  }
+}
+
+export async function exampleLookupLiteratureFulltext(): Promise<void> {
+  try {
+    const context = readExampleContext();
+    const result = await lookupLiteratureFulltext(
+      {
+        pmid: "29021135",
+        limit: 100,
+      },
+      toOpenApiClientOptions(context),
+    );
+
+    logExampleResult("lookupLiteratureFulltext", result);
+  } catch (error) {
+    handleExampleError(error);
+  }
+}
+
 export async function exampleGetHpaProfile(): Promise<void> {
   try {
     const context = readExampleContext();
@@ -138,6 +176,16 @@ export const syncApiScenarios: readonly ExampleScenario[] = [
     name: "search-gbd-data",
     description: "Search GBD incidence data with real query parameters.",
     run: exampleSearchGbdData,
+  },
+  {
+    name: "search-preclinical-literature",
+    description: "Search paginated literature-derived preclinical documents.",
+    run: exampleSearchPreclinicalLiterature,
+  },
+  {
+    name: "lookup-literature-fulltext",
+    description: "Check whether a PubMed article has local full-text chunks.",
+    run: exampleLookupLiteratureFulltext,
   },
   {
     name: "get-hpa-profile",

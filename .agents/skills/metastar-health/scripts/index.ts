@@ -4,6 +4,7 @@ export * from "./config.ts";
 export * from "./drugs.ts";
 export * from "./gbd.ts";
 export * from "./hpa.ts";
+export * from "./literature-fulltext.ts";
 export * from "./literature-process.ts";
 export * from "./ocr.ts";
 export * from "./papers.ts";

@@ -30,6 +30,13 @@ export const capabilityMetadata = [
     descriptionTopic: "HPA 画像",
   },
   {
+    moduleName: "literature-fulltext",
+    title: "文献全文存在性查询",
+    category: "sync-search",
+    referenceFile: "references/sync-search.md",
+    descriptionTopic: "文献全文存在性查询",
+  },
+  {
     moduleName: "literature-process",
     title: "文献解析",
     category: "async-doc-processing",

@@ -1,7 +1,7 @@
 ---
 name: metastar-health
 # BEGIN GENERATED description
-description: "使用 MetaStar Health 开放 API 进行研究任务，按需调用实体补全、药物搜索、GBD 查询、HPA 画像、文献解析、OCR、论文搜索、文献临床前数据检索、靶点助手、靶点快速评估、临床前文本提取、专利、临床试验、药物交易、资讯、PubMed、网页、会议和公司演示文稿检索能力。"
+description: "使用 MetaStar Health 开放 API 进行研究任务，按需调用实体补全、药物搜索、GBD 查询、HPA 画像、文献全文存在性查询、文献解析、OCR、论文搜索、文献临床前数据检索、靶点助手、靶点快速评估、临床前文本提取、专利、临床试验、药物交易、资讯、PubMed、网页、会议和公司演示文稿检索能力。"
 # END GENERATED description
 ---
 
@@ -11,7 +11,7 @@ description: "使用 MetaStar Health 开放 API 进行研究任务，按需调�
 
 ## 触发场景
 
-- 用户需要检索论文、药物、疾病负担、HPA 靶点画像或补全疾病、药物、靶点、公司实体。
+- 用户需要检索论文、药物、文献临床前数据、文献全文 chunks、疾病负担、HPA 靶点画像或补全疾病、药物、靶点、公司实体。
 - 用户需要对文档执行 OCR、临床前模型文本提取或文献结构化解析。
 - 用户需要提交靶点助手研究任务，或批量执行靶点快速评估。
 - 用户询问 MetaStar Health 开放 API 的 TypeScript 函数和异步任务轮询方式。
@@ -31,7 +31,7 @@ description: "使用 MetaStar Health 开放 API 进行研究任务，按需调�
 
 - `scripts/index.ts`：TypeScript 统一导出入口，业务函数和基础能力按模块拆分在 `scripts/` 下。
 - `references/overview.md`：先阅读此文档了解通用调用模式、认证配置和副作用边界。
-- `references/sync-search.md`：论文搜索、实体补全、药物搜索、HPA 画像和 GBD 查询。
+- `references/sync-search.md`：论文搜索、实体补全、药物搜索、文献临床前数据、文献全文存在性查询、HPA 画像、GBD 查询和通用检索工具。
 - `references/async-doc-processing.md`：OCR、临床前文本提取和文献解析的提交、查询与轮询。
 - `references/target-workflows.md`：靶点助手和靶点快速评估工作流。
 - `references/api-map.md`：由脚本维护的 API 能力表，用于确认业务模块和公共函数名。

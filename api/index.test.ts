@@ -24,6 +24,7 @@ test("index exports public runtime API and no test-private helpers", () => {
     "getTargetQuickAssessmentResult",
     "getTextExtractionResult",
     "getToolTaskResult",
+    "lookupLiteratureFulltext",
     "openApiToolNames",
     "parseOpenApiResponsePayload",
     "pollAsyncTask",

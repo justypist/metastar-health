@@ -40,8 +40,8 @@
 - **THEN** 可以调用提交文献解析任务和查询文献解析结果的函数
 
 #### Scenario: 覆盖同步搜索与查询服务
-- **WHEN** 使用论文搜索、实体自动补全、药物搜索、HPA 或 GBD 客户端模块
-- **THEN** 可以调用对应的搜索、健康检查或画像查询函数
+- **WHEN** 使用论文搜索、实体自动补全、药物搜索、文献临床前数据检索、文献全文存在性查询、HPA 或 GBD 客户端模块
+- **THEN** 可以调用对应的搜索、健康检查、全文查询或画像查询函数
 
 #### Scenario: 覆盖靶点任务服务
 - **WHEN** 使用靶点助手或靶点快速评估客户端模块
@@ -92,7 +92,7 @@
 - **THEN** 测试覆盖配置读取、认证头、URL 与查询参数、JSON 请求体、multipart 表单、响应解析、错误抛出、任务完成、任务失败和轮询超时行为
 
 #### Scenario: 业务 API 函数构造正确请求
-- **WHEN** 测试 `autocomplete.ts`、`papers.ts`、`drugs.ts`、`gbd.ts`、`hpa.ts`、`ocr.ts`、`text-extraction.ts`、`literature-process.ts`、`target-assistant.ts` 和 `target-quick-assessment.ts`
+- **WHEN** 测试 `autocomplete.ts`、`papers.ts`、`drugs.ts`、`gbd.ts`、`hpa.ts`、`preclinical-literature.ts`、`literature-fulltext.ts`、`ocr.ts`、`text-extraction.ts`、`literature-process.ts`、`target-assistant.ts` 和 `target-quick-assessment.ts`
 - **THEN** 每个公共函数使用预期路径、HTTP 方法、查询参数、请求体或上传参数调用底层请求封装，并正确返回解析后的数据
 
 #### Scenario: 统一导出入口保持完整

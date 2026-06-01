@@ -7,6 +7,7 @@
 | `drugs` | 药物搜索 | `references/sync-search.md` | `searchDrugs` |
 | `gbd` | GBD 疾病负担查询 | `references/sync-search.md` | `searchGbdData` |
 | `hpa` | HPA 靶点画像 | `references/sync-search.md` | `getHpaProfile` |
+| `literature-fulltext` | 文献全文存在性查询 | `references/sync-search.md` | `lookupLiteratureFulltext` |
 | `literature-process` | 文献解析 | `references/async-doc-processing.md` | `submitLiteratureProcessTask`, `getLiteratureProcessResult`, `pollLiteratureProcessResult` |
 | `ocr` | OCR 文档识别 | `references/async-doc-processing.md` | `submitOcrTask`, `getOcrResult`, `pollOcrResult` |
 | `papers` | 论文搜索 | `references/sync-search.md` | `searchPapers`, `getPapersHealth` |
