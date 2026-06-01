@@ -10,6 +10,7 @@
     "test": "node --test api/*.test.ts scripts/metastar-health-skill/*.test.ts",
     "skill:generate": "node scripts/metastar-health-skill/metastar-health-skill.ts",
     "skill:check": "node scripts/metastar-health-skill/metastar-health-skill.ts --check",
+    "page:pubmed-literature-import": "node --env-file .env pages/pubmed-literature-import/server.mjs",
     "example": "node --env-file .env examples/run.ts"
   },
   "devDependencies": {

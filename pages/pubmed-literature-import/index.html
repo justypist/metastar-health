@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="light">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PubMed 文献导入</title>
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <main class="page">
+      <header class="page-header">
+        <div>
+          <p class="eyebrow">MetaStar Literature</p>
+          <h1>PubMed 文献导入</h1>
+        </div>
+        <div class="header-actions">
+          <label class="field compact">
+            <span>主题</span>
+            <select id="themeMode" aria-label="主题">
+              <option value="system">跟随系统</option>
+              <option value="light">浅色</option>
+              <option value="dark">深色</option>
+            </select>
+          </label>
+          <button id="openDialogButton" class="button primary" type="button">打开窗口</button>
+        </div>
+      </header>
+    </main>
+
+    <div id="dialogBackdrop" class="dialog-backdrop" data-open="true">
+      <section class="dialog" role="dialog" aria-modal="true" aria-labelledby="dialogTitle">
+        <header class="dialog-header">
+          <div>
+            <p class="eyebrow">PubMed Search</p>
+            <h2 id="dialogTitle">文献搜索与导入</h2>
+          </div>
+          <div class="dialog-actions">
+            <button id="settingsButton" class="button secondary" type="button" aria-expanded="false" aria-controls="settingsPanel">
+              接口设置
+            </button>
+            <button id="closeDialogButton" class="icon-button" type="button" aria-label="关闭">×</button>
+          </div>
+        </header>
+
+        <section id="settingsPanel" class="settings-panel" hidden>
+          <form id="settingsForm" class="settings-grid">
+            <label class="field">
+              <span>NCBI API Key</span>
+              <input id="ncbiApiKeyInput" name="ncbiApiKey" type="password" autocomplete="off">
+            </label>
+            <div class="settings-submit">
+              <button class="button secondary" type="submit">保存设置</button>
+            </div>
+          </form>
+        </section>
+
+        <div class="dialog-body">
+          <aside class="query-panel">
+            <section class="panel-section">
+              <div class="section-heading">
+                <span class="step-index">1</span>
+                <h3>意图解析</h3>
+              </div>
+              <label class="field">
+                <span>Query</span>
+                <textarea
+                  id="queryInput"
+                  rows="8"
+                  spellcheck="false"
+                  placeholder="例如：EGFR 肺癌耐药机制相关文献"
+                ></textarea>
+              </label>
+              <div class="button-row">
+                <button id="parseButton" class="button secondary" type="button">解析关键词</button>
+                <button id="resetButton" class="button ghost" type="button">重置</button>
+              </div>
+              <label class="field">
+                <span>关键词</span>
+                <input id="keywordInput" type="text" autocomplete="off" placeholder="用逗号分隔">
+              </label>
+              <div id="keywordChips" class="chips" aria-live="polite"></div>
+            </section>
+
+            <section class="panel-section">
+              <div class="section-heading">
+                <span class="step-index">2</span>
+                <h3>PubMed 搜索</h3>
+              </div>
+              <div class="search-options">
+                <label class="field compact">
+                  <span>数量</span>
+                  <select id="maxResultsInput" aria-label="搜索数量">
+                    <option value="5">5</option>
+                    <option value="10" selected>10</option>
+                    <option value="20">20</option>
+                  </select>
+                </label>
+                <label class="field compact">
+                  <span>排序</span>
+                  <select id="sortInput" aria-label="排序">
+                    <option value="relevance" selected>相关性</option>
+                    <option value="pub_date">发布日期</option>
+                  </select>
+                </label>
+              </div>
+              <button id="searchButton" class="button primary full" type="button">搜索 PubMed</button>
+              <button id="checkButton" class="button secondary full" type="button" disabled>重新检测收录</button>
+            </section>
+          </aside>
+
+          <section class="results-panel">
+            <header class="results-header">
+              <div>
+                <p class="eyebrow">Results</p>
+                <h3>PubMed 列表</h3>
+              </div>
+              <label class="checkbox-field">
+                <input id="missingOnlyInput" type="checkbox">
+                <span>仅缺失</span>
+              </label>
+            </header>
+
+            <div id="statusBanner" class="status-banner" data-kind="idle" role="status" aria-live="polite">
+              输入 query 后解析关键词并搜索 PubMed。
+            </div>
+
+            <div id="resultsList" class="results-list" aria-live="polite"></div>
+          </section>
+        </div>
+      </section>
+    </div>
+
+    <script src="./app.js" defer></script>
+  </body>
+</html>
