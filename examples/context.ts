@@ -1,3 +1,4 @@
+import { mkdir, writeFile } from "fs/promises";
 import { OpenApiRequestError } from "../api/index.ts";
 
 export interface ExampleContext {
@@ -52,6 +53,7 @@ export function assertConfiguredValue(name: string, value: string, placeholder: 
 export function logExampleResult(name: string, result: unknown): void {
   console.info(`${name} result:`);
   console.info(result);
+  mkdir('output', { recursive: true }).then(() => writeFile(`output/${name}-${Date.now()}.json`, JSON.stringify(result, null, 2)))
 }
 
 export function handleExampleError(error: unknown): never {

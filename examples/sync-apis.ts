@@ -6,6 +6,7 @@ import {
   searchDrugs,
   searchGbdData,
   searchPapers,
+  searchWeb,
   searchPatents,
   searchPreclinicalLiterature,
 } from "../api/index.ts";
@@ -163,7 +164,25 @@ export async function exampleSearchPatents(): Promise<void> {
       toOpenApiClientOptions(context),
     );
 
-    logExampleResult("searchPatents", JSON.stringify(result, null, 2));
+    logExampleResult("searchPatents", result);
+  } catch (error) {
+    handleExampleError(error);
+  }
+}
+
+export async function exampleSearchWeb(): Promise<void> {
+  try {
+    const context = readExampleContext();
+    const result = await searchWeb(
+      {
+        query: "EGFR latest",
+        engines: ["google"],
+        maxResults: 10,
+      },
+      toOpenApiClientOptions(context),
+    );
+
+    logExampleResult("searchWeb", result);
   } catch (error) {
     handleExampleError(error);
   }
@@ -214,5 +233,10 @@ export const syncApiScenarios: readonly ExampleScenario[] = [
     name: "search-patents",
     description: "Search patents by target entity.",
     run: exampleSearchPatents,
+  },
+  {
+    name: "search-web",
+    description: "Search the web using the search engine tool.",
+    run: exampleSearchWeb,
   },
 ];
