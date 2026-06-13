@@ -6,6 +6,7 @@ import {
   searchDrugs,
   searchGbdData,
   searchPapers,
+  searchPatents,
   searchPreclinicalLiterature,
 } from "../api/index.ts";
 import { handleExampleError, logExampleResult, readExampleContext, toOpenApiClientOptions } from "./context.ts";
@@ -151,6 +152,23 @@ export async function exampleGetHpaProfile(): Promise<void> {
   }
 }
 
+export async function exampleSearchPatents(): Promise<void> {
+  try {
+    const context = readExampleContext();
+    const result = await searchPatents(
+      {
+        targets: [{ name: "EGFR" }],
+        limit: 5,
+      },
+      toOpenApiClientOptions(context),
+    );
+
+    logExampleResult("searchPatents", JSON.stringify(result, null, 2));
+  } catch (error) {
+    handleExampleError(error);
+  }
+}
+
 export const syncApiScenarios: readonly ExampleScenario[] = [
   {
     name: "autocomplete-entities",
@@ -191,5 +209,10 @@ export const syncApiScenarios: readonly ExampleScenario[] = [
     name: "get-hpa-profile",
     description: "Fetch an HPA profile for EGFR.",
     run: exampleGetHpaProfile,
+  },
+  {
+    name: "search-patents",
+    description: "Search patents by target entity.",
+    run: exampleSearchPatents,
   },
 ];
